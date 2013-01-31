@@ -7,9 +7,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class NodeTest {
-
+  
+  Node node;
+  
   @Before
   public void setUp() throws Exception {
+    node = new Node();
   }
 
   @After
@@ -17,35 +20,44 @@ public class NodeTest {
   }
 
   @Test
-  public void testNotInGraph() {
+  public void notInGraph() {
     Node node = new Node();
     
-    try {
-      node.getId();
-      fail("getId() not throwing exception");
-    }
-    catch(NodeException e) {
-      assertTrue(e.graph == null);
-      assertTrue(e.node == node);
-    }
+    assertTrue(node.id == -1);
+    assertTrue(node.graph == null);
   }
   
   @Test
-  public void testAddToGraph() throws Exception {
+  public void addToGraph() throws Exception {
     Graph graph = new Graph();
     
-    Node node = new Node();
     graph.addNode(node);
     assertTrue(node.getId() == 0);
     assertTrue(node.getGraph() == graph);
   }
   
   @Test
-  public void testRemoveFromGraph() throws Exception {
+  public void removeFromGraph() throws Exception {
     Graph graph = new Graph();
     
-    Node node = new Node();
     graph.addNode(node);
     graph.removeNode(node);
+    
+    assertTrue(node.graph == null);
+    assertTrue(node.id == -1);
+  }
+  
+  @Test
+  public void alreadyInGraph() throws Exception {
+    Graph graph = new Graph();
+    graph.addNode(node);
+    
+    try {
+      Graph graph2 = new Graph();
+      graph2.addNode(node);
+      fail("Should not have been able to add to second graph.");
+    }
+    catch(NodeException e) {
+    }
   }
 }

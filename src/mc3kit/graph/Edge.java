@@ -1,5 +1,14 @@
 package mc3kit.graph;
 
-public interface Edge<H extends Node, T extends Node> {
-
+public class Edge {
+  Node tail;
+  Node head;
+  int id;
+  Graph graph;
+  
+  public Edge(Node tail, Node head) {
+    this.tail = tail;
+    this.head = head;
+    id = -1;
+  }
 }
