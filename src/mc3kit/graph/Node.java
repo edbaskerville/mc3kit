@@ -2,10 +2,12 @@ package mc3kit.graph;
 
 public class Node {
   int id;
+  int order;
   Graph graph;
   
   public Node() {
     this.id = -1;
+    this.order = -1;
   }
   
   public Graph getGraph() {
