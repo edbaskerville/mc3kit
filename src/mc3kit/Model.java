@@ -15,7 +15,10 @@ import java.io.*;
 @SuppressWarnings("serial")
 public class Model implements Serializable {
   
+  Graph graph;
+  
   public Model() {
+    graph = new Graph();
   }
   
   public String[] getUnobservedVariableNames() {
@@ -26,12 +29,13 @@ public class Model implements Serializable {
     return null;
   }
   
-  public <T extends Node> T add(String name, T node) {
-    return null;
+  public <T extends Node> T addNode(T node) throws NodeException {
+    graph.addNode(node);
+    return node;
   }
   
   public Node get(String name) {
-    return null;
+    return graph.getNode(name);
   }
   
   public void setDistribution(String vName, String dName) { 

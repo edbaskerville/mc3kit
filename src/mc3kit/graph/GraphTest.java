@@ -26,7 +26,7 @@ public class GraphTest {
     
     assertEquals(node, graph.getNode(0));
     assertEquals(1, graph.nodeCount());
-    assertEquals(1, graph.nodeMap.size());
+    assertEquals(1, graph.nodeIdMap.size());
   }
   
   @Test
@@ -36,7 +36,7 @@ public class GraphTest {
     graph.removeNode(node);
     
     assertEquals(0, graph.nodes.size());
-    assertEquals(0, graph.nodeMap.size());
+    assertEquals(0, graph.nodeIdMap.size());
     assertEquals(0, graph.headNodeMap.size());
     assertEquals(0, graph.tailNodeMap.size());
   }
@@ -55,7 +55,7 @@ public class GraphTest {
     assert(edge.graph == graph);
     assert(edge.id == 0);
     assertEquals(2, graph.nodes.size());
-    assertEquals(1, graph.edgeMap.size());
+    assertEquals(1, graph.edgeIdMap.size());
     assertEquals(1, graph.tailNodeMap.get(node).size());
     assertEquals(1, graph.headNodeMap.get(node2).size());
   }

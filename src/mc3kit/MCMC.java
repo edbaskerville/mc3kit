@@ -10,12 +10,20 @@ import org.apache.log4j.*;
 @SuppressWarnings("serial")
 public class MCMC implements Serializable {
 
+  
+  /*** SETTABLE FIELDS ***/
+  
   ModelFactory modelFactory;
   Model model;
   RandomEngine rng;
   int chainCount = 1;
   
+  /*** STATE ***/
+  
   boolean initialized;
+  long iterationCount;
+  long terminationCount;
+  TerminationManager terminationManager;
   private List<Step> steps;
   
   public void setModel(Model model) throws MC3KitException {
@@ -113,15 +121,19 @@ public class MCMC implements Serializable {
   }
 
   private void initialize() throws MC3KitException {
-    throwIfInitialized();
-    initialized = true;
+    if(initialized) {
+      return;
+    }
 
     if (logger == null)
       logger = new ErrorLogger();
-
+    
+    if(heatFunction == null) {
+      heatFunction = new ConstantHeatFunction();
+    }
+     
     priorHeatExponents = heatFunction.getPriorHeatExponents(chainCount);
-    likelihoodHeatExponents = heatFunction
-        .getLikelihoodHeatExponents(chainCount);
+    likelihoodHeatExponents = heatFunction.getLikelihoodHeatExponents(chainCount);
 
     if (logger.isEnabledFor(Level.INFO)) {
       for (int i = 0; i < chainCount; i++) {
@@ -146,9 +158,27 @@ public class MCMC implements Serializable {
 
     initializeChains();
     initializeSteps();
+    
+    initialized = true;
   }
 
   private void initializeChains() throws MC3KitException {
+    if(chainCount < 1) {
+      throw new MC3KitException("There must be at least one chain.");
+    }
+
+    if(modelFactory == null && model == null) {
+      throw new MC3KitException("Either modelFactory or model must be set."); 
+    }
+    if(modelFactory == null && model != null) {
+      if(chainCount > 1) {
+        throw new MC3KitException("modelFactory, not model, must be set for a run with more than one chain.");
+      }
+    }
+    if(modelFactory != null && model != null) {
+      throw new MC3KitException("If modelFactory is set, model should not be set.");
+    }
+    
     int chainCount = getChainCount();
     
     chains = new Chain[chainCount];
@@ -156,8 +186,17 @@ public class MCMC implements Serializable {
       RandomEngine rng = makeRandomEngine();
       chains[i] = new Chain(this, i, chainCount, priorHeatExponents[i],
           likelihoodHeatExponents[i], rng);
-      Model model = modelFactory.createModel(chains[i]);
-      chains[i].setModel(model);
+      
+      Model chainModel;
+      if(modelFactory == null) {
+        assert(chainCount == 1);
+        assert(model != null);
+        chainModel = model;
+      }
+      else {
+        chainModel = modelFactory.createModel(chains[i]);
+      }
+      chains[i].setModel(chainModel);
     }
     logger.trace("Chains created.");
   }
@@ -187,7 +226,7 @@ public class MCMC implements Serializable {
         Task task = tasks.get(j);
         int[] chainIds = task.getChainIds();
 
-        taskManagers[i][j] = new TaskManager(task);
+        taskManagers[i][j] = new TaskManager(task, i == 0);
 
         for (int chainId : chainIds) {
           if (taskManagersByChain[i][chainId] != null) {
@@ -213,7 +252,7 @@ public class MCMC implements Serializable {
         TaskManager[] nextTaskManagers = new TaskManager[handledChains.length];
         for (int j = 0; j < handledChains.length; j++) {
           int chainId = handledChains[j].getChainId();
-
+          
           // Find the next step method sequentially that uses this chain,
           // looping back if necessary.
           for (int k = i + 1; k <= steps.size() + i; k++) {
@@ -231,89 +270,103 @@ public class MCMC implements Serializable {
   
   /**
    * Run MCMC for a single step.
+   * @throws MC3KitException 
    */
-  public void step() {
+  public void step() throws Throwable {
     runFor(1);
   }
   
   /**
    * Run MCMC for multiple steps.
    * @param iterationCount
+   * @throws MC3KitException 
    */
-  public void runFor(long iterationCount) {
+  public synchronized void runFor(long runForCount) throws Throwable {
+    if(runForCount == 0)
+      return;
+    
+    initialize();
+    terminationCount = iterationCount + runForCount;
+    run();
   }
   
-  public void run() throws Throwable {
+  public synchronized long getIterationCount() {
+    return iterationCount;
+  }
+  
+  private synchronized void run() throws Throwable {
+    assert(terminationCount > iterationCount);
     initialize();
-
+    
+    terminationManager = new TerminationManager();
+    
     logger.info("Starting run.");
 
     try {
       for (TaskManager taskManager : taskManagers[0]) {
+        assert(taskManager.iterationCount == iterationCount);
         completionService.submit(taskManager);
       }
 
-      while (true) {
+      boolean done = false;
+      while(!done) {
         Future<Object> completedTask = completionService.take();
-        completedTask.get();
+        Object result = completedTask.get();
+        if(result == terminationManager) {
+          done = true;
+          assert(iterationCount == terminationCount);
+        }
       }
     }
     catch (ExecutionException e) {
       throw e.getCause();
     }
+    
+    terminationManager = null;
   }
   
-  public Chain getChain(int chainId) {
+  Chain getChain(int chainId) {
     if (chainId < 0 || chainId >= getChainCount())
       return null;
 
     return chains[chainId];
   }
   
-  public Model getModel() {
+  public synchronized Model getModel() {
     return getChain(0).getModel();
   }
   
-  public Model getModel(int chainId) {
+  public synchronized Model getModel(int chainId) {
     return getChain(chainId).getModel();
   }
 
   synchronized RandomEngine makeRandomEngine() {
     return new MersenneTwister(seedGen.nextSeed());
   }
-
-  public int getThreadCount() {
-    return threadPool.getActiveCount();
-  }
-
-  class TaskManager implements Callable<Object> {
-    int completedChainCount;
-    Task task;
-    Chain[] handledChains;
-
-    TaskManager[] nextTaskManagers;
-
-    public TaskManager(Task task) {
-      this.task = task;
-
-      int[] chainIds = task.getChainIds();
-      handledChains = new Chain[chainIds.length];
-      for (int i = 0; i < chainIds.length; i++) {
-        handledChains[i] = chains[chainIds[i]];
-      }
+  
+  class TerminationManager implements Callable<Object> {
+    BitSet completedChains;
+    
+    public TerminationManager() {
+      completedChains = new BitSet();
     }
-
-    public void tallyComplete() {
-      boolean shouldSubmit = false;
-      synchronized (this) {
-        completedChainCount++;
-
-        if (completedChainCount == handledChains.length) {
-          shouldSubmit = true;
-          completedChainCount = 0;
+    
+    public void tallyComplete(int[] chainIds) {
+      boolean complete = false;
+      
+      synchronized(completedChains) {
+        for(int chainId : chainIds) {
+          assert(!completedChains.get(chainId));
+          
+          completedChains.set(chainId);
+        }
+        
+        if(completedChains.cardinality() == chainCount) {
+          complete = true;
         }
       }
-      if (shouldSubmit) {
+      
+      if(complete) {
         boolean submitted = false;
         int sleepMillis = 1;
         while (!submitted) {
@@ -328,6 +381,69 @@ public class MCMC implements Serializable {
             catch (InterruptedException e1) {
             }
             sleepMillis *= 2;
+          }
+        }
+      }
+    }
+
+    @Override
+    public Object call() throws Exception {
+      iterationCount = terminationCount;
+      return this;
+    }
+  }
+  
+  class TaskManager implements Callable<Object> {
+    long iterationCount;
+    int completedChainCount;
+    Task task;
+    boolean isTerminationHandler;
+    Chain[] handledChains;
+
+    TaskManager[] nextTaskManagers;
+
+    public TaskManager(Task task, boolean isTerminationHandler) {
+      this.task = task;
+      this.isTerminationHandler = isTerminationHandler;
+
+      int[] chainIds = task.getChainIds();
+      handledChains = new Chain[chainIds.length];
+      for (int i = 0; i < chainIds.length; i++) {
+        handledChains[i] = chains[chainIds[i]];
+      }
+    }
+
+    public void tallyComplete() {
+      boolean allComplete = false;
+      synchronized (this) {
+        completedChainCount++;
+
+        if (completedChainCount == handledChains.length) {
+          allComplete = true;
+          completedChainCount = 0;
+        }
+      }
+      if (allComplete) {
+        iterationCount++;
+        if(isTerminationHandler && iterationCount == terminationCount) {
+          terminationManager.tallyComplete(task.getChainIds());
+        }
+        else {
+          boolean submitted = false;
+          int sleepMillis = 1;
+          while (!submitted) {
+            try {
+              completionService.submit(this);
+              submitted = true;
+            }
+            catch (RejectedExecutionException e) {
+              try {
+                Thread.sleep(sleepMillis);
+              }
+              catch (InterruptedException e1) {
+              }
+              sleepMillis *= 2;
+            }
           }
         }
       }

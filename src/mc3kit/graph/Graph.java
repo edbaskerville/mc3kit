@@ -12,18 +12,23 @@ public class Graph {
   private int nextEdgeId;
   
   Set<Node> nodes;
-  Map<Integer, Node> nodeMap;
+  Map<Integer, Node> nodeIdMap;
+  Map<String, Node> nodeNameMap;
   Set<Edge> edges;
-  Map<Integer, Edge> edgeMap;
+  Map<Integer, Edge> edgeIdMap;
+  Map<String, Edge> edgeNameMap;
 
   Map<Node, Set<Edge>> tailNodeMap;
   Map<Node, Set<Edge>> headNodeMap;
   
   public Graph() {
     nodes = new HashSet<Node>();
-    nodeMap = new HashMap<Integer, Node>();
+    nodeIdMap = new HashMap<Integer, Node>();
+    nodeNameMap = new HashMap<String, Node>();
+    
     edges = new HashSet<Edge>();
-    edgeMap = new HashMap<Integer, Edge>();
+    edgeIdMap = new HashMap<Integer, Edge>();
+    edgeNameMap = new HashMap<String, Edge>();
 
     tailNodeMap = new HashMap<Node, Set<Edge>>();
     headNodeMap = new HashMap<Node, Set<Edge>>();
@@ -43,13 +48,20 @@ public class Graph {
       throw new NodeException(this, node, "Node already in another graph.");
     }
     
+    if(node.name != null && nodeNameMap.containsKey(node.name)) {
+      throw new NodeException(this, node, "Node with this name already in graph.");
+    }
+    
     int id = getNextNodeId();
     node.id = id;
     node.graph = this;
     nodes.add(node);
-    nodeMap.put(id,  node);
-    headNodeMap.put(node, new HashSet<Edge>());
+    nodeIdMap.put(id,  node);
+    if(node.name != null) {
+      nodeNameMap.put(node.name, node);
+    }
     tailNodeMap.put(node, new HashSet<Edge>());
+    headNodeMap.put(node, new HashSet<Edge>());
     
     return this;
   }
@@ -65,12 +77,19 @@ public class Graph {
     }
     assert(node.graph == this);
     
+    if(!(tailNodeMap.get(node).isEmpty() && headNodeMap.get(node).isEmpty())) {
+      throw new NodeException(this, node, "Node has edges in graph.");
+    }
+    
     nodes.remove(node);
-    nodeMap.remove(node.id);
+    nodeIdMap.remove(node.id);
     node.graph = null;
-    nodeMap.remove(node);
-    headNodeMap.remove(node);
+    nodeIdMap.remove(node);
+    if(node.name != null) {
+      nodeNameMap.remove(node.name);
+    }
     tailNodeMap.remove(node);
+    headNodeMap.remove(node);
     
     node.id = -1;
   }
@@ -106,13 +125,21 @@ public class Graph {
       throw new EdgeException(this, edge, "Edge head isn't in this graph.");
     }
     
+    if(edge.name != null && edgeNameMap.containsKey(edge.name)) {
+      throw new EdgeException(this, edge, "Edge with this name already in graph.");
+    }
+    
     assert(edge.id == -1);
     
     int id = getNextEdgeId();
     edge.id = id;
     edge.graph = this;
     edges.add(edge);
-    edgeMap.put(id, edge);
+    edgeIdMap.put(id, edge);
+    if(edge.name != null) {
+      edgeNameMap.put(edge.name, edge);
+    }
+    
     tailNodeMap.get(edge.tail).add(edge);
     headNodeMap.get(edge.head).add(edge);
     
@@ -120,19 +147,58 @@ public class Graph {
   }
   
   public void removeEdge(Edge edge) throws EdgeException {
+    if(!edges.contains(edge)) {
+      throw new EdgeException(this, edge, "Edge not in graph.");
+    }
+    assert(edge.graph == this);
+    
+    edges.remove(edge);
+    edgeIdMap.remove(edge.id);
+    edge.graph = null;
+    edgeIdMap.remove(edge);
+    if(edge.name != null) {
+      edgeNameMap.remove(edge.name);
+    }
+    tailNodeMap.get(edge.tail).remove(edge);
+    headNodeMap.get(edge.head).remove(edge);
+    
+    edge.id = -1;
   }
   
   /**
    * Gets a node by id.
    * @param id
-   * @return The corresponding node.
+   * @return The corresponding node, or null if it does not exist.
    */
-  public Node getNode(int id) throws NodeException {
-    return nodeMap.get(id);
+  public Node getNode(int id) {
+    return nodeIdMap.get(id);
   }
   
+  /**
+   * Gets a node by name.
+   * @param name
+   * @return The corresponding node, or null if it does not exist.
+   */
+  public Node getNode(String name) {
+    return nodeNameMap.get(name);
+  }
+  
+  /**
+   * Gets an edge by id
+   * @param id
+   * @return The corresponding edge, or null if it does not exist.
+   */
   public Edge getEdge(int id) {
-    return edgeMap.get(id);
+    return edgeIdMap.get(id);
+  }
+  
+  /**
+   * Gets an edge by name
+   * @param name
+   * @return The corresponding edge, or null if it does not exist.
+   */
+  public Edge getEdge(String name) {
+    return edgeNameMap.get(name);
   }
   
   public int nodeCount() {

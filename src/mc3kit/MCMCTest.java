@@ -21,15 +21,15 @@ public class MCMCTest {
   }
 
   @Test
-  public void testStandardNormal() throws MC3KitException {
+  public void testStandardNormal() throws Throwable {
     long burnIn = 5000;
     long iterCount = 10000;
     
     MCMC mcmc = new MCMC();
     
     Model m = new Model();
-    m.add("nd", new NormalDistribution());
-    m.add("nv", new DoubleVariable());
+    m.addNode(new NormalDistribution("nd"));
+    m.addNode(new DoubleVariable("nv"));
     m.setDistribution("nv", "nd");
     mcmc.setModel(m);
     
@@ -39,12 +39,15 @@ public class MCMCTest {
     UnivariateProposalTask proposalTask = new UnivariateProposalTask();
     proposalTask.setTuneEvery(100);
     proposalTask.setTuneFor(burnIn);
+    mcmc.addTask(proposalTask);
     
     // Run and collect statistics
     double sum = 0;
     double sumSq = 0;
     for(long i = 0; i < 10000; i++) {
       mcmc.step();
+      
+      assertEquals(i + 1, mcmc.getIterationCount());
       
       if(i >= burnIn) {
         double val = mcmc.getModel().getDoubleVariable("nv").getValue();
