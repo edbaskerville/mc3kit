@@ -1,4 +1,4 @@
-package mc3kit.proposal;
+package mc3kit;
 
 import cern.jet.random.*;
 import cern.jet.random.engine.*;
@@ -77,16 +77,23 @@ public class UnivariateProposalTask implements Task {
   
   /*** PRIVATE METHODS ***/
   
-  private void initialize(Model model) {
-    if(initialized)
-      return;
+  private void initialize(Model model) throws MC3KitException {
+    if(initialized) return;
     initialized = true;
 
     String[] varNames = model.getUnobservedVariableNames();
     proposers = new VariableProposer[varNames.length];
     for(int i = 0; i < varNames.length; i++) {
-      proposers[i] = model.makeVariableProposer(varNames[i]);
+      proposers[i] = makeVariableProposer(model, varNames[i]);
     }
+  }
+  
+  private VariableProposer<?> makeVariableProposer(Model model, String varName) {
+    Distribution<?> dist = model.getDistributionForVariable(varName);
+    if(dist == null) {
+      return null;
+    }
+    return dist.makeVariableProposer(varName);
   }
 
   private void throwIfInitialized() throws MC3KitException {

@@ -1,13 +1,11 @@
 package mc3kit;
 
 import org.junit.*;
+
 import static org.junit.Assert.*;
 
 import mc3kit.distributions.*;
-import mc3kit.proposal.*;
-
 import cern.jet.random.engine.*;
-
 import static java.lang.Math.*;
 
 public class MCMCTest {
@@ -28,8 +26,8 @@ public class MCMCTest {
     MCMC mcmc = new MCMC();
     
     Model m = new Model();
-    m.addNode(new NormalDistribution("nd"));
-    m.addNode(new DoubleVariable("nv"));
+    m.addDistribution(new NormalDistribution("nd"));
+    m.addVariable(new DoubleVariable("nv"));
     m.setDistribution("nv", "nd");
     mcmc.setModel(m);
     

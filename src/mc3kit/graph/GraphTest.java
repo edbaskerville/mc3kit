@@ -20,13 +20,13 @@ public class GraphTest {
 
   @Test
   public void addNodeSingle() throws Exception {
-    Node node = new Node();
+    Node node = new Node("node");
     
     graph.addNode(node);
     
-    assertEquals(node, graph.getNode(0));
+    assertEquals(node, graph.getNode("node"));
     assertEquals(1, graph.nodeCount());
-    assertEquals(1, graph.nodeIdMap.size());
+    assertEquals(1, graph.nodeNameMap.size());
   }
   
   @Test
@@ -36,7 +36,7 @@ public class GraphTest {
     graph.removeNode(node);
     
     assertEquals(0, graph.nodes.size());
-    assertEquals(0, graph.nodeIdMap.size());
+    assertEquals(0, graph.nodeNameMap.size());
     assertEquals(0, graph.headNodeMap.size());
     assertEquals(0, graph.tailNodeMap.size());
   }
@@ -53,9 +53,7 @@ public class GraphTest {
       .addEdge(edge);
     
     assert(edge.graph == graph);
-    assert(edge.id == 0);
     assertEquals(2, graph.nodes.size());
-    assertEquals(1, graph.edgeIdMap.size());
     assertEquals(1, graph.tailNodeMap.get(node).size());
     assertEquals(1, graph.headNodeMap.get(node2).size());
   }

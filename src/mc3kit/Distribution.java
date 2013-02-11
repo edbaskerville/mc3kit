@@ -1,8 +1,6 @@
 package mc3kit;
 
-import mc3kit.graph.*;
-
-public class Distribution<V extends Variable<?>> extends Node {
+public abstract class Distribution<V extends Variable<?>> extends ModelNode {
 
   public Distribution() {
     this(null);
@@ -11,4 +9,6 @@ public class Distribution<V extends Variable<?>> extends Node {
   public Distribution(String name) {
     super(name);
   }
+  
+  public abstract VariableProposer<V> makeVariableProposer(String varName);
 }

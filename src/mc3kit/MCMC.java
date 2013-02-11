@@ -231,7 +231,8 @@ public class MCMC implements Serializable {
         for (int chainId : chainIds) {
           if (taskManagersByChain[i][chainId] != null) {
             throw new MC3KitException(
-                "Two tasks handling chain %d in step %d.\n", chainId, i);
+              String.format("Two tasks handling chain %d in step %d.\n", chainId, i)
+            );
           }
           taskManagersByChain[i][chainId] = taskManagers[i][j];
         }
@@ -241,8 +242,9 @@ public class MCMC implements Serializable {
     // Make sure that every chain is covered in the first step
     for (int chainId = 0; chainId < chainCount; chainId++) {
       if (taskManagersByChain[0][chainId] == null)
-        throw new MC3KitException("Chain %d is not covered by first step.\n",
-            chainId);
+        throw new MC3KitException(
+          String.format("Chain %d is not covered by first step.\n", chainId)
+        );
     }
 
     // Identify forward dependencies for each step method
@@ -455,7 +457,7 @@ public class MCMC implements Serializable {
         task.step(handledChains);
       }
       catch (Exception e) {
-        throw new MC3KitException(e, "Exception thrown from task");
+        throw new MC3KitException("Exception thrown from task", e);
       }
 
       // Let the next step for this chain know we're complete;

@@ -1,7 +1,9 @@
 package mc3kit;
 
 public class DoubleVariable extends Variable<DoubleDistribution> implements DoubleValued {
-
+  
+  private double value;
+  
   public DoubleVariable() {
     this(null);
   }
@@ -12,21 +14,24 @@ public class DoubleVariable extends Variable<DoubleDistribution> implements Doub
   
   public DoubleVariable(String name) {
     super(name);
+    setObserved(false);
   }
   
   public DoubleVariable(String name, double value) {
     super(name);
-  }
-
-  public void setDistribution(DoubleDistribution dist) {
+    setObserved(true);
+    setValue(value);
   }
 
   @Override
   public double getValue() {
-    return 0;
+    return value;
   }
 
   @Override
   public void setValue(double value) {
+    this.value = value;
+    setChanged();
+    notifyObservers();
   }
 }

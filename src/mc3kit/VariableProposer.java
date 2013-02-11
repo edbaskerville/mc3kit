@@ -1,4 +1,4 @@
-package mc3kit.proposal;
+package mc3kit;
 
 import mc3kit.*;
 
@@ -11,7 +11,7 @@ public abstract class VariableProposer<V extends Variable<?>>
 	private int proposalCount;
 	private int acceptanceCount;
 	
-	protected VariableProposer(Model model, String name) {
+	protected VariableProposer(String name) {
 	  this.name = name;
 	}
 	

@@ -1,12 +1,12 @@
 package mc3kit.graph;
 
-public class Node {
-  int id;
+import java.util.Observable;
+
+public class Node extends Observable {
   String name;
   Graph graph;
   
   public Node() {
-    this.id = -1;
   }
   
   public Node(String name) {
@@ -16,13 +16,6 @@ public class Node {
   
   public Graph getGraph() {
     return graph;
-  }
-  
-  public int getId() throws NodeException {
-    if(id == -1) {
-      throw new NodeException(null, this, "No id assigned.");
-    }
-    return id;
   }
   
   public String getName() {

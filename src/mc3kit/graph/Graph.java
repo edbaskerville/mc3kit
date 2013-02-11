@@ -8,14 +8,9 @@ import java.util.*;
  *
  */
 public class Graph {
-  private int nextNodeId;
-  private int nextEdgeId;
-  
   Set<Node> nodes;
-  Map<Integer, Node> nodeIdMap;
   Map<String, Node> nodeNameMap;
   Set<Edge> edges;
-  Map<Integer, Edge> edgeIdMap;
   Map<String, Edge> edgeNameMap;
 
   Map<Node, Set<Edge>> tailNodeMap;
@@ -23,11 +18,9 @@ public class Graph {
   
   public Graph() {
     nodes = new HashSet<Node>();
-    nodeIdMap = new HashMap<Integer, Node>();
     nodeNameMap = new HashMap<String, Node>();
     
     edges = new HashSet<Edge>();
-    edgeIdMap = new HashMap<Integer, Edge>();
     edgeNameMap = new HashMap<String, Edge>();
 
     tailNodeMap = new HashMap<Node, Set<Edge>>();
@@ -52,11 +45,8 @@ public class Graph {
       throw new NodeException(this, node, "Node with this name already in graph.");
     }
     
-    int id = getNextNodeId();
-    node.id = id;
     node.graph = this;
     nodes.add(node);
-    nodeIdMap.put(id,  node);
     if(node.name != null) {
       nodeNameMap.put(node.name, node);
     }
@@ -75,23 +65,19 @@ public class Graph {
     if(!nodes.contains(node)) {
       throw new NodeException(this, node, "Node not in graph.");
     }
-    assert(node.graph == this);
+    assert(node.getGraph() == this);
     
     if(!(tailNodeMap.get(node).isEmpty() && headNodeMap.get(node).isEmpty())) {
       throw new NodeException(this, node, "Node has edges in graph.");
     }
     
     nodes.remove(node);
-    nodeIdMap.remove(node.id);
     node.graph = null;
-    nodeIdMap.remove(node);
     if(node.name != null) {
       nodeNameMap.remove(node.name);
     }
     tailNodeMap.remove(node);
     headNodeMap.remove(node);
-    
-    node.id = -1;
   }
   
   /**
@@ -129,13 +115,8 @@ public class Graph {
       throw new EdgeException(this, edge, "Edge with this name already in graph.");
     }
     
-    assert(edge.id == -1);
-    
-    int id = getNextEdgeId();
-    edge.id = id;
     edge.graph = this;
     edges.add(edge);
-    edgeIdMap.put(id, edge);
     if(edge.name != null) {
       edgeNameMap.put(edge.name, edge);
     }
@@ -153,25 +134,12 @@ public class Graph {
     assert(edge.graph == this);
     
     edges.remove(edge);
-    edgeIdMap.remove(edge.id);
     edge.graph = null;
-    edgeIdMap.remove(edge);
     if(edge.name != null) {
       edgeNameMap.remove(edge.name);
     }
     tailNodeMap.get(edge.tail).remove(edge);
     headNodeMap.get(edge.head).remove(edge);
-    
-    edge.id = -1;
-  }
-  
-  /**
-   * Gets a node by id.
-   * @param id
-   * @return The corresponding node, or null if it does not exist.
-   */
-  public Node getNode(int id) {
-    return nodeIdMap.get(id);
   }
   
   /**
@@ -181,15 +149,6 @@ public class Graph {
    */
   public Node getNode(String name) {
     return nodeNameMap.get(name);
-  }
-  
-  /**
-   * Gets an edge by id
-   * @param id
-   * @return The corresponding edge, or null if it does not exist.
-   */
-  public Edge getEdge(int id) {
-    return edgeIdMap.get(id);
   }
   
   /**
@@ -207,14 +166,6 @@ public class Graph {
   
   public int edgeCount() {
     return edges.size();
-  }
-  
-  private int getNextNodeId() {
-    return nextNodeId++;
-  }
-  
-  private int getNextEdgeId() {
-    return nextEdgeId++;
   }
   
   public void comprehensiveConsistencyCheck() throws GraphException {

@@ -23,7 +23,6 @@ public class NodeTest {
   public void notInGraph() {
     Node node = new Node();
     
-    assertTrue(node.id == -1);
     assertTrue(node.graph == null);
   }
   
@@ -32,7 +31,6 @@ public class NodeTest {
     Graph graph = new Graph();
     
     graph.addNode(node);
-    assertTrue(node.getId() == 0);
     assertTrue(node.getGraph() == graph);
   }
   
@@ -44,7 +42,6 @@ public class NodeTest {
     graph.removeNode(node);
     
     assertTrue(node.graph == null);
-    assertTrue(node.id == -1);
   }
   
   @Test
