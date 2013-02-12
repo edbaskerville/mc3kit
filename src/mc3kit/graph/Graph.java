@@ -7,7 +7,7 @@ import java.util.*;
  * @author Ed Baskerville
  *
  */
-public class Graph {
+public class Graph extends Observable{
   Set<Node> nodes;
   Map<String, Node> nodeNameMap;
   Set<Edge> edges;
@@ -168,10 +168,7 @@ public class Graph {
     return edges.size();
   }
   
-  public void comprehensiveConsistencyCheck() throws GraphException {
-    nodeIdentityCheck();
-  }
-  
-  private void nodeIdentityCheck() throws NodeException {
+  public Collection<Node> orderedNodesHeadToTail() {
+    return new ArrayList<Node>(nodes);
   }
 }

@@ -10,5 +10,7 @@ public abstract class Distribution<V extends Variable<?>> extends ModelNode {
     super(name);
   }
   
+  public abstract double getLogP(V var);
+  
   public abstract VariableProposer<V> makeVariableProposer(String varName);
 }

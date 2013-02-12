@@ -34,4 +34,14 @@ public class DoubleVariable extends Variable<DoubleDistribution> implements Doub
     setChanged();
     notifyObservers();
   }
+  
+  public boolean valueIsValid(double value) {
+    return true;
+  }
+
+  @Override
+  public void recalculate() {
+    DoubleDistribution dist = getDistribution();
+    setLogP(dist.getLogP(this));
+  }
 }

@@ -1,9 +1,9 @@
 package mc3kit;
 
-import mc3kit.graph.Node;
-
 public abstract class Variable<D extends Distribution<?>> extends ModelNode {
   private boolean observed;
+  
+  private double logP;
   
   public Variable() {
   }
@@ -18,5 +18,18 @@ public abstract class Variable<D extends Distribution<?>> extends ModelNode {
   
   public boolean isObserved() {
     return observed;
+  }
+  
+  protected void setLogP(double logP) {
+    this.logP = logP;
+  }
+  
+  public double getLogP() {
+    return logP;
+  }
+  
+  @SuppressWarnings("unchecked")
+  public D getDistribution() {
+    return (D)getModel().getDistributionForVariable(this);
   }
 }

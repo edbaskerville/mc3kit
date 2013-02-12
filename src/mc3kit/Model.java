@@ -18,12 +18,18 @@ public class Model implements Serializable {
   Graph graph;
   
   List<Variable<?>> unobservedVariables;
-  Map<String, DistributionEdge<?,?>> varDistEdgeMap;
+  Map<Variable<?>, DistributionEdge> varDistEdgeMap;
+  
+  double logPrior;
+  double logLikelihood;
+  
+  State state;
   
   public Model() {
     graph = new Graph();
     unobservedVariables = new ArrayList<Variable<?>>();
-    varDistEdgeMap = new HashMap<String, DistributionEdge<?,?>>();
+    varDistEdgeMap = new HashMap<Variable<?>, DistributionEdge>();
+    state = State.READY;
   }
   
   public String[] getUnobservedVariableNames() {
@@ -33,6 +39,68 @@ public class Model implements Serializable {
     }
     return varNames;
   }
+  
+  /*** CALCULATIONS ***/
+  
+  public void recalculate() throws ModelException {
+    logPrior = 0.0;
+    logLikelihood = 0.0;
+    
+    for(Node node : graph.orderedNodesHeadToTail()) {
+      ((ModelNode)node).recalculate();
+      
+      if(node instanceof Variable) {
+        Variable<?> var = (Variable<?>)node;
+        if(var.isObserved()) {
+          logLikelihood += var.getLogP();
+        }
+        else {
+          logPrior += var.getLogP();
+        }
+      }
+    }
+  }
+  
+  public void beginProposal() throws ModelException {
+    if(state != State.READY) {
+      throw new ModelException("beginProposal called with wrong state", this);
+    }
+    
+    state = State.IN_PROPOSAL;
+  }
+  
+  public void endProposal() throws ModelException {
+    if(state != State.IN_PROPOSAL) {
+      throw new ModelException("endProposal called with wrong state", this);
+    }
+    
+    state = State.PROPOSAL_COMPLETE;
+  }
+  
+  public void acceptProposal() throws ModelException {
+    if(state != State.PROPOSAL_COMPLETE) {
+      throw new ModelException("acceptProposal called with wrong state", this);
+    }
+    state = State.READY;
+  }
+  
+  public void beginRejection() throws ModelException {
+    if(state != State.PROPOSAL_COMPLETE) {
+      throw new ModelException("beginRejection called with wrong state", this);
+    }
+    
+    state = State.IN_REJECTION;
+  }
+  
+  public void endRejection() throws ModelException {
+    if(state != State.IN_REJECTION) {
+      throw new ModelException("endRejection called with wrong state", this);
+    }
+    
+    state = State.READY;
+  }
+  
+  /*** GRAPH CONSTRUCTION/MANIPULATION ***/
   
   public <V extends Variable<?>> V addVariable(V var) throws ModelNodeException {
     if(var.model != null) {
@@ -73,13 +141,28 @@ public class Model implements Serializable {
     return dist;
   }
   
-  @SuppressWarnings("unchecked")
+  public void addEdge(ModelEdge edge) throws ModelEdgeException {
+    try {
+      graph.addEdge(edge);
+    }
+    catch(EdgeException e) {
+      throw new ModelEdgeException("Exception thrown from underlying graph", this, edge, e);
+    }
+  }
+  
+  public void removeEdge(ModelEdge edge) throws ModelEdgeException {
+    try {
+      graph.removeEdge(edge);
+    }
+    catch(EdgeException e) {
+      throw new ModelEdgeException("Exception thrown from underlying graph", this, edge, e);
+    }
+  }
+  
   public <V extends Variable<D>, D extends Distribution<V>> void setDistribution(V var, D dist) throws ModelException {
-    String vName = var.getName();
-    
     // Check for existing edge: if unchanged, return; if not, remove the edge
-    if(varDistEdgeMap.containsKey(vName)) {
-      DistributionEdge<V, D> distEdge = (DistributionEdge<V, D>)varDistEdgeMap.get(vName);
+    if(varDistEdgeMap.containsKey(var)) {
+      DistributionEdge distEdge = varDistEdgeMap.get(var);
       assert(distEdge.getVariable() == var);
       if(distEdge.getDistribution() == dist) {
         return;
@@ -90,18 +173,18 @@ public class Model implements Serializable {
       catch(EdgeException e) {
         throw new ModelEdgeException("Exception thrown from underlying graph ", this, distEdge, e);
       }
-      varDistEdgeMap.remove(vName);
+      varDistEdgeMap.remove(var);
     }
     
     // Create a new edge
-    DistributionEdge<V, D> distEdge = new DistributionEdge<V, D>(var, dist);
+    DistributionEdge distEdge = new DistributionEdge(var, dist);
     try {
       graph.addEdge(distEdge);
     }
     catch(EdgeException e) {
       throw new ModelEdgeException("Exception thrown from underlying graph", this, distEdge, e);
     }
-    varDistEdgeMap.put(vName, distEdge);
+    varDistEdgeMap.put(var, distEdge);
   }
   
   @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -109,6 +192,16 @@ public class Model implements Serializable {
     Variable var = getVariable(vName);
     Distribution dist = getDistribution(dName);
     setDistribution(var, dist);
+  }
+  
+  /*** GETTERS ***/
+  
+  public double getLogPrior() {
+    return logPrior;
+  }
+  
+  public double getLogLikelihood() {
+    return logLikelihood;
   }
   
   public Variable<?> getVariable(String name) {
@@ -123,11 +216,22 @@ public class Model implements Serializable {
     return (Distribution<?>)graph.getNode(name);
   }
   
-  public Distribution<?> getDistributionForVariable(String varName) {
-    DistributionEdge<?,?> distEdge = varDistEdgeMap.get(varName);
+  public Distribution<?> getDistributionForVariable(Variable<?> var) {
+    DistributionEdge distEdge = varDistEdgeMap.get(var);
     if(distEdge == null) {
       return null;
     }
     return distEdge.getDistribution();
+  }
+  
+  public Distribution<?> getDistributionForVariable(String varName) {
+    return getDistributionForVariable(getVariable(varName));
+  }
+  
+  private enum State {
+    READY,
+    IN_PROPOSAL,
+    PROPOSAL_COMPLETE,
+    IN_REJECTION
   }
 }

@@ -3,6 +3,7 @@ package mc3kit.proposal;
 import cern.jet.random.Normal;
 import cern.jet.random.engine.RandomEngine;
 import mc3kit.*;
+import static mc3kit.util.Math.*;
 
 public class MHNormalProposer extends VariableProposer<DoubleVariable> {
 
@@ -16,15 +17,15 @@ public class MHNormalProposer extends VariableProposer<DoubleVariable> {
   public void step(Model model, double priorHeatExp, double likeHeatExp,
       RandomEngine rng) throws MC3KitException {
     
-    /*Normal normal = new Normal(0.0, proposalSD, rng);
+    Normal normal = new Normal(0.0, proposalSD, rng);
     
     double oldLogLikelihood = model.getLogLikelihood();
     double oldLogPrior = model.getLogPrior();
     
-    double proposalSDAdjusted = proposalSD;
+    DoubleVariable rv = model.getDoubleVariable(getName());
     
     double oldValue = rv.getValue();
-    double newValue = oldValue + normal.nextDouble(0.0, proposalSDAdjusted);
+    double newValue = oldValue + normal.nextDouble();
     
     if(!rv.valueIsValid(newValue))
     {
@@ -32,9 +33,9 @@ public class MHNormalProposer extends VariableProposer<DoubleVariable> {
       return;
     }
     
-    model.beginUpdate(false);
+    model.beginProposal();
     rv.setValue(newValue);
-    model.endUpdate();
+    model.endProposal();
     
     double newLogLikelihood = model.getLogLikelihood();
     double newLogPrior = model.getLogPrior();
@@ -47,15 +48,16 @@ public class MHNormalProposer extends VariableProposer<DoubleVariable> {
     
     if(accepted)
     {
+      model.acceptProposal();
       recordAcceptance();
     }
     else
     {
-      model.beginUpdate(true);
+      model.beginRejection();
       rv.setValue(oldValue);
-      model.endUpdate();
+      model.endRejection();
       
       recordRejection();
-    }*/
+    }
   }
 }
