@@ -75,19 +75,19 @@ public class NormalDistribution extends DoubleDistribution {
     }
   }
   
-  static double getLogPPrecision(double mean, double prec, double x) {
+  public static double getLogPPrecision(double mean, double prec, double x) {
     assert prec > 0.0;
     double d = x - mean;
     return 0.5 * (log(prec) - LOG_TWO_PI) - d * d * prec / 2.0;
   }
   
-  static double getLogPStdDev(double mean, double stdDev, double x) {
+  public static double getLogPStdDev(double mean, double stdDev, double x) {
     assert stdDev > 0.0;
     double d = x - mean;
     return -(log(stdDev) + 0.5 * LOG_TWO_PI) - d * d / (2.0 * stdDev * stdDev);
   }
   
-  static double getLogPVar(double mean, double var, double x) {
+  public static double getLogPVar(double mean, double var, double x) {
     assert var > 0.0;
     double d = x - mean;
     return -0.5 * (log(var) + LOG_TWO_PI) - d * d / (2.0 * var);
