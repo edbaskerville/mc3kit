@@ -33,4 +33,9 @@ public class Node extends Observable {
   public Set<Edge> getTailEdges() {
     return graph.getTailEdges(this);
   }
+  
+  @Override
+  public String toString() {
+    return name == null ? super.toString() : name;
+  }
 }

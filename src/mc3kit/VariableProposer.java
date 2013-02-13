@@ -1,7 +1,5 @@
 package mc3kit;
 
-import mc3kit.*;
-
 import cern.jet.random.engine.RandomEngine;
 
 public abstract class VariableProposer<V extends Variable<?>>

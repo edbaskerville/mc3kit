@@ -90,4 +90,57 @@ public class GraphTest {
     catch(EdgeException e) {
     }
   }
+  
+  @Test
+  public void simpleOrder() throws Exception {
+    // Ordering should start with node2 < node
+    Node node = new Node("node");
+    Node node2 = new Node("node2");
+    graph.addNode(node).addNode(node2);
+    assertTrue(node2.getOrder() < node.getOrder());
+    
+    // Adding edge node2 > node should reverse order
+    Edge edge = new Edge(node2, node);
+    graph.addEdge(edge);
+    assertTrue(node.getOrder() < node2.getOrder());
+  }
+  
+  @Test
+  public void edgeRemovalAddition() throws Exception {
+    // Ordering should start with node2 < node
+    Node node = new Node("node");
+    Node node2 = new Node("node2");
+    graph.addNode(node).addNode(node2);
+    assertTrue(node2.getOrder() < node.getOrder());
+    
+    // Adding edge node2 > node should reverse order
+    Edge edge = new Edge(node2, node);
+    graph.addEdge(edge);
+    assertTrue(node.getOrder() < node2.getOrder());
+    
+    // Removing and adding the reverse edge should reverse back
+    graph.removeEdge(edge);
+    edge = new Edge(node, node2);
+    graph.addEdge(edge);
+    assertTrue(node2.getOrder() < node.getOrder());
+  }
+  
+  @Test
+  public void cycle() throws Exception {
+    Node node = new Node("node");
+    Node node2 = new Node("node2");
+    Node node3 = new Node("node3");
+    graph.addNode(node).addNode(node2).addNode(node3);
+    
+    graph.addEdge(new Edge(node, node2));
+    graph.addEdge(new Edge(node2, node3));
+    
+    try {
+      graph.addEdge(new Edge(node3, node));
+      fail();
+    }
+    catch(EdgeException e) {
+      e.printStackTrace();
+    }
+  }
 }

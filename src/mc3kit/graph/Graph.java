@@ -7,9 +7,13 @@ import java.util.*;
  * @author Ed Baskerville
  *
  */
-public class Graph extends Observable{
+public class Graph extends Observable {
   Set<Node> nodes;
   Map<String, Node> nodeNameMap;
+  
+  Map<Node, Integer> nodeOrderMap;
+  SortedMap<Integer, Node> orderNodeMap;
+  
   Set<Edge> edges;
   Map<String, Edge> edgeNameMap;
 
@@ -19,6 +23,9 @@ public class Graph extends Observable{
   public Graph() {
     nodes = new HashSet<Node>();
     nodeNameMap = new HashMap<String, Node>();
+    
+    nodeOrderMap = new HashMap<Node, Integer>();
+    orderNodeMap = new TreeMap<Integer, Node>();
     
     edges = new HashSet<Edge>();
     edgeNameMap = new HashMap<String, Edge>();
@@ -53,6 +60,8 @@ public class Graph extends Observable{
     tailNodeMap.put(node, new HashSet<Edge>());
     headNodeMap.put(node, new HashSet<Edge>());
     
+    setOrder(node, getNextOrder());
+    
     return this;
   }
   
@@ -70,6 +79,8 @@ public class Graph extends Observable{
     if(!(tailNodeMap.get(node).isEmpty() && headNodeMap.get(node).isEmpty())) {
       throw new NodeException(this, node, "Node has edges in graph.");
     }
+    
+    removeOrder(node);
     
     nodes.remove(node);
     node.graph = null;
@@ -114,6 +125,10 @@ public class Graph extends Observable{
     if(edge.name != null && edgeNameMap.containsKey(edge.name)) {
       throw new EdgeException(this, edge, "Edge with this name already in graph.");
     }
+    
+    // Update order before manipulating other state. If edge introduces a cycle,
+    // an exception will be thrown but the graph will be unchanged from its previous state.
+    updateOrder(edge);
     
     edge.graph = this;
     edges.add(edge);
@@ -181,6 +196,157 @@ public class Graph extends Observable{
   }
   
   public int getOrder(Node node) {
-    return 0;
+    return nodeOrderMap.get(node);
+  }
+  
+  private int getNextOrder() {
+    if(nodeOrderMap.isEmpty()) {
+      return 0;
+    }
+    else {
+      return orderNodeMap.firstKey() - 1;
+    }
+  }
+  
+  private void removeOrder(Node node) {
+    assert node != null;
+    
+    Integer order = nodeOrderMap.remove(node);
+    assert order != null;
+    
+    node = orderNodeMap.remove(order);
+    assert node != null;
+  }
+  
+  private void setOrder(Node node, Integer order) {
+    assert node != null;
+    assert order != null;
+    
+    nodeOrderMap.put(node, order);
+    orderNodeMap.put(order, node);
+  }
+  
+  /*** DYNAMIC MAINTENANCE OF TOPOLOGICAL ORDERING 
+   * @throws EdgeException ***/
+  
+  private void updateOrder(Edge edge) throws EdgeException {
+    
+    // Implementation of the PK algorithm, published in
+    // Pearce, David J. and Paul H. J. Kelly. 2007.
+    // A dynamic topological sort algorithm for directed acyclic graphs.
+    // ACM Journal of Experimental Algorithmics 11.
+    // http://doi.acm.org/10.1145/1187436.1210590
+    // http://homepages.ecs.vuw.ac.nz/~djp/dts.html
+    
+    
+    Node tail = edge.getTail();
+    Node head = edge.getHead();
+    int tailOrder = tail.getOrder();
+    int headOrder = head.getOrder();
+    assert tailOrder != headOrder;
+    System.err.printf("old order: tail %d, head %d\n", tailOrder, headOrder);
+    if(headOrder < tailOrder) {
+      // If the head already has a lower order, then do nothing
+      return;
+    }
+    
+    // Find affected forward & backward nodes
+    // (delta_xy^F, delta_xy^B in paper)
+    Set<Node> fwNodes = findAffectedForwardNodes(edge);
+    System.err.printf("affected fw: %s\n", fwNodes);
+    Set<Node> bwNodes = findAffectedBackwardNodes(edge);
+    System.err.printf("affected bw: %s\n", bwNodes);
+
+    // Get sorted list of all indexes
+    applyNewIndexes(fwNodes, bwNodes);
+    System.err.printf("new order: tail %d, head %d\n", tailOrder, headOrder);
+  }
+
+  private Set<Node> findAffectedForwardNodes(Edge edge) throws EdgeException {
+    Stack<Node> stack = new Stack<Node>();
+    Set<Node> visited = new HashSet<Node>();
+    Set<Node> outOfOrder = new HashSet<Node>();
+    stack.push(edge.tail);
+    while(!stack.isEmpty()) {
+      Node top = stack.pop();
+      
+      if(top == edge.head) {
+        throw new EdgeException(this, edge, "Adding edge generates directed cycle in graph."); 
+      }
+      
+      if(!visited.contains(top)) {
+        visited.add(top);
+        if(top.getOrder() < edge.head.getOrder()) {
+          outOfOrder.add(top);
+          for(Edge topEdge : getHeadEdges(top)) {
+            stack.push(topEdge.getTail());
+          }
+        }
+      }
+    }
+
+    return outOfOrder;
+  }
+
+  private Set<Node> findAffectedBackwardNodes(Edge edge) throws EdgeException {
+    Stack<Node> stack = new Stack<Node>();
+    Set<Node> visited = new HashSet<Node>();
+    Set<Node> outOfOrder = new HashSet<Node>();
+    stack.push(edge.head);
+    while(!stack.isEmpty()) {
+      Node top = stack.pop();
+      
+      if(top == edge.tail) {
+        throw new EdgeException(this, edge, "Adding edge generates directed cycle in graph."); 
+      }
+      
+      if(!visited.contains(top)) {
+        visited.add(top);
+        if(top.getOrder() > edge.tail.getOrder()) {
+          outOfOrder.add(top);
+          for(Edge topEdge : getTailEdges(top)) {
+            stack.push(topEdge.getTail());
+          }
+        }
+      }
+    }
+
+    return outOfOrder;
+  }
+  
+  private void applyNewIndexes(Set<Node> fwNodes, Set<Node> bwNodes) {
+    Set<Node> intersection = new HashSet<Node>(fwNodes);
+    intersection.retainAll(bwNodes);
+    assert intersection.isEmpty();
+    
+    // Get sorted list of all indexes
+    int[] indexes = new int[fwNodes.size() + bwNodes.size()];
+    int i = 0;
+    for (Node node : bwNodes)
+      indexes[i++] = node.getOrder();
+    for (Node node : fwNodes)
+      indexes[i++] = node.getOrder();
+    Arrays.sort(indexes);
+    System.err.printf("indexes: %s\n", Arrays.toString(indexes));
+    
+    Comparator<Node> comparator = new Comparator<Node>() {
+      @Override
+      public int compare(Node o1, Node o2) {
+        return getOrder(o1) - getOrder(o2);
+      }
+    };
+    
+    // Get nodes sorted by desired order
+    Node[] bwNodesSorted = bwNodes.toArray(new Node[0]);
+    Arrays.sort(bwNodesSorted, comparator);
+    Node[] fwNodesSorted = fwNodes.toArray(new Node[0]);
+    Arrays.sort(fwNodesSorted, comparator);
+    
+    // Apply indexes to backward nodes, then forward nodes
+    i = 0;
+    for (Node node : bwNodesSorted)
+      setOrder(node, indexes[i++]);
+    for (Node node : fwNodesSorted)
+      setOrder(node, indexes[i++]);
   }
 }
