@@ -30,13 +30,20 @@ public class DoubleVariable extends Variable<DoubleDistribution> implements Doub
 
   @Override
   public void setValue(double value) {
-    this.value = value;
-    setChanged();
-    notifyObservers();
+    if(this.value != value) {
+      this.value = value;
+      setChanged();
+      notifyObservers();
+    }
   }
   
-  public boolean valueIsValid(double value) {
-    return true;
+  public boolean valueIsValid(double value) throws ModelNodeException {
+    DoubleDistribution dist = getDistribution();
+    if(dist == null) {
+      throw new ModelNodeException("Can't ask whether value is valid without distribution.", getModel(), this);
+    }
+    
+    return dist.valueIsValid(value);
   }
 
   @Override

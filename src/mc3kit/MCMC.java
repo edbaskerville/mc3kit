@@ -183,9 +183,15 @@ public class MCMC implements Serializable {
     int chainCount = getChainCount();
     chains = new Chain[chainCount];
     for(int i = 0; i < chainCount; i++) {
-      RandomEngine rng = makeRandomEngine();
+      RandomEngine chainRng;
+      if(chainCount == 1 && rng != null) {
+        chainRng = rng;
+      }
+      else {
+        chainRng = makeRandomEngine();
+      }
       chains[i] = new Chain(this, i, chainCount, priorHeatExponents[i],
-          likelihoodHeatExponents[i], rng);
+          likelihoodHeatExponents[i], chainRng);
     }
     
     if(chainCount == 1) {

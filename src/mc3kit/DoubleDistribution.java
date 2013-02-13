@@ -12,4 +12,6 @@ public abstract class DoubleDistribution extends Distribution<DoubleVariable> {
 
   @Override
   public abstract VariableProposer<DoubleVariable> makeVariableProposer(String varName);
+  
+  public abstract boolean valueIsValid(double value);
 }

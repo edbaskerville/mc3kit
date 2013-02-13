@@ -1,5 +1,7 @@
 package mc3kit;
 
+import cern.jet.random.engine.RandomEngine;
+
 public abstract class Variable<D extends Distribution<?>> extends ModelNode {
   private boolean observed;
   
@@ -26,6 +28,11 @@ public abstract class Variable<D extends Distribution<?>> extends ModelNode {
   
   public double getLogP() {
     return logP;
+  }
+  
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  public void sample(RandomEngine rng) {
+    ((Distribution)getDistribution()).sample(this, rng);
   }
   
   @SuppressWarnings("unchecked")

@@ -1,5 +1,7 @@
 package mc3kit.distributions;
 
+import cern.jet.random.Normal;
+import cern.jet.random.engine.RandomEngine;
 import mc3kit.*;
 
 import static java.lang.Math.*;
@@ -91,5 +93,39 @@ public class NormalDistribution extends DoubleDistribution {
     assert var > 0.0;
     double d = x - mean;
     return -0.5 * (log(var) + LOG_TWO_PI) - d * d / (2.0 * var);
+  }
+
+  @Override
+  public void sample(DoubleVariable var, RandomEngine rng) {
+    double mean = 0.0;
+    if(meanEdge != null) {
+      mean = getDoubleValue(meanEdge);
+    }
+    
+    double sd = 1.0;
+    if(stdDevEdge != null) {
+      assert precEdge == null;
+      assert varEdge == null;
+      sd = getDoubleValue(stdDevEdge);
+    }
+    else if(varEdge != null) {
+      assert precEdge == null;
+      assert stdDevEdge == null;
+      sd = sqrt(getDoubleValue(varEdge));
+    }
+    else if(precEdge != null) {
+      assert stdDevEdge == null;
+      assert varEdge == null;
+      sd = sqrt(1.0/getDoubleValue(precEdge));
+    }
+    var.setValue(new Normal(mean, sd, rng).nextDouble());
+  }
+
+  @Override
+  public boolean valueIsValid(double val) {
+    if(Double.isInfinite(val) || Double.isNaN(val)) {
+      return false;
+    }
+    return true;
   }
 }

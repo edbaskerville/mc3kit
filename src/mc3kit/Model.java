@@ -3,6 +3,8 @@ package mc3kit;
 import java.util.*;
 import java.io.*;
 
+import cern.jet.random.engine.RandomEngine;
+
 import mc3kit.graph.*;
 
 /**
@@ -55,12 +57,31 @@ public class Model implements Observer, Serializable {
     state = State.IN_CONSTRUCTION;
   }
   
-  public void endConstruction() throws ModelException {
+  public void endConstruction(RandomEngine rng) throws ModelException {
     if(state != State.IN_CONSTRUCTION) {
       throw new ModelException("endConstruction called with wrong state", this);
     }
     
-    recalculate();
+    for(Node node : graph.orderedNodesHeadToTail()) {
+      ((ModelNode)node).update();
+      
+      if(node instanceof Variable) {
+        Variable<?> var = (Variable<?>)node;
+        if(var.isObserved()) {
+          logLikelihood += var.getLogP();
+        }
+        else {
+          if(!changedValueVars.contains(var)) {
+            var.sample(rng);
+          }
+          
+          logPrior += var.getLogP();
+        }
+      }
+    }
+    
+    changedValueVars = new HashSet<Variable<?>>();
+    
     state = State.READY;
   }
   
@@ -109,25 +130,6 @@ public class Model implements Observer, Serializable {
     logPrior = oldLogPrior;
     
     state = State.READY;
-  }
-  
-  private void recalculate() throws ModelException {
-    logPrior = 0.0;
-    logLikelihood = 0.0;
-    
-    for(Node node : graph.orderedNodesHeadToTail()) {
-      ((ModelNode)node).update();
-      
-      if(node instanceof Variable) {
-        Variable<?> var = (Variable<?>)node;
-        if(var.isObserved()) {
-          logLikelihood += var.getLogP();
-        }
-        else {
-          logPrior += var.getLogP();
-        }
-      }
-    }
   }
   
   private void propagateChanges(boolean isProposal) throws ModelException {
@@ -344,8 +346,14 @@ public class Model implements Observer, Serializable {
   public void update(Observable obj, Object arg1) {
     if(obj instanceof Variable) {
       Variable<?> var = (Variable<?>)obj;
-      assert !var.isObserved();
-      changedValueVars.add(var);
+      assert state == State.IN_CONSTRUCTION || state == State.IN_PROPOSAL || state == State.IN_REJECTION;
+      if(state == State.IN_PROPOSAL || state == State.IN_REJECTION) {
+        assert !var.isObserved();
+      }
+      
+      if(!var.isObserved()) {
+        changedValueVars.add(var);
+      }
     }
   }
 }

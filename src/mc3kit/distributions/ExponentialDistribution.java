@@ -1,6 +1,8 @@
 package mc3kit.distributions;
 
 import static java.lang.Math.log;
+import cern.jet.random.Exponential;
+import cern.jet.random.engine.RandomEngine;
 import mc3kit.*;
 import mc3kit.proposal.*;
 
@@ -59,5 +61,28 @@ public class ExponentialDistribution extends DoubleDistribution {
     assert scale > 0;
     
     return -log(scale) - x / scale;
+  }
+
+  @Override
+  public boolean valueIsValid(double val) {
+    if(Double.isInfinite(val) || Double.isNaN(val) || val <= 0.0) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public void sample(DoubleVariable var, RandomEngine rng) {
+    double rate;
+    if(rateEdge != null) {
+      rate = getDoubleValue(rateEdge);
+    }
+    else if(scaleEdge != null) {
+      rate = 1.0 / getDoubleValue(scaleEdge);
+    }
+    else {
+      rate = 1.0;
+    }
+    var.setValue(new Exponential(rate, rng).nextDouble());
   }
 }
