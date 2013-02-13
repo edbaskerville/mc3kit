@@ -40,8 +40,9 @@ public class DoubleVariable extends Variable<DoubleDistribution> implements Doub
   }
 
   @Override
-  public void recalculate() {
+  public boolean update() {
     DoubleDistribution dist = getDistribution();
     setLogP(dist.getLogP(this));
+    return false;
   }
 }

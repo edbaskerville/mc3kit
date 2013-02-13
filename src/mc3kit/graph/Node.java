@@ -1,6 +1,6 @@
 package mc3kit.graph;
 
-import java.util.Observable;
+import java.util.*;
 
 public class Node extends Observable {
   String name;
@@ -20,5 +20,17 @@ public class Node extends Observable {
   
   public String getName() {
     return name;
+  }
+  
+  public int getOrder() {
+    return graph.getOrder(this);
+  }
+  
+  public Set<Edge> getHeadEdges() {
+    return graph.getHeadEdges(this);
+  }
+  
+  public Set<Edge> getTailEdges() {
+    return graph.getTailEdges(this);
   }
 }

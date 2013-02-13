@@ -54,7 +54,7 @@ public final class Math {
             * logPriorRatio + likelihoodHeatExponent * logLikelihoodRatio;
 
         if(logAcceptanceProbability >= 0.0
-            || log(rng.nextDouble()) < logAcceptanceProbability) {
+            || log(rng.nextDouble()) <= logAcceptanceProbability) {
           accepted = true;
         }
       }

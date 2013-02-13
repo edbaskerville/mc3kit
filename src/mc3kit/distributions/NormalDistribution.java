@@ -30,9 +30,6 @@ public class NormalDistribution extends DoubleDistribution {
   public VariableProposer<DoubleVariable> makeVariableProposer(String varName) {
     return new MHNormalProposer(varName);
   }
-
-  @Override
-  public void recalculate() { }
   
   public <T extends ModelNode & DoubleValued> void setMeanNode(T meanNode) throws ModelEdgeException {
     meanEdge = updateEdge(meanEdge, meanNode);

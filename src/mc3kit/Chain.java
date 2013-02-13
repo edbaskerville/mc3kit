@@ -14,8 +14,6 @@ public class Chain implements Serializable
 	double likelihoodHeatExponent;
 	RandomEngine rng;
 	
-	long iterationCount;
-	
 	Model model;
 	
 	Chain(MCMC mcmc, int chainId, int chainCount, double priorHeatExponent, double likelihoodHeatExponent, RandomEngine rng)
@@ -75,16 +73,6 @@ public class Chain implements Serializable
 			return mcmc.getChain(chainId + 1);
 		}
 		return null;
-	}
-	
-	public void iterate()
-	{
-		iterationCount++;
-	}
-	
-	public long getIterationCount()
-	{
-		return iterationCount;
 	}
 	
 	public ErrorLogger getLogger()

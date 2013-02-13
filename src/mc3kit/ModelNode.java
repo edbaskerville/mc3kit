@@ -1,6 +1,7 @@
 package mc3kit;
 
-import mc3kit.graph.Node;
+import java.util.*;
+import mc3kit.graph.*;
 
 public abstract class ModelNode extends Node {
   Model model;
@@ -11,7 +12,21 @@ public abstract class ModelNode extends Node {
     super(name);
   }
   
-  public void recalculate() { }
+  public boolean update() {
+    return true;
+  }
+  
+  public boolean update(Set<ModelEdge> fromEdges) {
+    return update();
+  }
+  
+  public boolean updateAfterRejection() {
+    return update();
+  }
+  
+  public boolean updateAfterRejection(Set<ModelEdge> fromEdges) {
+    return update(fromEdges);
+  }
   
   public Model getModel() {
     return model;

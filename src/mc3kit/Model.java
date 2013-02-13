@@ -13,7 +13,7 @@ import mc3kit.graph.*;
  *
  */
 @SuppressWarnings("serial")
-public class Model implements Serializable {
+public class Model implements Observer, Serializable {
   
   Graph graph;
   
@@ -23,13 +23,18 @@ public class Model implements Serializable {
   double logPrior;
   double logLikelihood;
   
+  double oldLogPrior;
+  double oldLogLikelihood;
+  
   State state;
+  Set<Variable<?>> changedValueVars;
   
   public Model() {
     graph = new Graph();
     unobservedVariables = new ArrayList<Variable<?>>();
     varDistEdgeMap = new HashMap<Variable<?>, DistributionEdge>();
-    state = State.READY;
+    state = State.UNINITIALIZED;
+    changedValueVars = new HashSet<Variable<?>>();
   }
   
   public String[] getUnobservedVariableNames() {
@@ -42,23 +47,21 @@ public class Model implements Serializable {
   
   /*** CALCULATIONS ***/
   
-  public void recalculate() throws ModelException {
-    logPrior = 0.0;
-    logLikelihood = 0.0;
-    
-    for(Node node : graph.orderedNodesHeadToTail()) {
-      ((ModelNode)node).recalculate();
-      
-      if(node instanceof Variable) {
-        Variable<?> var = (Variable<?>)node;
-        if(var.isObserved()) {
-          logLikelihood += var.getLogP();
-        }
-        else {
-          logPrior += var.getLogP();
-        }
-      }
+  public void beginConstruction() throws ModelException {
+    if(state != State.UNINITIALIZED) {
+      throw new ModelException("beginConstruction called with wrong state", this);
     }
+    
+    state = State.IN_CONSTRUCTION;
+  }
+  
+  public void endConstruction() throws ModelException {
+    if(state != State.IN_CONSTRUCTION) {
+      throw new ModelException("endConstruction called with wrong state", this);
+    }
+    
+    recalculate();
+    state = State.READY;
   }
   
   public void beginProposal() throws ModelException {
@@ -73,6 +76,10 @@ public class Model implements Serializable {
     if(state != State.IN_PROPOSAL) {
       throw new ModelException("endProposal called with wrong state", this);
     }
+    
+    oldLogPrior = logPrior;
+    oldLogLikelihood = logLikelihood;
+    propagateChanges(true);
     
     state = State.PROPOSAL_COMPLETE;
   }
@@ -97,7 +104,101 @@ public class Model implements Serializable {
       throw new ModelException("endRejection called with wrong state", this);
     }
     
+    propagateChanges(false);
+    logLikelihood = oldLogLikelihood;
+    logPrior = oldLogPrior;
+    
     state = State.READY;
+  }
+  
+  private void recalculate() throws ModelException {
+    logPrior = 0.0;
+    logLikelihood = 0.0;
+    
+    for(Node node : graph.orderedNodesHeadToTail()) {
+      ((ModelNode)node).update();
+      
+      if(node instanceof Variable) {
+        Variable<?> var = (Variable<?>)node;
+        if(var.isObserved()) {
+          logLikelihood += var.getLogP();
+        }
+        else {
+          logPrior += var.getLogP();
+        }
+      }
+    }
+  }
+  
+  private void propagateChanges(boolean isProposal) throws ModelException {
+    Set<ModelEdge> emptyEdgeSet = new HashSet<ModelEdge>(0);
+    
+    // Map of nodes to parent edges that have changed, for the sake of efficient updating
+    Map<ModelNode, Set<ModelEdge>> visitedEdges = new HashMap<ModelNode, Set<ModelEdge>>();
+    
+    // Queue of nodes to update in topological order, starting with variables
+    // whose values have changed
+    SortedMap<Integer, ModelNode> updateQueue = new TreeMap<Integer, ModelNode>();
+    for(Variable<?> var : changedValueVars) {
+      updateQueue.put(var.getOrder(), var);
+    }
+    
+    // Traverse graph in topological order
+    int lastOrder = Integer.MIN_VALUE;
+    while (!updateQueue.isEmpty()) {
+      int order = updateQueue.firstKey();
+      assert order > lastOrder;
+      lastOrder = order;
+      
+      ModelNode node = updateQueue.get(order);
+      updateQueue.remove(order);
+      
+      Set<ModelEdge> fromEdges = visitedEdges.get(node);
+      if(fromEdges == null) fromEdges = emptyEdgeSet;
+      
+      // Get old log-probability for random variables
+      double oldLogP = 0.0;
+      if(node instanceof Variable) {
+        oldLogP = ((Variable<?>)node).getLogP();
+      }
+      
+      // Update the node
+      boolean changed;
+      if(isProposal) {
+        changed = node.update(fromEdges);
+      }
+      else {
+        changed = node.updateAfterRejection(fromEdges);
+      }
+      
+      // Update log-prior or log-likelihood for random variables
+      if(node instanceof Variable) {
+        Variable<?> var = (Variable<?>)node;
+        double newLogP = var.getLogP();
+        if(var.isObserved()) {
+          logLikelihood += (newLogP - oldLogP);
+        }
+        else {
+          logPrior += (newLogP - oldLogP);
+        }
+      }
+      
+      // If the node changed, add all the edges representing dependencies
+      // on it (the head) to the visited-edge map for the dependent nodes
+      // (the tails)
+      if(changed || changedValueVars.contains(node)) {
+        for(Edge edge : node.getHeadEdges()) {
+          ModelNode tail = (ModelNode)edge.getTail();
+          if(!visitedEdges.containsKey(tail)) {
+            visitedEdges.put(tail, new HashSet<ModelEdge>());
+          }
+          visitedEdges.get(tail).add((ModelEdge)edge);
+          updateQueue.put(tail.getOrder(), tail);
+        }
+      }
+    }
+    
+    changedValueVars = new HashSet<Variable<?>>();
   }
   
   /*** GRAPH CONSTRUCTION/MANIPULATION ***/
@@ -121,6 +222,8 @@ public class Model implements Serializable {
       }
       unobservedVariables.add(var);
     }
+    
+    var.addObserver(this);
     
     return var;
   }
@@ -229,9 +332,20 @@ public class Model implements Serializable {
   }
   
   private enum State {
+    UNINITIALIZED,
+    IN_CONSTRUCTION,
     READY,
     IN_PROPOSAL,
     PROPOSAL_COMPLETE,
     IN_REJECTION
+  }
+
+  @Override
+  public void update(Observable obj, Object arg1) {
+    if(obj instanceof Variable) {
+      Variable<?> var = (Variable<?>)obj;
+      assert !var.isObserved();
+      changedValueVars.add(var);
+    }
   }
 }

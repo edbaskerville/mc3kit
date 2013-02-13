@@ -142,6 +142,14 @@ public class Graph extends Observable{
     headNodeMap.get(edge.head).remove(edge);
   }
   
+  public Set<Edge> getHeadEdges(Node node) {
+    return headNodeMap.get(node);
+  }
+  
+  public Set<Edge> getTailEdges(Node node) {
+    return tailNodeMap.get(node);
+  }
+  
   /**
    * Gets a node by name.
    * @param name
@@ -170,5 +178,9 @@ public class Graph extends Observable{
   
   public Collection<Node> orderedNodesHeadToTail() {
     return new ArrayList<Node>(nodes);
+  }
+  
+  public int getOrder(Node node) {
+    return 0;
   }
 }

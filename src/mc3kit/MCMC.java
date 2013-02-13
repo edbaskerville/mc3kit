@@ -120,7 +120,7 @@ public class MCMC implements Serializable {
     setLogger(new ErrorLogger(log4jLogger));
   }
 
-  private void initialize() throws MC3KitException {
+  private void initialize() throws Throwable {
     if(initialized) {
       return;
     }
@@ -162,7 +162,7 @@ public class MCMC implements Serializable {
     initialized = true;
   }
 
-  private void initializeChains() throws MC3KitException {
+  private void initializeChains() throws Throwable {
     if(chainCount < 1) {
       throw new MC3KitException("There must be at least one chain.");
     }
@@ -179,24 +179,38 @@ public class MCMC implements Serializable {
       throw new MC3KitException("If modelFactory is set, model should not be set.");
     }
     
+    // Make chains
     int chainCount = getChainCount();
-    
     chains = new Chain[chainCount];
-    for (int i = 0; i < chainCount; i++) {
+    for(int i = 0; i < chainCount; i++) {
       RandomEngine rng = makeRandomEngine();
       chains[i] = new Chain(this, i, chainCount, priorHeatExponents[i],
           likelihoodHeatExponents[i], rng);
-      
-      Model chainModel;
+    }
+    
+    if(chainCount == 1) {
       if(modelFactory == null) {
-        assert(chainCount == 1);
         assert(model != null);
-        chainModel = model;
+        chains[0].setModel(model);
       }
-      else {
-        chainModel = modelFactory.createModel(chains[i]);
+    }
+    else {
+      // Use thread pool to construct models for different chains
+      for(int i = 0; i < chainCount; i++) {
+        final int chainId = i;
+        completionService.submit(new Callable<Object>() {
+          @Override
+          public Object call() throws Exception {
+            chains[chainId].setModel(modelFactory.createModel(chains[chainId]));
+            return this;
+          }
+        });
       }
-      chains[i].setModel(chainModel);
+      
+      // Wait for completion
+      for(int i = 0; i < chainCount; i++) {
+        completionService.take();
+      }
     }
     logger.trace("Chains created.");
   }
@@ -300,6 +314,8 @@ public class MCMC implements Serializable {
     assert(terminationCount > iterationCount);
     initialize();
     
+    System.err.printf("Running until %d\n", terminationCount);
+    
     terminationManager = new TerminationManager();
     
     logger.info("Starting run.");
@@ -315,8 +331,12 @@ public class MCMC implements Serializable {
         Future<Object> completedTask = completionService.take();
         Object result = completedTask.get();
         if(result == terminationManager) {
+          System.err.println("Got termination task.");
           done = true;
           assert(iterationCount == terminationCount);
+        }
+        else {
+          System.err.println("Got non-termination task.");
         }
       }
     }
