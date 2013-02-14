@@ -1,28 +1,34 @@
 package mc3kit.distributions;
 
+import static cern.jet.stat.Gamma.logGamma;
 import static java.lang.Math.log;
 import cern.jet.random.Exponential;
 import cern.jet.random.engine.RandomEngine;
 import mc3kit.*;
 import mc3kit.proposal.*;
 
-public class ExponentialDistribution extends DoubleDistribution {
+public class GammaDistribution extends DoubleDistribution {
   
+  ModelEdge shapeEdge;
   ModelEdge rateEdge;
   ModelEdge scaleEdge;
   
   
-  public ExponentialDistribution() {
+  public GammaDistribution() {
     this(null);
   }
   
-  public ExponentialDistribution(String name) {
+  public GammaDistribution(String name) {
     super(name);
   }
 
   @Override
   public VariableProposer<DoubleVariable> makeVariableProposer(String varName) {
     return new MHMultiplierProposal(varName);
+  }
+  
+  public <T extends ModelNode & DoubleValued> void setShape(T shapeNode) throws ModelEdgeException {
+    shapeEdge = updateEdge(shapeEdge, shapeNode);
   }
   
   public <T extends ModelNode & DoubleValued> void setRate(T rateNode) throws ModelEdgeException {
@@ -39,28 +45,35 @@ public class ExponentialDistribution extends DoubleDistribution {
   public double getLogP(DoubleVariable v) {
     double x = v.getValue();
     
+    double shape = 1.0;
+    if(shapeEdge != null) {
+      shape = getDoubleValue(shapeEdge);
+    }
+    
     if(rateEdge != null) {
       assert scaleEdge == null;
-      return getLogPRate(x, getDoubleValue(rateEdge));
+      return getLogPRate(x, shape, getDoubleValue(rateEdge));
     }
     else if(scaleEdge != null) {
-      return getLogPScale(x, getDoubleValue(scaleEdge));
+      return getLogPScale(x, shape, getDoubleValue(scaleEdge));
     }
     return -x; // for rate == scale == null => rate = 1
   }
   
-  public static double getLogPRate(double x, double rate) {
+  public static double getLogPRate(double x, double shape, double rate) {
     assert x > 0;
+    assert shape > 0;
     assert rate > 0;
     
-    return log(rate) - rate * x;
+    return shape * log(rate) - logGamma(shape) + (shape - 1.0) * log(x) - rate * x;
   }
   
-  public static double getLogPScale(double x, double scale) {
+  public static double getLogPScale(double x, double shape, double scale) {
     assert x > 0;
+    assert shape > 0;
     assert scale > 0;
     
-    return -log(scale) - x / scale;
+    return - shape * log(scale) - logGamma(shape) + (shape - 1.0) * log(x) - x / scale;
   }
 
   @Override
