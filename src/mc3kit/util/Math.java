@@ -3,10 +3,21 @@ package mc3kit.util;
 import static java.lang.Math.log;
 import cern.jet.random.*;
 import cern.jet.random.engine.RandomEngine;
+import cern.jet.stat.Gamma;
 
 public final class Math {
   public static double LOG_PI = log(java.lang.Math.PI);
   public static double LOG_TWO_PI = log(2 * java.lang.Math.PI);
+  
+  public static double logGamma(double x)
+  {
+    if(x == 1.0) return 0.0;
+    return Gamma.logGamma(x);
+  }
+  
+  public static double logBeta(double x, double y) {
+    return logGamma(x) + logGamma(y) - logGamma(x + y);
+  }
   
   public static int[] getRandomPermutation(int size, Uniform uniform) {
     int[] vals = new int[size];

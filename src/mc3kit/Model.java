@@ -63,6 +63,13 @@ public class Model implements Observer, Serializable {
     }
     
     for(Node node : graph.orderedNodesHeadToTail()) {
+      if(node instanceof Variable) {
+        Variable<?> var = (Variable<?>)node;
+        if(!var.isObserved()) {
+          var.sample(rng);
+        }
+      }
+      
       ((ModelNode)node).update();
       
       if(node instanceof Variable) {
@@ -71,10 +78,6 @@ public class Model implements Observer, Serializable {
           logLikelihood += var.getLogP();
         }
         else {
-          if(!changedValueVars.contains(var)) {
-            var.sample(rng);
-          }
-          
           logPrior += var.getLogP();
         }
       }

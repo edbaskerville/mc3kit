@@ -170,4 +170,56 @@ public class MCMCTest {
     System.err.printf("var = %f\n", var);
     assertEquals(1/12.0, var, 0.01);
   }
+
+  @Test
+  public void testBeta() throws Throwable {
+    long burnIn = 5000;
+    long iterCount = 10000;
+    
+    MCMC mcmc = new MCMC();
+    RandomEngine rng = new MersenneTwister(1453);
+    mcmc.setRng(rng);
+    
+    Model m = new Model();
+    
+    m.beginConstruction();
+    m.addDistribution(new BetaDistribution("d", 2.0, 3.0));
+    m.addVariable(new DoubleVariable("v"));
+    m.setDistribution("v", "d");
+    m.endConstruction(rng);
+    
+    mcmc.setModel(m);
+    
+    UnivariateProposalStep proposalStep = new UnivariateProposalStep();
+    proposalStep.setTuneEvery(100);
+    proposalStep.setTuneFor(burnIn);
+    mcmc.addStep(proposalStep);
+    
+    // Run, collect statistics, and check moments against expected distribution
+    double sum = 0;
+    double sumSq = 0;
+    for(long i = 0; i < iterCount; i++) {
+      mcmc.step();
+      
+      assertEquals(i + 1, mcmc.getIterationCount());
+      
+      if(i >= burnIn) {
+        double val = mcmc.getModel().getDoubleVariable("v").getValue();
+        assertTrue(val > 0.0);
+        assertTrue(val < 1.0);
+        sum += val;
+        sumSq += val * val;
+      }
+    }
+    
+    double N = iterCount - burnIn;
+    
+    double mean = sum / N;
+    System.err.printf("mean = %f\n", mean);
+    assertEquals(0.4, mean, 0.01);
+    
+    double var = N / (N - 1) * (sumSq/N - mean * mean);
+    System.err.printf("var = %f\n", var);
+    assertEquals(5.0/(5*5*6.0), var, 0.01);
+  }
 }
