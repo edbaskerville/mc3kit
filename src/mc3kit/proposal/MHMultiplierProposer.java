@@ -5,11 +5,11 @@ import mc3kit.*;
 import static java.lang.Math.exp;
 import static mc3kit.util.Math.*;
 
-public class MHMultiplierProposal extends VariableProposer<DoubleVariable> {
+public class MHMultiplierProposer extends VariableProposer<DoubleVariable> {
 
   double lambda;
   
-  public MHMultiplierProposal(String name) {
+  public MHMultiplierProposer(String name) {
     super(name);
     this.lambda = 0.5;
   } 

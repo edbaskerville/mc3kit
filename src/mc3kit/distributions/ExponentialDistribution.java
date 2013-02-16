@@ -22,7 +22,7 @@ public class ExponentialDistribution extends DoubleDistribution {
 
   @Override
   public VariableProposer<DoubleVariable> makeVariableProposer(String varName) {
-    return new MHMultiplierProposal(varName);
+    return new MHMultiplierProposer(varName);
   }
   
   public <T extends ModelNode & DoubleValued> void setRate(T rateNode) throws ModelEdgeException {

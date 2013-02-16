@@ -24,7 +24,7 @@ public class GammaDistribution extends DoubleDistribution {
 
   @Override
   public VariableProposer<DoubleVariable> makeVariableProposer(String varName) {
-    return new MHMultiplierProposal(varName);
+    return new MHMultiplierProposer(varName);
   }
   
   public <T extends ModelNode & DoubleValued> void setShape(T shapeNode) throws ModelEdgeException {
