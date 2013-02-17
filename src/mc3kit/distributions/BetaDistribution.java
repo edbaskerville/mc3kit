@@ -50,7 +50,6 @@ public class BetaDistribution extends DoubleDistribution {
   
   private void updateConstant() {
     logBetaAB = logBeta(alpha, beta);
-    System.err.printf("logBeta: %f\n", logBetaAB);
   }
 
   @Override
@@ -67,7 +66,6 @@ public class BetaDistribution extends DoubleDistribution {
   public double getLogP(DoubleVariable var) {
     double x = var.getValue();
     double logP = (alpha - 1.0) * log(x) + (beta - 1.0) * log1p(-x) - logBetaAB;
-    System.err.printf("x = %f, alpha = %f, beta = %f, logP = %f\n", x,  alpha, beta, logP);
     return logP;
   }
 

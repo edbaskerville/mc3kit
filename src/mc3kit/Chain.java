@@ -1,6 +1,7 @@
 package mc3kit;
 
 import java.io.Serializable;
+import java.util.logging.Logger;
 
 import cern.jet.random.engine.RandomEngine;
 
@@ -16,6 +17,8 @@ public class Chain implements Serializable
 	
 	Model model;
 	
+	Logger logger;
+	
 	Chain(MCMC mcmc, int chainId, int chainCount, double priorHeatExponent, double likelihoodHeatExponent, RandomEngine rng)
 	{
 		this.mcmc = mcmc;
@@ -24,6 +27,8 @@ public class Chain implements Serializable
 		this.priorHeatExponent = priorHeatExponent;
 		this.likelihoodHeatExponent = likelihoodHeatExponent;
 		this.rng = rng;
+		
+		logger = Logger.getLogger("mc3kit.Chain." + chainId);
 	}
 	
 	public MCMC getMCMC()
@@ -75,8 +80,7 @@ public class Chain implements Serializable
 		return null;
 	}
 	
-	public ErrorLogger getLogger()
-	{
-		return mcmc.getLogger();
+	public Logger getLogger() {
+	  return logger;
 	}
 }

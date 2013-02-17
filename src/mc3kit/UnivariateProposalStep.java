@@ -1,6 +1,7 @@
 package mc3kit;
 
 import static mc3kit.util.Math.getRandomPermutation;
+import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,10 +93,11 @@ public class UnivariateProposalStep implements Step {
     @Override
     public void step(Chain[] chains) throws MC3KitException {
       assert (chains.length == 1);
-      
-      System.err.println("UnivariateProposalStep stepping");
 
       Chain chain = chains[0];
+      
+      chain.getLogger().fine("UnivariateProposalStep stepping");
+      
       Model model = chain.getModel();
       initialize(model);
 
@@ -103,20 +105,20 @@ public class UnivariateProposalStep implements Step {
       double likeHeatExp = chain.getLikelihoodHeatExponent();
       RandomEngine rng = chain.getRng();
 
-      chain.getLogger().trace("univariate stepping %d\n", chainId);
+      chain.getLogger().fine(format("univariate stepping %d", chainId));
 
       Uniform unif = new Uniform(rng);
 
       // Run all proposers in random order
       for(int i : getRandomPermutation(proposers.length, unif)) {
-        proposers[i].step(model, priorHeatExp, likeHeatExp, rng);
+        proposers[i].step(chain, model, priorHeatExp, likeHeatExp, rng);
       }
 
       iterationCount++;
 
       // If we're still in the tuning period, tune
       if((iterationCount <= tuneFor) && iterationCount % tuneEvery == 0) {
-        System.err.printf("tuning\n");
+        chain.getLogger().fine("tuning");
         for(VariableProposer proposer : proposers) {
           proposer.tune(targetAcceptanceRate);
           proposer.resetTuningPeriod();

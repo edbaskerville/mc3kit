@@ -4,6 +4,7 @@ import cern.jet.random.Normal;
 import cern.jet.random.engine.RandomEngine;
 import mc3kit.*;
 import static mc3kit.util.Math.*;
+import static java.lang.String.format;
 
 public class MHNormalProposer extends VariableProposer<DoubleVariable> {
 
@@ -15,24 +16,24 @@ public class MHNormalProposer extends VariableProposer<DoubleVariable> {
   } 
 
   @Override
-  public void step(Model model, double priorHeatExp, double likeHeatExp,
+  public void step(Chain chain, Model model, double priorHeatExp, double likeHeatExp,
       RandomEngine rng) throws MC3KitException {
     
-    System.err.println("MHNormalProposer stepping");
+    chain.getLogger().finest("MHNormalProposer stepping");
     
     Normal normal = new Normal(0.0, proposalSD, rng);
     
     double oldLogLikelihood = model.getLogLikelihood();
     double oldLogPrior = model.getLogPrior();
     
-    System.err.printf("oldLP, oldLL: %f, %f\n", oldLogPrior, oldLogLikelihood);
+    chain.getLogger().finest(format("oldLP, oldLL: %f, %f", oldLogPrior, oldLogLikelihood));
     
     DoubleVariable rv = model.getDoubleVariable(getName());
     
     double oldValue = rv.getValue();
     double newValue = oldValue + normal.nextDouble();
     
-    System.err.printf("oldVal, newVal = %f, %f\n", oldValue, newValue);
+    chain.getLogger().finest(format("oldVal, newVal = %f, %f", oldValue, newValue));
     
     if(!rv.valueIsValid(newValue))
     {
@@ -47,7 +48,7 @@ public class MHNormalProposer extends VariableProposer<DoubleVariable> {
     double newLogPrior = model.getLogPrior();
     double newLogLikelihood = model.getLogLikelihood();
     
-    System.err.printf("newLP, newLL: %f, %f\n", newLogPrior, newLogLikelihood);
+    chain.getLogger().finest(format("newLP, newLL: %f, %f", newLogPrior, newLogLikelihood));
     
     boolean accepted = shouldAcceptMetropolisHastings(rng, priorHeatExp, likeHeatExp,
       oldLogPrior, oldLogLikelihood,

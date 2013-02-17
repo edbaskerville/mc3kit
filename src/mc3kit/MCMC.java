@@ -2,10 +2,11 @@ package mc3kit;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.logging.*;
 import java.io.*;
-import cern.jet.random.engine.*;
+import static java.lang.String.format;
 
-import org.apache.log4j.*;
+import cern.jet.random.engine.*;
 
 @SuppressWarnings("serial")
 public class MCMC implements Serializable {
@@ -17,78 +18,23 @@ public class MCMC implements Serializable {
   Model model;
   RandomEngine rng;
   int chainCount = 1;
-  
-  /*** STATE ***/
-  
-  boolean initialized;
-  long iterationCount;
-  long terminationCount;
-  TerminationManager terminationManager;
-  private List<Step> steps;
-  
-  public void setModel(Model model) throws MC3KitException {
-    throwIfInitialized();
-    this.model = model;
-  }
-  
-  public void setRng(RandomEngine rng) throws MC3KitException {
-    throwIfInitialized();
-    this.rng = rng;
-  }
-
-  public void setModelFactory(ModelFactory modelFactory) throws MC3KitException {
-    throwIfInitialized();
-    this.modelFactory = modelFactory;
-  }
-
-  public int getChainCount() {
-    return chainCount;
-  }
-
-  public void setChainCount(int chainCount) throws MC3KitException {
-    throwIfInitialized();
-    this.chainCount = chainCount;
-  }
-  
-  public void addTask(final Task task) throws MC3KitException {
-    throwIfInitialized();
-    steps.add(new Step() {
-      @Override
-      public List<Task> makeTasks(int chainCount) throws MC3KitException {
-        List<Task> list = new ArrayList<Task>();
-        list.add(task);
-        return list;
-      }
-    });
-  }
-  
-  public void addStep(Step step) throws MC3KitException {
-    throwIfInitialized();
-    steps.add(step);
-  }
 
   private HeatFunction heatFunction;
   private double[] priorHeatExponents;
   private double[] likelihoodHeatExponents;
 
-  public HeatFunction getHeatFunction() {
-    return heatFunction;
-  }
-
-  public void setHeatFunction(HeatFunction heatFunction) throws MC3KitException {
-    throwIfInitialized();
-    this.heatFunction = heatFunction;
-  }
-
   private Long randomSeed = null;
-
-  public Long getRandomSeed() {
-    return randomSeed;
-  }
-
-  public void setRandomSeed(Long randomSeed) {
-    this.randomSeed = randomSeed;
-  }
+  
+  private List<Step> steps;
+  
+  /*** STATE ***/
+  
+  Logger logger;
+  
+  boolean initialized;
+  long iterationCount;
+  long terminationCount;
+  TerminationManager terminationManager;
 
   /*** THREAD POOL MANAGEMENT ***/
 
@@ -102,31 +48,13 @@ public class MCMC implements Serializable {
 
   public MCMC() {
     steps = new ArrayList<Step>();
-  }
-
-  /*** LOGGER ***/
-
-  private ErrorLogger logger;
-
-  public ErrorLogger getLogger() {
-    return logger;
-  }
-
-  public void setLogger(ErrorLogger logger) {
-    this.logger = logger;
-  }
-
-  public void setLog4jLogger(Logger log4jLogger) {
-    setLogger(new ErrorLogger(log4jLogger));
+    logger = Logger.getLogger("mc3kit.MCMC");
   }
 
   private void initialize() throws Throwable {
     if(initialized) {
       return;
     }
-
-    if (logger == null)
-      logger = new ErrorLogger();
     
     if(heatFunction == null) {
       heatFunction = new ConstantHeatFunction();
@@ -135,17 +63,15 @@ public class MCMC implements Serializable {
     priorHeatExponents = heatFunction.getPriorHeatExponents(chainCount);
     likelihoodHeatExponents = heatFunction.getLikelihoodHeatExponents(chainCount);
 
-    if (logger.isEnabledFor(Level.INFO)) {
-      for (int i = 0; i < chainCount; i++) {
-        logger.info("chain %d: prior heat exp. %f, like heat exp %f", i,
-            priorHeatExponents[i], likelihoodHeatExponents[i]);
-      }
+    for (int i = 0; i < chainCount; i++) {
+      logger.info(format("chain %d: prior heat exp. %f, like heat exp %f", i,
+          priorHeatExponents[i], likelihoodHeatExponents[i]));
     }
 
     threadPool = new ThreadPoolExecutor(chainCount, 2 * chainCount, 60,
         TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
     completionService = new ExecutorCompletionService<Object>(threadPool);
-    logger.trace("Thread pool created.");
+    logger.info("Thread pool created.");
 
     // Initialize a top-level RNG to generate start seed-table
     // start locations for each replicate
@@ -218,7 +144,7 @@ public class MCMC implements Serializable {
         completionService.take();
       }
     }
-    logger.trace("Chains created.");
+    logger.info("Chains created.");
   }
 
   private void initializeSteps() throws MC3KitException {
@@ -251,7 +177,7 @@ public class MCMC implements Serializable {
         for (int chainId : chainIds) {
           if (taskManagersByChain[i][chainId] != null) {
             throw new MC3KitException(
-              String.format("Two tasks handling chain %d in step %d.\n", chainId, i)
+              String.format("Two tasks handling chain %d in step %d.", chainId, i)
             );
           }
           taskManagersByChain[i][chainId] = taskManagers[i][j];
@@ -263,7 +189,7 @@ public class MCMC implements Serializable {
     for (int chainId = 0; chainId < chainCount; chainId++) {
       if (taskManagersByChain[0][chainId] == null)
         throw new MC3KitException(
-          String.format("Chain %d is not covered by first step.\n", chainId)
+          String.format("Chain %d is not covered by first step.", chainId)
         );
     }
 
@@ -287,7 +213,7 @@ public class MCMC implements Serializable {
         taskManager.nextTaskManagers = nextTaskManagers;
       }
     }
-    logger.trace("Steps set up.");
+    logger.info("Steps set up.");
   }
   
   /**
@@ -320,11 +246,11 @@ public class MCMC implements Serializable {
     assert(terminationCount > iterationCount);
     initialize();
     
-    System.err.printf("Running until %d\n", terminationCount);
+    logger.fine(format("Running until %d", terminationCount));
     
     terminationManager = new TerminationManager();
     
-    logger.info("Starting run.");
+    logger.fine("Starting run.");
 
     try {
       for (TaskManager taskManager : taskManagers[0]) {
@@ -337,12 +263,12 @@ public class MCMC implements Serializable {
         Future<Object> completedTask = completionService.take();
         Object result = completedTask.get();
         if(result == terminationManager) {
-          System.err.println("Got termination task.");
+          logger.fine("Got termination task.");
           done = true;
           assert(iterationCount == terminationCount);
         }
         else {
-          System.err.println("Got non-termination task.");
+          logger.finer("Got non-termination task.");
         }
       }
     }
@@ -503,5 +429,78 @@ public class MCMC implements Serializable {
   private void throwIfInitialized() throws MC3KitException {
     if (initialized)
       throw new MC3KitException("Already initialized");
+  }
+  
+  /*** ACCESSORS ***/
+
+  
+  public void setModel(Model model) throws MC3KitException {
+    throwIfInitialized();
+    this.model = model;
+  }
+  
+  public void setRng(RandomEngine rng) throws MC3KitException {
+    throwIfInitialized();
+    this.rng = rng;
+  }
+
+  public void setModelFactory(ModelFactory modelFactory) throws MC3KitException {
+    throwIfInitialized();
+    this.modelFactory = modelFactory;
+  }
+
+  public int getChainCount() {
+    return chainCount;
+  }
+
+  public void setChainCount(int chainCount) throws MC3KitException {
+    throwIfInitialized();
+    this.chainCount = chainCount;
+  }
+  
+  public void addTask(final Task task) throws MC3KitException {
+    throwIfInitialized();
+    steps.add(new Step() {
+      @Override
+      public List<Task> makeTasks(int chainCount) throws MC3KitException {
+        List<Task> list = new ArrayList<Task>();
+        list.add(task);
+        return list;
+      }
+    });
+  }
+  
+  public void addStep(Step step) throws MC3KitException {
+    throwIfInitialized();
+    steps.add(step);
+  }
+
+  public HeatFunction getHeatFunction() {
+    return heatFunction;
+  }
+
+  public void setHeatFunction(HeatFunction heatFunction) throws MC3KitException {
+    throwIfInitialized();
+    this.heatFunction = heatFunction;
+  }
+
+  public Long getRandomSeed() {
+    return randomSeed;
+  }
+
+  public void setRandomSeed(Long randomSeed) {
+    this.randomSeed = randomSeed;
+  }
+  
+  public static void setLogLevel(Level level) {
+    Logger logger = Logger.getLogger("");
+    logger.setLevel(level);
+    for(Handler handler : logger.getHandlers()) {
+      handler.setLevel(level);
+    }
+  }
+  
+  public static void addLogHandler(Handler handler) {
+    Logger.getLogger("").addHandler(handler);
   }
 }

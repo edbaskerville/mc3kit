@@ -41,7 +41,7 @@ public abstract class VariableProposer<V extends Variable<?>>
 		acceptanceCount++;
 	}
 	
-	public abstract void step(Model model, double priorHeatExp, double likeHeatExp, RandomEngine rng)
+	public abstract void step(Chain chain, Model model, double priorHeatExp, double likeHeatExp, RandomEngine rng)
 	    throws MC3KitException;
 	public void tune(double targetRate) throws MC3KitException {}
 	

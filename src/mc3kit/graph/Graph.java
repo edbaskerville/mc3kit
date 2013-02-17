@@ -1,6 +1,9 @@
 package mc3kit.graph;
 
 import java.util.*;
+import java.util.logging.Logger;
+
+import static java.lang.String.format;
 
 /**
  * Represents a directed graph.
@@ -20,6 +23,8 @@ public class Graph extends Observable {
   Map<Node, Set<Edge>> tailNodeMap;
   Map<Node, Set<Edge>> headNodeMap;
   
+  private Logger logger;
+  
   public Graph() {
     nodes = new HashSet<Node>();
     nodeNameMap = new HashMap<String, Node>();
@@ -32,6 +37,8 @@ public class Graph extends Observable {
 
     tailNodeMap = new HashMap<Node, Set<Edge>>();
     headNodeMap = new HashMap<Node, Set<Edge>>();
+    
+    logger = Logger.getLogger("mc3kit.graph.Graph");
   }
   
   /**
@@ -240,7 +247,7 @@ public class Graph extends Observable {
     int tailOrder = tail.getOrder();
     int headOrder = head.getOrder();
     assert tailOrder != headOrder;
-    System.err.printf("old order: tail %d, head %d\n", tailOrder, headOrder);
+    logger.finest(format("old order: tail %d, head %d", tailOrder, headOrder));
     if(headOrder < tailOrder) {
       // If the head already has a lower order, then do nothing
       return;
@@ -249,13 +256,13 @@ public class Graph extends Observable {
     // Find affected forward & backward nodes
     // (delta_xy^F, delta_xy^B in paper)
     Set<Node> fwNodes = findAffectedForwardNodes(edge);
-    System.err.printf("affected fw: %s\n", fwNodes);
+    logger.finest(format("affected fw: %s", fwNodes));
     Set<Node> bwNodes = findAffectedBackwardNodes(edge);
-    System.err.printf("affected bw: %s\n", bwNodes);
+    logger.finest(format("affected bw: %s", bwNodes));
 
     // Get sorted list of all indexes
     applyNewIndexes(fwNodes, bwNodes);
-    System.err.printf("new order: tail %d, head %d\n", tailOrder, headOrder);
+    logger.finest(format("new order: tail %d, head %d", tailOrder, headOrder));
   }
 
   private Set<Node> findAffectedForwardNodes(Edge edge) throws IllegalArgumentException {
@@ -323,7 +330,7 @@ public class Graph extends Observable {
     for (Node node : fwNodes)
       indexes[i++] = node.getOrder();
     Arrays.sort(indexes);
-    System.err.printf("indexes: %s\n", Arrays.toString(indexes));
+    logger.finest(format("indexes: %s", Arrays.toString(indexes)));
     
     Comparator<Node> comparator = new Comparator<Node>() {
       @Override
