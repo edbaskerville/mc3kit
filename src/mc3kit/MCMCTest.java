@@ -66,18 +66,18 @@ public class MCMCTest {
     double N = iterCount - burnIn;
     
     double mean = sum / N;
-    System.err.printf("mean = %f", mean);
+    System.err.printf("mean = %f\n", mean);
     assertEquals(0.0, mean, 0.02);
     
     double sd = sqrt(N / (N - 1) * (sumSq/N - mean * mean));
-    System.err.printf("sd = %f", sd);
+    System.err.printf("sd = %f\n", sd);
     assertEquals(1.0, sd, 0.02);
   }
 
   @Test
   public void testStandardExponential() throws Throwable {
-    long burnIn = 5000;
-    long iterCount = 10000;
+    long burnIn = 40000;
+    long iterCount = 80000;
     
     MCMC mcmc = new MCMC();
     RandomEngine rng = new MersenneTwister(1453);
@@ -116,12 +116,12 @@ public class MCMCTest {
     double N = iterCount - burnIn;
     
     double mean = sum / N;
-    System.err.printf("mean = %f", mean);
-    assertEquals(1.0, mean, 0.1);
+    System.err.printf("mean = %f\n", mean);
+    assertEquals(1.0, mean, 0.02);
     
     double var = N / (N - 1) * (sumSq/N - mean * mean);
-    System.err.printf("var = %f", var);
-    assertEquals(1.0, var, 0.1);
+    System.err.printf("var = %f\n", var);
+    assertEquals(1.0, var, 0.02);
   }
 
   @Test
@@ -168,11 +168,11 @@ public class MCMCTest {
     double N = iterCount - burnIn;
     
     double mean = sum / N;
-    System.err.printf("mean = %f", mean);
-    assertEquals(0.5, mean, 0.1);
+    System.err.printf("mean = %f\n", mean);
+    assertEquals(0.5, mean, 0.02);
     
     double var = N / (N - 1) * (sumSq/N - mean * mean);
-    System.err.printf("var = %f", var);
+    System.err.printf("var = %f\n", var);
     assertEquals(1/12.0, var, 0.01);
   }
 
@@ -220,11 +220,11 @@ public class MCMCTest {
     double N = iterCount - burnIn;
     
     double mean = sum / N;
-    System.err.printf("mean = %f", mean);
-    assertEquals(0.4, mean, 0.01);
+    System.err.printf("mean = %f\n", mean);
+    assertEquals(0.4, mean, 0.02);
     
     double var = N / (N - 1) * (sumSq/N - mean * mean);
-    System.err.printf("var = %f", var);
+    System.err.printf("var = %f\n", var);
     assertEquals(5.0/(5*5*6.0), var, 0.01);
   }
 
@@ -275,11 +275,11 @@ public class MCMCTest {
     double N = iterCount - burnIn;
     
     double mean = sum / N;
-    System.err.printf("mean = %f", mean);
-    assertEquals(0.0, mean, 0.15);
+    System.err.printf("mean = %f\n", mean);
+    assertEquals(0.0, mean, 0.02);
     
     double var = N / (N - 1) * (sumSq/N - mean * mean);
-    System.err.printf("var = %f", var);
-    assertEquals(2.0, var, 0.4);
+    System.err.printf("var = %f\n", var);
+    assertEquals(2.0, var, 0.02);
   }
 }
