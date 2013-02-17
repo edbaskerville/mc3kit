@@ -32,7 +32,7 @@ public abstract class ModelNode extends Node {
     return model;
   }
   
-  protected ModelEdge updateEdge(ModelEdge edge, ModelNode headNode) throws ModelEdgeException {
+  protected ModelEdge updateEdge(ModelEdge edge, ModelNode headNode) {
     if(edge != null) {
       if(edge.getHead() == headNode) {
         return edge;

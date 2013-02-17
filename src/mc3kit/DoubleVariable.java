@@ -37,10 +37,10 @@ public class DoubleVariable extends Variable<DoubleDistribution> implements Doub
     }
   }
   
-  public boolean valueIsValid(double value) throws ModelNodeException {
+  public boolean valueIsValid(double value) throws MC3KitException {
     DoubleDistribution dist = getDistribution();
     if(dist == null) {
-      throw new ModelNodeException("Can't ask whether value is valid without distribution.", getModel(), this);
+      throw new MC3KitException("Can't ask whether value is valid without distribution.");
     }
     
     return dist.valueIsValid(value);

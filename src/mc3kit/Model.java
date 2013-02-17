@@ -208,22 +208,17 @@ public class Model implements Observer, Serializable {
   
   /*** GRAPH CONSTRUCTION/MANIPULATION ***/
   
-  public <V extends Variable<?>> V addVariable(V var) throws ModelNodeException {
+  public <V extends Variable<?>> V addVariable(V var) {
     if(var.model != null) {
-      throw new ModelNodeException("Variable already in model", this, var);
+      throw new IllegalArgumentException("Variable already in model");
     }
     
-    try {
-      graph.addNode(var);
-    }
-    catch(NodeException e) {
-      throw new ModelNodeException("Exception thrown from underlying graph", this, var, e);
-    }
+    graph.addNode(var);
     var.model = this;
     
     if(!var.isObserved()) {
       if(var.getName() == null) {
-        throw new ModelNodeException("Unobserved random variables must have a name.", this, var);
+        throw new IllegalArgumentException("Unobserved random variables must have a name.");
       }
       unobservedVariables.add(var);
     }
@@ -233,38 +228,23 @@ public class Model implements Observer, Serializable {
     return var;
   }
   
-  public <D extends Distribution<?>> D addDistribution(D dist) throws ModelNodeException {
+  public <D extends Distribution<?>> D addDistribution(D dist) {
     if(dist.model != null) {
-      throw new ModelNodeException("Distribution already in model.", this, dist);
+      throw new IllegalArgumentException("Distribution already in model.");
     }
     
-    try {
-      graph.addNode(dist);
-    }
-    catch(NodeException e) {
-      throw new ModelNodeException("Exception thrown from underlying graph", this, dist, e);
-    }
+    graph.addNode(dist);
     dist.model = this;
     
     return dist;
   }
   
-  public void addEdge(ModelEdge edge) throws ModelEdgeException {
-    try {
-      graph.addEdge(edge);
-    }
-    catch(EdgeException e) {
-      throw new ModelEdgeException("Exception thrown from underlying graph", this, edge, e);
-    }
+  public void addEdge(ModelEdge edge) {
+    graph.addEdge(edge);
   }
   
-  public void removeEdge(ModelEdge edge) throws ModelEdgeException {
-    try {
-      graph.removeEdge(edge);
-    }
-    catch(EdgeException e) {
-      throw new ModelEdgeException("Exception thrown from underlying graph", this, edge, e);
-    }
+  public void removeEdge(ModelEdge edge) {
+    graph.removeEdge(edge);
   }
   
   public <V extends Variable<D>, D extends Distribution<V>> void setDistribution(V var, D dist) throws ModelException {
@@ -275,23 +255,13 @@ public class Model implements Observer, Serializable {
       if(distEdge.getDistribution() == dist) {
         return;
       }
-      try {
-        graph.removeEdge(distEdge);
-      }
-      catch(EdgeException e) {
-        throw new ModelEdgeException("Exception thrown from underlying graph ", this, distEdge, e);
-      }
+      graph.removeEdge(distEdge);
       varDistEdgeMap.remove(var);
     }
     
     // Create a new edge
     DistributionEdge distEdge = new DistributionEdge(var, dist);
-    try {
-      graph.addEdge(distEdge);
-    }
-    catch(EdgeException e) {
-      throw new ModelEdgeException("Exception thrown from underlying graph", this, distEdge, e);
-    }
+    graph.addEdge(distEdge);
     varDistEdgeMap.put(var, distEdge);
   }
   
