@@ -188,7 +188,7 @@ public class Graph extends Observable {
   }
   
   public Collection<Node> orderedNodesHeadToTail() {
-    return new ArrayList<Node>(nodes);
+    return orderNodeMap.values();
   }
   
   public int getOrder(Node node) {
