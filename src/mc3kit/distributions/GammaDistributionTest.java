@@ -3,7 +3,6 @@ package mc3kit.distributions;
 import org.junit.*;
 
 import static org.junit.Assert.*;
-import static mc3kit.util.Math.*;
 
 public class GammaDistributionTest {
 

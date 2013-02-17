@@ -5,6 +5,7 @@ import org.junit.*;
 import static org.junit.Assert.*;
 
 import mc3kit.distributions.*;
+import mc3kit.functions.DoubleSumFunction;
 import cern.jet.random.engine.*;
 import static java.lang.Math.*;
 
@@ -221,5 +222,60 @@ public class MCMCTest {
     double var = N / (N - 1) * (sumSq/N - mean * mean);
     System.err.printf("var = %f\n", var);
     assertEquals(5.0/(5*5*6.0), var, 0.01);
+  }
+
+  @Test
+  public void testSumNormals() throws Throwable {
+    long burnIn = 5000;
+    long iterCount = 10000;
+    
+    RandomEngine rng = new MersenneTwister(101);
+    
+    MCMC mcmc = new MCMC();
+    mcmc.setRng(rng);
+    
+    Model m = new Model();
+    
+    m.beginConstruction();
+    DoubleDistribution d = m.addDistribution(new NormalDistribution());
+    DoubleVariable v1 = m.addVariable(new DoubleVariable("v1"))
+      .setDistribution(d);
+    DoubleVariable v2 = m.addVariable(new DoubleVariable("v2"))
+      .setDistribution(d);
+    m.addFunction(new DoubleSumFunction("v12"))
+      .add(v1).add(v2);
+    m.endConstruction(rng);
+    
+    mcmc.setModel(m);
+    
+    UnivariateProposalStep proposalStep = new UnivariateProposalStep();
+    proposalStep.setTuneEvery(100);
+    proposalStep.setTuneFor(burnIn);
+    mcmc.addStep(proposalStep);
+    
+    // Run, collect statistics, and check moments against expected distribution
+    double sum = 0;
+    double sumSq = 0;
+    for(long i = 0; i < iterCount; i++) {
+      mcmc.step();
+      
+      assertEquals(i + 1, mcmc.getIterationCount());
+      
+      if(i >= burnIn) {
+        double val = mcmc.getModel().getDoubleFunction("v12").getValue();
+        sum += val;
+        sumSq += val * val;
+      }
+    }
+    
+    double N = iterCount - burnIn;
+    
+    double mean = sum / N;
+    System.err.printf("mean = %f\n", mean);
+    assertEquals(0.0, mean, 0.15);
+    
+    double var = N / (N - 1) * (sumSq/N - mean * mean);
+    System.err.printf("var = %f\n", var);
+    assertEquals(2.0, var, 0.4);
   }
 }

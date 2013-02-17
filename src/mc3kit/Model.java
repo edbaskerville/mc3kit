@@ -228,6 +228,17 @@ public class Model implements Observer, Serializable {
     return var;
   }
   
+  public <F extends Function> F addFunction(F func) {
+    if(func.model != null) {
+      throw new IllegalArgumentException("Function already in model.");
+    }
+    
+    graph.addNode(func);
+    func.model = this;
+    
+    return func;
+  }
+  
   public <D extends Distribution<?>> D addDistribution(D dist) {
     if(dist.model != null) {
       throw new IllegalArgumentException("Distribution already in model.");
@@ -247,7 +258,7 @@ public class Model implements Observer, Serializable {
     graph.removeEdge(edge);
   }
   
-  public <V extends Variable<D>, D extends Distribution<V>> void setDistribution(V var, D dist) throws ModelException {
+  public <V extends Variable<?>, D extends Distribution<?>> void setDistribution(V var, D dist) {
     // Check for existing edge: if unchanged, return; if not, remove the edge
     if(varDistEdgeMap.containsKey(var)) {
       DistributionEdge distEdge = varDistEdgeMap.get(var);
@@ -265,10 +276,9 @@ public class Model implements Observer, Serializable {
     varDistEdgeMap.put(var, distEdge);
   }
   
-  @SuppressWarnings({ "rawtypes", "unchecked" })
   public void setDistribution(String vName, String dName) throws ModelException { 
-    Variable var = getVariable(vName);
-    Distribution dist = getDistribution(dName);
+    Variable<?> var = getVariable(vName);
+    Distribution<?> dist = getDistribution(dName);
     setDistribution(var, dist);
   }
   
@@ -288,6 +298,10 @@ public class Model implements Observer, Serializable {
   
   public DoubleVariable getDoubleVariable(String name) {
     return (DoubleVariable)graph.getNode(name);
+  }
+  
+  public DoubleFunction getDoubleFunction(String name) {
+    return (DoubleFunction)graph.getNode(name);
   }
   
   public Distribution<?> getDistribution(String name) {

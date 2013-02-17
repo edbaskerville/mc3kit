@@ -8,7 +8,6 @@ import static java.lang.Math.*;
 import static mc3kit.util.Math.*;
 import mc3kit.DoubleDistribution;
 import mc3kit.DoubleVariable;
-import mc3kit.ModelEdgeException;
 import mc3kit.VariableProposer;
 
 import mc3kit.proposal.*;
@@ -33,23 +32,23 @@ public class NormalDistribution extends DoubleDistribution {
     return new MHNormalProposer(varName);
   }
   
-  public <T extends ModelNode & DoubleValued> void setMean(T meanNode) throws ModelEdgeException {
+  public <T extends ModelNode & DoubleValued> void setMean(T meanNode) {
     meanEdge = updateEdge(meanEdge, meanNode);
   }
   
-  public <T extends ModelNode & DoubleValued> void setVariance(T varNode) throws ModelEdgeException {
+  public <T extends ModelNode & DoubleValued> void setVariance(T varNode) {
     precEdge = updateEdge(precEdge, null);
     stdDevEdge = updateEdge(stdDevEdge, null);
     varEdge = updateEdge(varEdge, varNode);
   }
   
-  public <T extends ModelNode & DoubleValued> void setStdDev(T stdDevNode) throws ModelEdgeException {
+  public <T extends ModelNode & DoubleValued> void setStdDev(T stdDevNode) {
     precEdge = updateEdge(precEdge, null);
     varEdge = updateEdge(varEdge, null);
     stdDevEdge = updateEdge(stdDevEdge, stdDevNode);
   }
   
-  public <T extends ModelNode & DoubleValued> void setPrecision(T precNode) throws ModelEdgeException {
+  public <T extends ModelNode & DoubleValued> void setPrecision(T precNode) {
     varEdge = updateEdge(varEdge, null);
     stdDevEdge = updateEdge(stdDevEdge, null);
     precEdge = updateEdge(precEdge, precNode);

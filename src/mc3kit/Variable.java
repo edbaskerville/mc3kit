@@ -35,6 +35,11 @@ public abstract class Variable<D extends Distribution<?>> extends ModelNode {
     ((Distribution)getDistribution()).sample(this, rng);
   }
   
+  public Variable<D> setDistribution(D dist) {
+    getModel().setDistribution(this, dist);
+    return this;
+  }
+  
   @SuppressWarnings("unchecked")
   public D getDistribution() {
     return (D)getModel().getDistributionForVariable(this);

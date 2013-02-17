@@ -37,6 +37,12 @@ public class DoubleVariable extends Variable<DoubleDistribution> implements Doub
     }
   }
   
+  @Override
+  public DoubleVariable setDistribution(DoubleDistribution dist) {
+    super.setDistribution(dist);
+    return this;
+  }
+  
   public boolean valueIsValid(double value) throws MC3KitException {
     DoubleDistribution dist = getDistribution();
     if(dist == null) {

@@ -3,10 +3,6 @@ package mc3kit.distributions;
 import static org.junit.Assert.*;
 
 import mc3kit.DoubleVariable;
-import mc3kit.ModelNodeException;
-
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 public class UniformDistributionTest {
@@ -14,7 +10,7 @@ public class UniformDistributionTest {
   @Test
   public void minMaxEqual() {
     try {
-      UniformDistribution ud = new UniformDistribution("ud", 0.0, 0.0);
+      new UniformDistribution("ud", 0.0, 0.0);
       fail();
     }
     catch(IllegalArgumentException e) {
@@ -24,7 +20,7 @@ public class UniformDistributionTest {
   @Test
   public void minLTMax() {
     try {
-      UniformDistribution ud = new UniformDistribution("ud", 1.0, 0.0);
+      new UniformDistribution("ud", 1.0, 0.0);
       fail();
     }
     catch(IllegalArgumentException e) {
@@ -34,7 +30,7 @@ public class UniformDistributionTest {
   @Test
   public void minNaN() {
     try {
-      UniformDistribution ud = new UniformDistribution("ud", Double.NaN, 0.0);
+      new UniformDistribution("ud", Double.NaN, 0.0);
       fail();
     }
     catch(IllegalArgumentException e) {
@@ -44,7 +40,7 @@ public class UniformDistributionTest {
   @Test
   public void maxNaN() {
     try {
-      UniformDistribution ud = new UniformDistribution("ud", 0.0, Double.NaN);
+      new UniformDistribution("ud", 0.0, Double.NaN);
       fail();
     }
     catch(IllegalArgumentException e) {
@@ -54,7 +50,7 @@ public class UniformDistributionTest {
   @Test
   public void minInf() {
     try {
-      UniformDistribution ud = new UniformDistribution("ud", Double.NEGATIVE_INFINITY, 0.0);
+      new UniformDistribution("ud", Double.NEGATIVE_INFINITY, 0.0);
       fail();
     }
     catch(IllegalArgumentException e) {
@@ -64,7 +60,7 @@ public class UniformDistributionTest {
   @Test
   public void maxInf() {
     try {
-      UniformDistribution ud = new UniformDistribution("ud", 0.0, Double.POSITIVE_INFINITY);
+      new UniformDistribution("ud", 0.0, Double.POSITIVE_INFINITY);
       fail();
     }
     catch(IllegalArgumentException e) {
