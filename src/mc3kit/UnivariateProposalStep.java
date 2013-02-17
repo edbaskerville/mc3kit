@@ -116,6 +116,7 @@ public class UnivariateProposalStep implements Step {
 
       // If we're still in the tuning period, tune
       if((iterationCount <= tuneFor) && iterationCount % tuneEvery == 0) {
+        System.err.printf("tuning\n");
         for(VariableProposer proposer : proposers) {
           proposer.tune(targetAcceptanceRate);
           proposer.resetTuningPeriod();

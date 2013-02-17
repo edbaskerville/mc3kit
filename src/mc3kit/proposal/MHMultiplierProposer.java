@@ -70,4 +70,9 @@ public class MHMultiplierProposer extends VariableProposer<DoubleVariable> {
       recordRejection();
     }
   }
+
+  @Override
+  public void tune(double targetRate) throws MC3KitException {
+    lambda = adjustTuningParameter(lambda, getAcceptanceRate(), targetRate);
+  }
 }

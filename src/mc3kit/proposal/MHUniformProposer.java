@@ -79,4 +79,12 @@ public class MHUniformProposer extends VariableProposer<DoubleVariable> {
       recordRejection();
     }
   }
+
+  @Override
+  public void tune(double targetRate) throws MC3KitException {
+    proposalRadius = min(
+      adjustTuningParameter(proposalRadius, getAcceptanceRate(), targetRate),
+      max - min
+    );
+  }
 }

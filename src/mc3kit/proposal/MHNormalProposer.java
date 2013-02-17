@@ -69,4 +69,9 @@ public class MHNormalProposer extends VariableProposer<DoubleVariable> {
       recordRejection();
     }
   }
+
+  @Override
+  public void tune(double targetRate) throws MC3KitException {
+    proposalSD = adjustTuningParameter(proposalSD, getAcceptanceRate(), targetRate);
+  }
 }
