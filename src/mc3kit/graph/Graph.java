@@ -37,19 +37,18 @@ public class Graph extends Observable {
   /**
    * Adds a node to the graph.
    * @param node The node to add.
-   * @throws NodeException if the node is already in this graph or another graph.
    */
-  public Graph addNode(Node node) throws NodeException {
+  public Graph addNode(Node node) {
     if(nodes.contains(node)) {
-      throw new NodeException(this, node, "Node already in this graph.");
+      throw new IllegalArgumentException("Node already in this graph.");
     }
     
     if(node.graph != null) {
-      throw new NodeException(this, node, "Node already in another graph.");
+      throw new IllegalArgumentException("Node already in another graph.");
     }
     
     if(node.name != null && nodeNameMap.containsKey(node.name)) {
-      throw new NodeException(this, node, "Node with this name already in graph.");
+      throw new IllegalArgumentException("Node with this name already in graph.");
     }
     
     node.graph = this;
@@ -68,16 +67,15 @@ public class Graph extends Observable {
   /**
    * Removes a node from the graph.
    * @param node The node to remove.
-   * @throws NodeException If the node is not in the graph.
    */
-  public void removeNode(Node node) throws NodeException {
+  public void removeNode(Node node) {
     if(!nodes.contains(node)) {
-      throw new NodeException(this, node, "Node not in graph.");
+      throw new IllegalArgumentException("Node not in graph.");
     }
     assert(node.getGraph() == this);
     
     if(!(tailNodeMap.get(node).isEmpty() && headNodeMap.get(node).isEmpty())) {
-      throw new NodeException(this, node, "Node has edges in graph.");
+      throw new IllegalArgumentException("Node has edges in graph.");
     }
     
     removeOrder(node);
@@ -93,37 +91,35 @@ public class Graph extends Observable {
   
   /**
    * Adds an edge to the graph.
-   * @param edge The edge to remove.
-   * @throws EdgeException If the edge's nodes aren't already in the graph,
-   * or if the edge is already in the graph. 
+   * @param edge The edge to remove. 
    */
-  public Graph addEdge(Edge edge) throws EdgeException {
+  public Graph addEdge(Edge edge) {
     if(edges.contains(edge)) {
-      throw new EdgeException(this, edge, "Edge already in graph.");
+      throw new IllegalArgumentException("Edge already in graph.");
     }
     
     if(edge.graph != null) {
-      throw new EdgeException(this, edge, "Edge already in another graph.");
+      throw new IllegalArgumentException("Edge already in another graph.");
     }
     
     if(edge.tail == null) {
-      throw new EdgeException(this, edge, "Edge tail is null.");
+      throw new IllegalArgumentException("Edge tail is null.");
     }
     
     if(edge.head == null) {
-      throw new EdgeException(this, edge, "Edge head is null.");
+      throw new IllegalArgumentException("Edge head is null.");
     }
     
     if(!nodes.contains(edge.tail)) {
-      throw new EdgeException(this, edge, "Edge tail isn't in this graph.");
+      throw new IllegalArgumentException("Edge tail isn't in this graph.");
     }
     
     if(!nodes.contains(edge.head)) {
-      throw new EdgeException(this, edge, "Edge head isn't in this graph.");
+      throw new IllegalArgumentException("Edge head isn't in this graph.");
     }
     
     if(edge.name != null && edgeNameMap.containsKey(edge.name)) {
-      throw new EdgeException(this, edge, "Edge with this name already in graph.");
+      throw new IllegalArgumentException("Edge with this name already in graph.");
     }
     
     // Update order before manipulating other state. If edge introduces a cycle,
@@ -142,9 +138,9 @@ public class Graph extends Observable {
     return this;
   }
   
-  public void removeEdge(Edge edge) throws EdgeException {
+  public void removeEdge(Edge edge) {
     if(!edges.contains(edge)) {
-      throw new EdgeException(this, edge, "Edge not in graph.");
+      throw new IllegalArgumentException("Edge not in graph.");
     }
     assert(edge.graph == this);
     
@@ -227,9 +223,9 @@ public class Graph extends Observable {
   }
   
   /*** DYNAMIC MAINTENANCE OF TOPOLOGICAL ORDERING 
-   * @throws EdgeException ***/
+   * @throws IllegalArgumentException ***/
   
-  private void updateOrder(Edge edge) throws EdgeException {
+  private void updateOrder(Edge edge) throws IllegalArgumentException {
     
     // Implementation of the PK algorithm, published in
     // Pearce, David J. and Paul H. J. Kelly. 2007.
@@ -262,7 +258,7 @@ public class Graph extends Observable {
     System.err.printf("new order: tail %d, head %d\n", tailOrder, headOrder);
   }
 
-  private Set<Node> findAffectedForwardNodes(Edge edge) throws EdgeException {
+  private Set<Node> findAffectedForwardNodes(Edge edge) throws IllegalArgumentException {
     Stack<Node> stack = new Stack<Node>();
     Set<Node> visited = new HashSet<Node>();
     Set<Node> outOfOrder = new HashSet<Node>();
@@ -271,7 +267,7 @@ public class Graph extends Observable {
       Node top = stack.pop();
       
       if(top == edge.head) {
-        throw new EdgeException(this, edge, "Adding edge generates directed cycle in graph."); 
+        throw new IllegalArgumentException("Adding edge generates directed cycle in graph."); 
       }
       
       if(!visited.contains(top)) {
@@ -288,7 +284,7 @@ public class Graph extends Observable {
     return outOfOrder;
   }
 
-  private Set<Node> findAffectedBackwardNodes(Edge edge) throws EdgeException {
+  private Set<Node> findAffectedBackwardNodes(Edge edge) {
     Stack<Node> stack = new Stack<Node>();
     Set<Node> visited = new HashSet<Node>();
     Set<Node> outOfOrder = new HashSet<Node>();
@@ -297,7 +293,7 @@ public class Graph extends Observable {
       Node top = stack.pop();
       
       if(top == edge.tail) {
-        throw new EdgeException(this, edge, "Adding edge generates directed cycle in graph."); 
+        throw new IllegalArgumentException("Adding edge generates directed cycle in graph."); 
       }
       
       if(!visited.contains(top)) {

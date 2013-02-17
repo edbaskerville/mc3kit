@@ -54,7 +54,7 @@ public class NodeTest {
       graph2.addNode(node);
       fail("Should not have been able to add to second graph.");
     }
-    catch(NodeException e) {
+    catch(Exception e) {
     }
   }
 }

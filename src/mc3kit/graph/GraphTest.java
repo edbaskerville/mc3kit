@@ -68,7 +68,7 @@ public class GraphTest {
       graph.addEdge(edge);
       fail("Should have been impossible to add edge.");
     }
-    catch(EdgeException e) {
+    catch(Exception e) {
     }
   }
   
@@ -87,7 +87,7 @@ public class GraphTest {
       graph.addEdge(edge);
       fail("Should have been impossible to add edge.");
     }
-    catch(EdgeException e) {
+    catch(Exception e) {
     }
   }
   
@@ -139,7 +139,7 @@ public class GraphTest {
       graph.addEdge(new Edge(node3, node));
       fail();
     }
-    catch(EdgeException e) {
+    catch(Exception e) {
       e.printStackTrace();
     }
   }
