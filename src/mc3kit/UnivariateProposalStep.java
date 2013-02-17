@@ -113,7 +113,6 @@ public class UnivariateProposalStep implements Step {
 
       // If we're still in the tuning period, tune
       if((iterationCount <= tuneFor) && iterationCount % tuneEvery == 0) {
-        chain.getLogger().fine("tuning");
         for(VariableProposer proposer : proposers) {
           proposer.tune(targetAcceptanceRate);
           proposer.resetTuningPeriod();
@@ -134,12 +133,14 @@ public class UnivariateProposalStep implements Step {
       }
     }
     
-    private VariableProposer makeVariableProposer(Model model, String varName) {
-      Distribution dist = model.getDistributionForVariable(varName);
-      if(dist == null) {
-        return null;
+    private VariableProposer makeVariableProposer(Model model, String varName) throws MC3KitException {
+      Variable var = model.getVariable(varName);
+      
+      if(var == null) {
+        throw new MC3KitException(format("No variable named %s", varName));
       }
-      return dist.makeVariableProposer(varName);
+      
+      return var.makeProposer();
     }
   }
 }

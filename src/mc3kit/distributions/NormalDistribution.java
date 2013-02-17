@@ -7,47 +7,61 @@ import static java.lang.Math.*;
 import static mc3kit.util.Math.*;
 import mc3kit.DoubleDistribution;
 import mc3kit.DoubleVariable;
+import mc3kit.ModelException;
 import mc3kit.VariableProposer;
 
 import mc3kit.proposal.*;
 
 public class NormalDistribution extends DoubleDistribution {
+
+  double mean;
+  double stdDev;
   
   ModelEdge meanEdge;
-  ModelEdge precEdge;
-  ModelEdge varEdge;
   ModelEdge stdDevEdge;
+  ModelEdge varEdge;
+  ModelEdge precEdge;
   
   public NormalDistribution() {
     this(null);
   }
   
   public NormalDistribution(String name) {
-    super(name);
+    this(name, 0.0, 1.0);
   }
 
+  public NormalDistribution(double mean, double stdDev) {
+    this(null, mean, stdDev);
+  }
+  
+  public NormalDistribution(String name, double mean, double stdDev) {
+    super(name);
+    this.mean = mean;
+    this.stdDev = stdDev;
+  }
+  
   @Override
   public VariableProposer makeVariableProposer(String varName) {
     return new MHNormalProposer(varName);
   }
   
-  public <T extends ModelNode & DoubleValued> void setMean(T meanNode) {
+  public <T extends ModelNode & DoubleValued> void setMean(T meanNode) throws ModelException {
     meanEdge = updateEdge(meanEdge, meanNode);
   }
   
-  public <T extends ModelNode & DoubleValued> void setVariance(T varNode) {
+  public <T extends ModelNode & DoubleValued> void setVariance(T varNode) throws ModelException {
     precEdge = updateEdge(precEdge, null);
     stdDevEdge = updateEdge(stdDevEdge, null);
     varEdge = updateEdge(varEdge, varNode);
   }
   
-  public <T extends ModelNode & DoubleValued> void setStdDev(T stdDevNode) {
+  public <T extends ModelNode & DoubleValued> void setStdDev(T stdDevNode) throws ModelException {
     precEdge = updateEdge(precEdge, null);
     varEdge = updateEdge(varEdge, null);
     stdDevEdge = updateEdge(stdDevEdge, stdDevNode);
   }
   
-  public <T extends ModelNode & DoubleValued> void setPrecision(T precNode) {
+  public <T extends ModelNode & DoubleValued> void setPrecision(T precNode) throws ModelException {
     varEdge = updateEdge(varEdge, null);
     stdDevEdge = updateEdge(stdDevEdge, null);
     precEdge = updateEdge(precEdge, precNode);
@@ -56,22 +70,22 @@ public class NormalDistribution extends DoubleDistribution {
   @Override
   public double getLogP(Variable v) {
     double x = ((DoubleVariable)v).getValue();
-    double mean = meanEdge == null ? 0.0 : getDoubleValue(meanEdge);
+    double mean = meanEdge == null ? this.mean : getDoubleValue(meanEdge);
     
     if(precEdge != null) {
       assert varEdge == null;
       assert stdDevEdge == null;
       return getLogPPrecision(mean, getDoubleValue(precEdge), x);
     }
-    else if(stdDevEdge != null) {
-      assert precEdge == null;
-      assert varEdge == null;
-      return getLogPStdDev(mean, getDoubleValue(stdDevEdge), x);
-    }
-    else {
+    else if(varEdge != null) {
       assert precEdge == null;
       assert stdDevEdge == null;
-      return getLogPVar(mean, varEdge == null ? 1.0 : getDoubleValue(varEdge), x);
+      return getLogPVar(mean, getDoubleValue(varEdge), x);
+    }
+    else  {
+      assert precEdge == null;
+      assert varEdge == null;
+      return getLogPStdDev(mean, stdDevEdge == null ? this.stdDev : getDoubleValue(stdDevEdge), x);
     }
   }
   
@@ -95,12 +109,12 @@ public class NormalDistribution extends DoubleDistribution {
 
   @Override
   public void sample(Variable var) {
-    double mean = 0.0;
+    double mean = this.mean;
     if(meanEdge != null) {
       mean = getDoubleValue(meanEdge);
     }
     
-    double sd = 1.0;
+    double sd = this.stdDev;
     if(stdDevEdge != null) {
       assert precEdge == null;
       assert varEdge == null;

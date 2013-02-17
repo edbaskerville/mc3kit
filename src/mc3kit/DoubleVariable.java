@@ -38,7 +38,7 @@ public class DoubleVariable extends Variable implements DoubleValued {
   }
   
   @Override
-  public DoubleVariable setDistribution(Distribution dist) {
+  public DoubleVariable setDistribution(Distribution dist) throws ModelException {
     super.setDistribution(dist);
     return this;
   }

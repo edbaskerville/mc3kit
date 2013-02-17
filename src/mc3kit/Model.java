@@ -3,6 +3,9 @@ package mc3kit;
 import java.util.*;
 import java.io.*;
 
+import static java.lang.String.format;
+import static java.lang.Math.*;
+
 import cern.jet.random.engine.RandomEngine;
 
 import mc3kit.graph.*;
@@ -32,6 +35,7 @@ public class Model implements Observer, Serializable {
   
   State state;
   Set<Variable> changedValueVars;
+  Set<ModelNode> newEdgeHeads;
   
   public Model(Chain initialChain) {
     this.chain = initialChain;
@@ -40,6 +44,7 @@ public class Model implements Observer, Serializable {
     varDistEdgeMap = new HashMap<Variable, DistributionEdge>();
     state = State.UNINITIALIZED;
     changedValueVars = new HashSet<Variable>();
+    newEdgeHeads = new HashSet<ModelNode>();
   }
   
   public String[] getUnobservedVariableNames() {
@@ -61,6 +66,9 @@ public class Model implements Observer, Serializable {
   }
   
   public void endConstruction() throws ModelException {
+    logPrior = 0.0;
+    logLikelihood = 0.0;
+    
     if(state != State.IN_CONSTRUCTION) {
       throw new ModelException("endConstruction called with wrong state", this);
     }
@@ -68,7 +76,7 @@ public class Model implements Observer, Serializable {
     for(Node node : graph.orderedNodesHeadToTail()) {
       if(node instanceof Variable) {
         Variable var = (Variable)node;
-        if(!var.isObserved()) {
+        if(!var.isObserved() && !changedValueVars.contains(var)) {
           var.sample();
         }
       }
@@ -86,9 +94,41 @@ public class Model implements Observer, Serializable {
       }
     }
     
-    changedValueVars = new HashSet<Variable>();
+    changedValueVars.clear();
+    newEdgeHeads.clear();
     
     state = State.READY;
+  }
+  
+  public void recalculate() throws MC3KitException {
+    oldLogPrior = logPrior;
+    oldLogLikelihood = logLikelihood;
+    
+    logPrior = 0.0;
+    logLikelihood = 0.0;
+    
+    for(Node node : graph.orderedNodesHeadToTail()) {
+      ((ModelNode)node).update();
+      
+      if(node instanceof Variable) {
+        Variable var = (Variable)node;
+        if(var.isObserved()) {
+          logLikelihood += var.getLogP();
+        }
+        else {
+          logPrior += var.getLogP();
+        }
+      }
+    }
+    
+    double logPriorDiff = abs(oldLogPrior - logPrior);
+    double logLikeDiff = abs(oldLogLikelihood - logLikelihood);
+    
+    if(logPriorDiff > 1e-8 || logLikeDiff > 1e-8) {
+      throw new MC3KitException(format("Too much error in prior (%f, should be %f, diff %f) or likelihood (%f, should be %f, diff %f)", 
+          oldLogPrior, logPrior, logPriorDiff, oldLogLikelihood, logLikelihood, logLikeDiff)
+      );
+    }
   }
   
   public void beginProposal() throws ModelException {
@@ -145,10 +185,13 @@ public class Model implements Observer, Serializable {
     Map<ModelNode, Set<ModelEdge>> visitedEdges = new HashMap<ModelNode, Set<ModelEdge>>();
     
     // Queue of nodes to update in topological order, starting with variables
-    // whose values have changed
+    // whose values have changed and heads of new edges
     SortedMap<Integer, ModelNode> updateQueue = new TreeMap<Integer, ModelNode>();
     for(Variable var : changedValueVars) {
       updateQueue.put(var.getOrder(), var);
+    }
+    for(ModelNode node : newEdgeHeads) {
+      updateQueue.put(node.getOrder(), node);
     }
     
     // Traverse graph in topological order
@@ -206,7 +249,8 @@ public class Model implements Observer, Serializable {
       }
     }
     
-    changedValueVars = new HashSet<Variable>();
+    changedValueVars.clear();
+    newEdgeHeads.clear();
   }
   
   /*** GRAPH CONSTRUCTION/MANIPULATION ***/
@@ -253,15 +297,24 @@ public class Model implements Observer, Serializable {
     return dist;
   }
   
-  public void addEdge(ModelEdge edge) {
+  public void addEdge(ModelEdge edge) throws ModelException {
+    if(!(state == State.IN_CONSTRUCTION || state == State.IN_PROPOSAL || state == State.IN_REJECTION)) {
+      throw new ModelException("Adding edge in wrong state", this);
+    }
+    
     graph.addEdge(edge);
+    newEdgeHeads.add(edge.getHead());
   }
   
-  public void removeEdge(ModelEdge edge) {
+  public void removeEdge(ModelEdge edge) throws ModelException {
+    if(!(state == State.IN_CONSTRUCTION || state == State.IN_PROPOSAL || state == State.IN_REJECTION)) {
+      throw new ModelException("Removing edge in wrong state", this);
+    }
+    
     graph.removeEdge(edge);
   }
   
-  public <V extends Variable, D extends Distribution> void setDistribution(V var, D dist) {
+  public <V extends Variable, D extends Distribution> void setDistribution(V var, D dist) throws ModelException {
     // Check for existing edge: if unchanged, return; if not, remove the edge
     if(varDistEdgeMap.containsKey(var)) {
       DistributionEdge distEdge = varDistEdgeMap.get(var);
@@ -275,7 +328,7 @@ public class Model implements Observer, Serializable {
     
     // Create a new edge
     DistributionEdge distEdge = new DistributionEdge(var, dist);
-    graph.addEdge(distEdge);
+    addEdge(distEdge);
     varDistEdgeMap.put(var, distEdge);
   }
   
@@ -293,6 +346,10 @@ public class Model implements Observer, Serializable {
   
   public double getLogLikelihood() {
     return logLikelihood;
+  }
+  
+  public ModelNode get(String name) {
+    return (ModelNode)graph.getNode(name);
   }
   
   public Variable getVariable(String name) {

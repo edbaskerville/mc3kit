@@ -57,6 +57,7 @@ public class MCMCTest {
     double sumSq = 0;
     for(long i = 0; i < iterCount; i++) {
       mcmc.step();
+      mcmc.getModel().recalculate();
       
       assertEquals(i + 1, mcmc.getIterationCount());
       
@@ -111,6 +112,7 @@ public class MCMCTest {
     double sumSq = 0;
     for(long i = 0; i < iterCount; i++) {
       mcmc.step();
+      mcmc.getModel().recalculate();
       
       assertEquals(i + 1, mcmc.getIterationCount());
       
@@ -165,6 +167,7 @@ public class MCMCTest {
     double sumSq = 0;
     for(long i = 0; i < iterCount; i++) {
       mcmc.step();
+      mcmc.getModel().recalculate();
       
       assertEquals(i + 1, mcmc.getIterationCount());
       
@@ -222,6 +225,7 @@ public class MCMCTest {
     double sumSq = 0;
     for(long i = 0; i < iterCount; i++) {
       mcmc.step();
+      mcmc.getModel().recalculate();
       
       assertEquals(i + 1, mcmc.getIterationCount());
       
@@ -283,6 +287,7 @@ public class MCMCTest {
     double sumSq = 0;
     for(long i = 0; i < iterCount; i++) {
       mcmc.step();
+      mcmc.getModel().recalculate();
       
       assertEquals(i + 1, mcmc.getIterationCount());
       

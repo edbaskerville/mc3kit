@@ -11,4 +11,12 @@ public class ModelEdge extends Edge {
   public ModelEdge(String name, ModelNode tail, ModelNode head) {
     super(name, tail, head);
   }
+  
+  public ModelNode getTail() {
+    return (ModelNode)super.getTail();
+  }
+  
+  public ModelNode getHead() {
+    return (ModelNode)super.getHead();
+  }
 }

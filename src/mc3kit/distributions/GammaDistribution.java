@@ -26,16 +26,16 @@ public class GammaDistribution extends DoubleDistribution {
     return new MHMultiplierProposer(varName);
   }
   
-  public <T extends ModelNode & DoubleValued> void setShape(T shapeNode) {
+  public <T extends ModelNode & DoubleValued> void setShape(T shapeNode) throws ModelException {
     shapeEdge = updateEdge(shapeEdge, shapeNode);
   }
   
-  public <T extends ModelNode & DoubleValued> void setRate(T rateNode) {
+  public <T extends ModelNode & DoubleValued> void setRate(T rateNode) throws ModelException {
     scaleEdge = updateEdge(scaleEdge, null);
     rateEdge = updateEdge(rateEdge, rateNode);
   }
   
-  public <T extends ModelNode & DoubleValued> void setScale(T scaleNode) {
+  public <T extends ModelNode & DoubleValued> void setScale(T scaleNode) throws ModelException {
     rateEdge = updateEdge(rateEdge, null);
     scaleEdge = updateEdge(scaleEdge, scaleNode);
   }
