@@ -16,8 +16,9 @@ public class MHNormalProposer extends VariableProposer<DoubleVariable> {
   } 
 
   @Override
-  public void step(Chain chain, Model model, double priorHeatExp, double likeHeatExp,
-      RandomEngine rng) throws MC3KitException {
+  public void step(Model model) throws MC3KitException {
+    Chain chain = model.getChain();
+    RandomEngine rng = chain.getRng();
     
     chain.getLogger().finest("MHNormalProposer stepping");
     
@@ -50,7 +51,8 @@ public class MHNormalProposer extends VariableProposer<DoubleVariable> {
     
     chain.getLogger().finest(format("newLP, newLL: %f, %f", newLogPrior, newLogLikelihood));
     
-    boolean accepted = shouldAcceptMetropolisHastings(rng, priorHeatExp, likeHeatExp,
+    boolean accepted = shouldAcceptMetropolisHastings(rng,
+       chain.getPriorHeatExponent(), chain.getLikelihoodHeatExponent(),
       oldLogPrior, oldLogLikelihood,
       newLogPrior, newLogLikelihood,
       0.0

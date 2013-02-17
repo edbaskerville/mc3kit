@@ -100,9 +100,7 @@ public class UnivariateProposalStep implements Step {
       
       Model model = chain.getModel();
       initialize(model);
-
-      double priorHeatExp = chain.getPriorHeatExponent();
-      double likeHeatExp = chain.getLikelihoodHeatExponent();
+      
       RandomEngine rng = chain.getRng();
 
       chain.getLogger().fine(format("univariate stepping %d", chainId));
@@ -111,7 +109,7 @@ public class UnivariateProposalStep implements Step {
 
       // Run all proposers in random order
       for(int i : getRandomPermutation(proposers.length, unif)) {
-        proposers[i].step(chain, model, priorHeatExp, likeHeatExp, rng);
+        proposers[i].step(model);
       }
 
       iterationCount++;

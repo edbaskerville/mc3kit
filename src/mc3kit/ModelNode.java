@@ -1,6 +1,8 @@
 package mc3kit;
 
 import java.util.*;
+
+import cern.jet.random.engine.RandomEngine;
 import mc3kit.graph.*;
 
 public abstract class ModelNode extends Node {
@@ -51,5 +53,13 @@ public abstract class ModelNode extends Node {
   
   protected double getDoubleValue(ModelEdge edge) {
     return ((DoubleValued)edge.getHead()).getValue();
+  }
+  
+  public Chain getChain() {
+    return model.getChain();
+  }
+  
+  public RandomEngine getRng() {
+    return getChain().getRng();
   }
 }

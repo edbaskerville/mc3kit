@@ -17,6 +17,8 @@ import mc3kit.graph.*;
 @SuppressWarnings("serial")
 public class Model implements Observer, Serializable {
   
+  Chain chain;
+  
   Graph graph;
   
   List<Variable<?>> unobservedVariables;
@@ -342,5 +344,17 @@ public class Model implements Observer, Serializable {
         changedValueVars.add(var);
       }
     }
+  }
+  
+  public void setChain(Chain chain) {
+    this.chain = chain;
+  }
+  
+  public Chain getChain() {
+    return chain;
+  }
+  
+  public RandomEngine getRng() {
+    return chain.getRng();
   }
 }

@@ -124,6 +124,7 @@ public class MCMC implements Serializable {
       if(modelFactory == null) {
         assert(model != null);
         chains[0].setModel(model);
+        model.setChain(chains[0]);
       }
     }
     else {
@@ -133,7 +134,9 @@ public class MCMC implements Serializable {
         completionService.submit(new Callable<Object>() {
           @Override
           public Object call() throws Exception {
-            chains[chainId].setModel(modelFactory.createModel(chains[chainId]));
+            Model chainModel = modelFactory.createModel(chains[chainId]);
+            chains[chainId].setModel(chainModel);
+            chainModel.setChain(chains[chainId]);
             return this;
           }
         });

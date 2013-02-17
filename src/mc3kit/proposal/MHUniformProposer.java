@@ -3,8 +3,8 @@ package mc3kit.proposal;
 import static java.lang.Math.*;
 import static mc3kit.util.Math.shouldAcceptMetropolisHastings;
 import static java.lang.String.format;
-import mc3kit.*;
 import cern.jet.random.engine.RandomEngine;
+import mc3kit.*;
 
 public class MHUniformProposer extends VariableProposer<DoubleVariable> {
 
@@ -20,8 +20,10 @@ public class MHUniformProposer extends VariableProposer<DoubleVariable> {
   } 
 
   @Override
-  public void step(Chain chain, Model model, double priorHeatExp, double likeHeatExp,
-      RandomEngine rng) throws MC3KitException {
+  public void step(Model model) throws MC3KitException {
+    Chain chain = model.getChain();
+    RandomEngine rng = chain.getRng();
+    
     chain.getLogger().finest("MHUniformProposer stepping");
     
     double oldLogLikelihood = model.getLogLikelihood();
@@ -60,7 +62,8 @@ public class MHUniformProposer extends VariableProposer<DoubleVariable> {
     
     chain.getLogger().finest(format("newLP, newLL: %f, %f", newLogPrior, newLogLikelihood));
     
-    boolean accepted = shouldAcceptMetropolisHastings(rng, priorHeatExp, likeHeatExp,
+    boolean accepted = shouldAcceptMetropolisHastings(rng,
+      chain.getPriorHeatExponent(), chain.getLikelihoodHeatExponent(),
       oldLogPrior, oldLogLikelihood,
       newLogPrior, newLogLikelihood,
       logBackwardProposal - logForwardProposal
