@@ -15,8 +15,6 @@ public class MCMC implements Serializable {
   /*** SETTABLE FIELDS ***/
   
   ModelFactory modelFactory;
-  Model model;
-  RandomEngine rng;
   int chainCount = 1;
 
   private HeatFunction heatFunction;
@@ -93,60 +91,38 @@ public class MCMC implements Serializable {
       throw new MC3KitException("There must be at least one chain.");
     }
 
-    if(modelFactory == null && model == null) {
-      throw new MC3KitException("Either modelFactory or model must be set."); 
-    }
-    if(modelFactory == null && model != null) {
-      if(chainCount > 1) {
-        throw new MC3KitException("modelFactory, not model, must be set for a run with more than one chain.");
-      }
-    }
-    if(modelFactory != null && model != null) {
-      throw new MC3KitException("If modelFactory is set, model should not be set.");
+    if(modelFactory == null) {
+      throw new MC3KitException("modelFactory must be set."); 
     }
     
     // Make chains
     int chainCount = getChainCount();
     chains = new Chain[chainCount];
     for(int i = 0; i < chainCount; i++) {
-      RandomEngine chainRng;
-      if(chainCount == 1 && rng != null) {
-        chainRng = rng;
-      }
-      else {
-        chainRng = makeRandomEngine();
-      }
+      RandomEngine rng = makeRandomEngine();
       chains[i] = new Chain(this, i, chainCount, priorHeatExponents[i],
-          likelihoodHeatExponents[i], chainRng);
+          likelihoodHeatExponents[i], rng);
     }
     
-    if(chainCount == 1) {
-      if(modelFactory == null) {
-        assert(model != null);
-        chains[0].setModel(model);
-        model.setChain(chains[0]);
-      }
+    // Use thread pool to construct models for different chains
+    for(int i = 0; i < chainCount; i++) {
+      final int chainId = i;
+      safeSubmit(new Callable<Object>() {
+        @Override
+        public Object call() throws Exception {
+          Model chainModel = modelFactory.createModel(chains[chainId]);
+          chains[chainId].setModel(chainModel);
+          chainModel.setChain(chains[chainId]);
+          return this;
+        }
+      });
     }
-    else {
-      // Use thread pool to construct models for different chains
-      for(int i = 0; i < chainCount; i++) {
-        final int chainId = i;
-        safeSubmit(new Callable<Object>() {
-          @Override
-          public Object call() throws Exception {
-            Model chainModel = modelFactory.createModel(chains[chainId]);
-            chains[chainId].setModel(chainModel);
-            chainModel.setChain(chains[chainId]);
-            return this;
-          }
-        });
-      }
-      
-      // Wait for completion
-      for(int i = 0; i < chainCount; i++) {
-        completionService.take();
-      }
+    
+    // Wait for completion
+    for(int i = 0; i < chainCount; i++) {
+      completionService.take();
     }
+    
     logger.info("Chains created.");
   }
 
@@ -442,17 +418,6 @@ public class MCMC implements Serializable {
   }
   
   /*** ACCESSORS ***/
-
-  
-  public void setModel(Model model) throws MC3KitException {
-    throwIfInitialized();
-    this.model = model;
-  }
-  
-  public void setRng(RandomEngine rng) throws MC3KitException {
-    throwIfInitialized();
-    this.rng = rng;
-  }
 
   public void setModelFactory(ModelFactory modelFactory) throws MC3KitException {
     throwIfInitialized();

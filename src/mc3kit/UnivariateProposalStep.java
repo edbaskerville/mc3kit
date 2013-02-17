@@ -71,9 +71,7 @@ public class UnivariateProposalStep implements Step {
     boolean initialized;
     private long iterationCount;
     
-    @SuppressWarnings("rawtypes")
     VariableProposer[] proposers;
-    
     
     /*** CONSTRUCTOR ***/
     
@@ -89,7 +87,6 @@ public class UnivariateProposalStep implements Step {
       return new int[] { chainId };
     }
 
-    @SuppressWarnings({ "rawtypes" })
     @Override
     public void step(Chain[] chains) throws MC3KitException {
       assert (chains.length == 1);
@@ -137,8 +134,8 @@ public class UnivariateProposalStep implements Step {
       }
     }
     
-    private VariableProposer<?> makeVariableProposer(Model model, String varName) {
-      Distribution<?> dist = model.getDistributionForVariable(varName);
+    private VariableProposer makeVariableProposer(Model model, String varName) {
+      Distribution dist = model.getDistributionForVariable(varName);
       if(dist == null) {
         return null;
       }

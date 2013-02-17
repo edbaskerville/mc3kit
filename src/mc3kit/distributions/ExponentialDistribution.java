@@ -2,7 +2,6 @@ package mc3kit.distributions;
 
 import static java.lang.Math.log;
 import cern.jet.random.Exponential;
-import cern.jet.random.engine.RandomEngine;
 import mc3kit.*;
 import mc3kit.proposal.*;
 
@@ -21,7 +20,7 @@ public class ExponentialDistribution extends DoubleDistribution {
   }
 
   @Override
-  public VariableProposer<DoubleVariable> makeVariableProposer(String varName) {
+  public VariableProposer makeVariableProposer(String varName) {
     return new MHMultiplierProposer(varName);
   }
   
@@ -36,8 +35,8 @@ public class ExponentialDistribution extends DoubleDistribution {
   }
 
   @Override
-  public double getLogP(DoubleVariable v) {
-    double x = v.getValue();
+  public double getLogP(Variable v) {
+    double x = ((DoubleVariable)v).getValue();
     
     if(rateEdge != null) {
       assert scaleEdge == null;
@@ -72,7 +71,7 @@ public class ExponentialDistribution extends DoubleDistribution {
   }
 
   @Override
-  public void sample(DoubleVariable var, RandomEngine rng) {
+  public void sample(Variable var) {
     double rate;
     if(rateEdge != null) {
       rate = getDoubleValue(rateEdge);
@@ -83,6 +82,6 @@ public class ExponentialDistribution extends DoubleDistribution {
     else {
       rate = 1.0;
     }
-    var.setValue(new Exponential(rate, rng).nextDouble());
+    ((DoubleVariable)var).setValue(new Exponential(rate, getRng()).nextDouble());
   }
 }

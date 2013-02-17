@@ -1,6 +1,6 @@
 package mc3kit;
 
-public abstract class DoubleDistribution extends Distribution<DoubleVariable> {
+public abstract class DoubleDistribution extends Distribution {
 
   public DoubleDistribution() {
     this(null);
@@ -11,7 +11,7 @@ public abstract class DoubleDistribution extends Distribution<DoubleVariable> {
   }
 
   @Override
-  public abstract VariableProposer<DoubleVariable> makeVariableProposer(String varName);
+  public abstract VariableProposer makeVariableProposer(String varName);
   
   public abstract boolean valueIsValid(double value);
 }

@@ -6,7 +6,7 @@ import static java.lang.String.format;
 import cern.jet.random.engine.RandomEngine;
 import mc3kit.*;
 
-public class MHUniformProposer extends VariableProposer<DoubleVariable> {
+public class MHUniformProposer extends VariableProposer {
 
   double min;
   double max;

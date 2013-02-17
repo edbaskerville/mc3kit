@@ -1,8 +1,7 @@
 package mc3kit;
 
-import cern.jet.random.engine.RandomEngine;
 
-public abstract class Variable<D extends Distribution<?>> extends ModelNode {
+public abstract class Variable extends ModelNode {
   private boolean observed;
   
   private double logP;
@@ -30,18 +29,16 @@ public abstract class Variable<D extends Distribution<?>> extends ModelNode {
     return logP;
   }
   
-  @SuppressWarnings({ "rawtypes", "unchecked" })
-  public void sample(RandomEngine rng) {
-    ((Distribution)getDistribution()).sample(this, rng);
+  public void sample() {
+    getDistribution().sample(this);
   }
   
-  public Variable<D> setDistribution(D dist) {
+  public Variable setDistribution(Distribution dist) {
     getModel().setDistribution(this, dist);
     return this;
   }
   
-  @SuppressWarnings("unchecked")
-  public D getDistribution() {
-    return (D)getModel().getDistributionForVariable(this);
+  public Distribution getDistribution() {
+    return getModel().getDistributionForVariable(this);
   }
 }

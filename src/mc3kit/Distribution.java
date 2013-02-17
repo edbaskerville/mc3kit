@@ -1,8 +1,7 @@
 package mc3kit;
 
-import cern.jet.random.engine.RandomEngine;
 
-public abstract class Distribution<V extends Variable<?>> extends ModelNode {
+public abstract class Distribution extends ModelNode {
 
   public Distribution() {
     this(null);
@@ -12,9 +11,9 @@ public abstract class Distribution<V extends Variable<?>> extends ModelNode {
     super(name);
   }
   
-  public abstract double getLogP(V var);
+  public abstract double getLogP(Variable var);
   
-  public abstract VariableProposer<V> makeVariableProposer(String varName);
+  public abstract VariableProposer makeVariableProposer(String varName);
   
-  public abstract void sample(V var, RandomEngine rng);
+  public abstract void sample(Variable var);
 }

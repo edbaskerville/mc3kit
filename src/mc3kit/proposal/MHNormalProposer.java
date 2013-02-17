@@ -6,7 +6,7 @@ import mc3kit.*;
 import static mc3kit.util.Math.*;
 import static java.lang.String.format;
 
-public class MHNormalProposer extends VariableProposer<DoubleVariable> {
+public class MHNormalProposer extends VariableProposer {
 
   double proposalSD;
   

@@ -2,7 +2,6 @@ package mc3kit.distributions;
 
 import mc3kit.*;
 import mc3kit.proposal.MHUniformProposer;
-import cern.jet.random.engine.RandomEngine;
 import static java.lang.Math.*;
 
 public class UniformDistribution extends DoubleDistribution {
@@ -43,7 +42,7 @@ public class UniformDistribution extends DoubleDistribution {
   }
 
   @Override
-  public VariableProposer<DoubleVariable> makeVariableProposer(String varName) {
+  public VariableProposer makeVariableProposer(String varName) {
     return new MHUniformProposer(varName, min, max);
   }
 
@@ -53,12 +52,13 @@ public class UniformDistribution extends DoubleDistribution {
   }
 
   @Override
-  public double getLogP(DoubleVariable var) {
+  public double getLogP(Variable var) {
     return logP;
   }
 
   @Override
-  public void sample(DoubleVariable var, RandomEngine rng) {
+  public void sample(Variable var) {
+    ((DoubleVariable)var).setValue(min + (max - min) * getRng().nextDouble());
   }
 
   @Override

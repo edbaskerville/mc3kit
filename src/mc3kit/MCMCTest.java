@@ -8,7 +8,6 @@ import static org.junit.Assert.*;
 
 import mc3kit.distributions.*;
 import mc3kit.functions.DoubleSumFunction;
-import cern.jet.random.engine.*;
 import static java.lang.Math.*;
 
 public class MCMCTest {
@@ -26,22 +25,27 @@ public class MCMCTest {
     long burnIn = 5000;
     long iterCount = 10000;
     
-    RandomEngine rng = new MersenneTwister(100);
-    
     MCMC mcmc = new MCMC();
-    mcmc.setRng(rng);
+    mcmc.setRandomSeed(100L);
     
     MCMC.setLogLevel(Level.INFO);
     
-    Model m = new Model();
+    ModelFactory mf = new ModelFactory() {
+      @Override
+      public Model createModel(Chain initialChain) throws MC3KitException {
+        Model m = new Model(initialChain);
+        
+        m.beginConstruction();
+        m.addDistribution(new NormalDistribution("nd"));
+        m.addVariable(new DoubleVariable("nv"));
+        m.setDistribution("nv", "nd");
+        m.endConstruction();
+        
+        return m;
+      }
+    };
     
-    m.beginConstruction();
-    m.addDistribution(new NormalDistribution("nd"));
-    m.addVariable(new DoubleVariable("nv"));
-    m.setDistribution("nv", "nd");
-    m.endConstruction(rng);
-    
-    mcmc.setModel(m);
+    mcmc.setModelFactory(mf);
     
     UnivariateProposalStep proposalStep = new UnivariateProposalStep();
     proposalStep.setTuneEvery(100);
@@ -76,22 +80,26 @@ public class MCMCTest {
 
   @Test
   public void testStandardExponential() throws Throwable {
-    long burnIn = 40000;
-    long iterCount = 80000;
+    long burnIn = 10000;
+    long iterCount = 50000;
     
     MCMC mcmc = new MCMC();
-    RandomEngine rng = new MersenneTwister(1453);
-    mcmc.setRng(rng);
+    mcmc.setRandomSeed(1453L);
     
-    Model m = new Model();
-    
-    m.beginConstruction();
-    m.addDistribution(new ExponentialDistribution("ed"));
-    m.addVariable(new DoubleVariable("ev"));
-    m.setDistribution("ev", "ed");
-    m.endConstruction(rng);
-    
-    mcmc.setModel(m);
+    mcmc.setModelFactory(new ModelFactory() {
+      @Override
+      public Model createModel(Chain initialChain) throws MC3KitException {
+        Model m = new Model(initialChain);
+        
+        m.beginConstruction();
+        m.addDistribution(new ExponentialDistribution("ed"));
+        m.addVariable(new DoubleVariable("ev"));
+        m.setDistribution("ev", "ed");
+        m.endConstruction();
+        
+        return m;
+      }
+    });
     
     UnivariateProposalStep proposalStep = new UnivariateProposalStep();
     proposalStep.setTuneEvery(100);
@@ -130,18 +138,22 @@ public class MCMCTest {
     long iterCount = 10000;
     
     MCMC mcmc = new MCMC();
-    RandomEngine rng = new MersenneTwister(1453);
-    mcmc.setRng(rng);
+    mcmc.setRandomSeed(100L);
     
-    Model m = new Model();
-    
-    m.beginConstruction();
-    m.addDistribution(new UniformDistribution("ed"));
-    m.addVariable(new DoubleVariable("ev"));
-    m.setDistribution("ev", "ed");
-    m.endConstruction(rng);
-    
-    mcmc.setModel(m);
+    mcmc.setModelFactory(new ModelFactory() {
+      @Override
+      public Model createModel(Chain initialChain) throws MC3KitException {
+        Model m = new Model(initialChain);
+        
+        m.beginConstruction();
+        m.addDistribution(new UniformDistribution("ed"));
+        m.addVariable(new DoubleVariable("ev"));
+        m.setDistribution("ev", "ed");
+        m.endConstruction();
+        
+        return m;
+      }
+    });
     
     UnivariateProposalStep proposalStep = new UnivariateProposalStep();
     proposalStep.setTuneEvery(100);
@@ -182,18 +194,23 @@ public class MCMCTest {
     long iterCount = 10000;
     
     MCMC mcmc = new MCMC();
-    RandomEngine rng = new MersenneTwister(1453);
-    mcmc.setRng(rng);
+    mcmc.setRandomSeed(100L);
     
-    Model m = new Model();
-    
-    m.beginConstruction();
-    m.addDistribution(new BetaDistribution("d", 2.0, 3.0));
-    m.addVariable(new DoubleVariable("v"));
-    m.setDistribution("v", "d");
-    m.endConstruction(rng);
-    
-    mcmc.setModel(m);
+    mcmc.setModelFactory(new ModelFactory() {
+      
+      @Override
+      public Model createModel(Chain initialChain) throws MC3KitException {
+        Model m = new Model(initialChain);
+        
+        m.beginConstruction();
+        m.addDistribution(new BetaDistribution("d", 2.0, 3.0));
+        m.addVariable(new DoubleVariable("v"));
+        m.setDistribution("v", "d");
+        m.endConstruction();
+        
+        return m;
+      }
+    });
     
     UnivariateProposalStep proposalStep = new UnivariateProposalStep();
     proposalStep.setTuneEvery(100);
@@ -230,27 +247,31 @@ public class MCMCTest {
 
   @Test
   public void testSumNormals() throws Throwable {
-    long burnIn = 5000;
-    long iterCount = 10000;
-    
-    RandomEngine rng = new MersenneTwister(101);
+    long burnIn = 10000;
+    long iterCount = 100000;
     
     MCMC mcmc = new MCMC();
-    mcmc.setRng(rng);
+    mcmc.setRandomSeed(100L);
     
-    Model m = new Model();
-    
-    m.beginConstruction();
-    DoubleDistribution d = m.addDistribution(new NormalDistribution());
-    DoubleVariable v1 = m.addVariable(new DoubleVariable("v1"))
-      .setDistribution(d);
-    DoubleVariable v2 = m.addVariable(new DoubleVariable("v2"))
-      .setDistribution(d);
-    m.addFunction(new DoubleSumFunction("v12"))
-      .add(v1).add(v2);
-    m.endConstruction(rng);
-    
-    mcmc.setModel(m);
+    mcmc.setModelFactory(new ModelFactory() {
+      
+      @Override
+      public Model createModel(Chain initialChain) throws MC3KitException {
+        Model m = new Model(initialChain);
+        
+        m.beginConstruction();
+        DoubleDistribution d = m.addDistribution(new NormalDistribution());
+        DoubleVariable v1 = m.addVariable(new DoubleVariable("v1"))
+          .setDistribution(d);
+        DoubleVariable v2 = m.addVariable(new DoubleVariable("v2"))
+          .setDistribution(d);
+        m.addFunction(new DoubleSumFunction("v12"))
+          .add(v1).add(v2);
+        m.endConstruction();
+        
+        return m;
+      }
+    });
     
     UnivariateProposalStep proposalStep = new UnivariateProposalStep();
     proposalStep.setTuneEvery(100);

@@ -6,7 +6,7 @@ import static java.lang.Math.exp;
 import static mc3kit.util.Math.*;
 import static java.lang.String.format;
 
-public class MHMultiplierProposer extends VariableProposer<DoubleVariable> {
+public class MHMultiplierProposer extends VariableProposer {
 
   double lambda;
   

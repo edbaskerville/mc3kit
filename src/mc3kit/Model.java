@@ -21,8 +21,8 @@ public class Model implements Observer, Serializable {
   
   Graph graph;
   
-  List<Variable<?>> unobservedVariables;
-  Map<Variable<?>, DistributionEdge> varDistEdgeMap;
+  List<Variable> unobservedVariables;
+  Map<Variable, DistributionEdge> varDistEdgeMap;
   
   double logPrior;
   double logLikelihood;
@@ -31,14 +31,15 @@ public class Model implements Observer, Serializable {
   double oldLogLikelihood;
   
   State state;
-  Set<Variable<?>> changedValueVars;
+  Set<Variable> changedValueVars;
   
-  public Model() {
+  public Model(Chain initialChain) {
+    this.chain = initialChain;
     graph = new Graph();
-    unobservedVariables = new ArrayList<Variable<?>>();
-    varDistEdgeMap = new HashMap<Variable<?>, DistributionEdge>();
+    unobservedVariables = new ArrayList<Variable>();
+    varDistEdgeMap = new HashMap<Variable, DistributionEdge>();
     state = State.UNINITIALIZED;
-    changedValueVars = new HashSet<Variable<?>>();
+    changedValueVars = new HashSet<Variable>();
   }
   
   public String[] getUnobservedVariableNames() {
@@ -59,23 +60,23 @@ public class Model implements Observer, Serializable {
     state = State.IN_CONSTRUCTION;
   }
   
-  public void endConstruction(RandomEngine rng) throws ModelException {
+  public void endConstruction() throws ModelException {
     if(state != State.IN_CONSTRUCTION) {
       throw new ModelException("endConstruction called with wrong state", this);
     }
     
     for(Node node : graph.orderedNodesHeadToTail()) {
       if(node instanceof Variable) {
-        Variable<?> var = (Variable<?>)node;
+        Variable var = (Variable)node;
         if(!var.isObserved()) {
-          var.sample(rng);
+          var.sample();
         }
       }
       
       ((ModelNode)node).update();
       
       if(node instanceof Variable) {
-        Variable<?> var = (Variable<?>)node;
+        Variable var = (Variable)node;
         if(var.isObserved()) {
           logLikelihood += var.getLogP();
         }
@@ -85,7 +86,7 @@ public class Model implements Observer, Serializable {
       }
     }
     
-    changedValueVars = new HashSet<Variable<?>>();
+    changedValueVars = new HashSet<Variable>();
     
     state = State.READY;
   }
@@ -146,7 +147,7 @@ public class Model implements Observer, Serializable {
     // Queue of nodes to update in topological order, starting with variables
     // whose values have changed
     SortedMap<Integer, ModelNode> updateQueue = new TreeMap<Integer, ModelNode>();
-    for(Variable<?> var : changedValueVars) {
+    for(Variable var : changedValueVars) {
       updateQueue.put(var.getOrder(), var);
     }
     
@@ -166,7 +167,7 @@ public class Model implements Observer, Serializable {
       // Get old log-probability for random variables
       double oldLogP = 0.0;
       if(node instanceof Variable) {
-        oldLogP = ((Variable<?>)node).getLogP();
+        oldLogP = ((Variable)node).getLogP();
       }
       
       // Update the node
@@ -180,7 +181,7 @@ public class Model implements Observer, Serializable {
       
       // Update log-prior or log-likelihood for random variables
       if(node instanceof Variable) {
-        Variable<?> var = (Variable<?>)node;
+        Variable var = (Variable)node;
         double newLogP = var.getLogP();
         if(var.isObserved()) {
           logLikelihood += (newLogP - oldLogP);
@@ -205,12 +206,12 @@ public class Model implements Observer, Serializable {
       }
     }
     
-    changedValueVars = new HashSet<Variable<?>>();
+    changedValueVars = new HashSet<Variable>();
   }
   
   /*** GRAPH CONSTRUCTION/MANIPULATION ***/
   
-  public <V extends Variable<?>> V addVariable(V var) {
+  public <V extends Variable> V addVariable(V var) {
     if(var.model != null) {
       throw new IllegalArgumentException("Variable already in model");
     }
@@ -241,7 +242,7 @@ public class Model implements Observer, Serializable {
     return func;
   }
   
-  public <D extends Distribution<?>> D addDistribution(D dist) {
+  public <D extends Distribution> D addDistribution(D dist) {
     if(dist.model != null) {
       throw new IllegalArgumentException("Distribution already in model.");
     }
@@ -260,7 +261,7 @@ public class Model implements Observer, Serializable {
     graph.removeEdge(edge);
   }
   
-  public <V extends Variable<?>, D extends Distribution<?>> void setDistribution(V var, D dist) {
+  public <V extends Variable, D extends Distribution> void setDistribution(V var, D dist) {
     // Check for existing edge: if unchanged, return; if not, remove the edge
     if(varDistEdgeMap.containsKey(var)) {
       DistributionEdge distEdge = varDistEdgeMap.get(var);
@@ -279,8 +280,8 @@ public class Model implements Observer, Serializable {
   }
   
   public void setDistribution(String vName, String dName) throws ModelException { 
-    Variable<?> var = getVariable(vName);
-    Distribution<?> dist = getDistribution(dName);
+    Variable var = getVariable(vName);
+    Distribution dist = getDistribution(dName);
     setDistribution(var, dist);
   }
   
@@ -294,8 +295,8 @@ public class Model implements Observer, Serializable {
     return logLikelihood;
   }
   
-  public Variable<?> getVariable(String name) {
-    return (Variable<?>)graph.getNode(name);
+  public Variable getVariable(String name) {
+    return (Variable)graph.getNode(name);
   }
   
   public DoubleVariable getDoubleVariable(String name) {
@@ -306,11 +307,11 @@ public class Model implements Observer, Serializable {
     return (DoubleFunction)graph.getNode(name);
   }
   
-  public Distribution<?> getDistribution(String name) {
-    return (Distribution<?>)graph.getNode(name);
+  public Distribution getDistribution(String name) {
+    return (Distribution)graph.getNode(name);
   }
   
-  public Distribution<?> getDistributionForVariable(Variable<?> var) {
+  public Distribution getDistributionForVariable(Variable var) {
     DistributionEdge distEdge = varDistEdgeMap.get(var);
     if(distEdge == null) {
       return null;
@@ -318,7 +319,7 @@ public class Model implements Observer, Serializable {
     return distEdge.getDistribution();
   }
   
-  public Distribution<?> getDistributionForVariable(String varName) {
+  public Distribution getDistributionForVariable(String varName) {
     return getDistributionForVariable(getVariable(varName));
   }
   
@@ -334,7 +335,7 @@ public class Model implements Observer, Serializable {
   @Override
   public void update(Observable obj, Object arg1) {
     if(obj instanceof Variable) {
-      Variable<?> var = (Variable<?>)obj;
+      Variable var = (Variable)obj;
       assert state == State.IN_CONSTRUCTION || state == State.IN_PROPOSAL || state == State.IN_REJECTION;
       if(state == State.IN_PROPOSAL || state == State.IN_REJECTION) {
         assert !var.isObserved();

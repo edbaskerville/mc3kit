@@ -1,7 +1,7 @@
 package mc3kit;
 
 
-public abstract class VariableProposer<V extends Variable<?>>
+public abstract class VariableProposer
 {
 	private String name;
 	

@@ -1,6 +1,6 @@
 package mc3kit;
 
-public class DoubleVariable extends Variable<DoubleDistribution> implements DoubleValued {
+public class DoubleVariable extends Variable implements DoubleValued {
   
   private double value;
   
@@ -38,13 +38,13 @@ public class DoubleVariable extends Variable<DoubleDistribution> implements Doub
   }
   
   @Override
-  public DoubleVariable setDistribution(DoubleDistribution dist) {
+  public DoubleVariable setDistribution(Distribution dist) {
     super.setDistribution(dist);
     return this;
   }
   
   public boolean valueIsValid(double value) throws MC3KitException {
-    DoubleDistribution dist = getDistribution();
+    DoubleDistribution dist = (DoubleDistribution)getDistribution();
     if(dist == null) {
       throw new MC3KitException("Can't ask whether value is valid without distribution.");
     }
@@ -54,7 +54,7 @@ public class DoubleVariable extends Variable<DoubleDistribution> implements Doub
 
   @Override
   public boolean update() {
-    DoubleDistribution dist = getDistribution();
+    DoubleDistribution dist = (DoubleDistribution)getDistribution();
     setLogP(dist.getLogP(this));
     return false;
   }

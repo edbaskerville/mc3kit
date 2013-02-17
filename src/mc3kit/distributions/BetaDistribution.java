@@ -3,7 +3,6 @@ package mc3kit.distributions;
 import mc3kit.*;
 import mc3kit.proposal.MHUniformProposer;
 import cern.jet.random.Beta;
-import cern.jet.random.engine.RandomEngine;
 import static mc3kit.util.Math.*;
 import static java.lang.Math.*;
 
@@ -53,7 +52,7 @@ public class BetaDistribution extends DoubleDistribution {
   }
 
   @Override
-  public VariableProposer<DoubleVariable> makeVariableProposer(String varName) {
+  public VariableProposer makeVariableProposer(String varName) {
     return new MHUniformProposer(varName, 0.0, 1.0);
   }
 
@@ -63,16 +62,16 @@ public class BetaDistribution extends DoubleDistribution {
   }
 
   @Override
-  public double getLogP(DoubleVariable var) {
-    double x = var.getValue();
+  public double getLogP(Variable var) {
+    double x = ((DoubleVariable)var).getValue();
     double logP = (alpha - 1.0) * log(x) + (beta - 1.0) * log1p(-x) - logBetaAB;
     return logP;
   }
 
   @Override
-  public void sample(DoubleVariable var, RandomEngine rng) {
-    Beta betaGen = new Beta(alpha, beta, rng);
-    var.setValue(betaGen.nextDouble());
+  public void sample(Variable var) {
+    Beta betaGen = new Beta(alpha, beta, getRng());
+    ((DoubleVariable)var).setValue(betaGen.nextDouble());
   }
 
   @Override

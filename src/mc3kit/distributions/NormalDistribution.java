@@ -1,7 +1,6 @@
 package mc3kit.distributions;
 
 import cern.jet.random.Normal;
-import cern.jet.random.engine.RandomEngine;
 import mc3kit.*;
 
 import static java.lang.Math.*;
@@ -28,7 +27,7 @@ public class NormalDistribution extends DoubleDistribution {
   }
 
   @Override
-  public VariableProposer<DoubleVariable> makeVariableProposer(String varName) {
+  public VariableProposer makeVariableProposer(String varName) {
     return new MHNormalProposer(varName);
   }
   
@@ -55,8 +54,8 @@ public class NormalDistribution extends DoubleDistribution {
   }
 
   @Override
-  public double getLogP(DoubleVariable v) {
-    double x = v.getValue();
+  public double getLogP(Variable v) {
+    double x = ((DoubleVariable)v).getValue();
     double mean = meanEdge == null ? 0.0 : getDoubleValue(meanEdge);
     
     if(precEdge != null) {
@@ -95,7 +94,7 @@ public class NormalDistribution extends DoubleDistribution {
   }
 
   @Override
-  public void sample(DoubleVariable var, RandomEngine rng) {
+  public void sample(Variable var) {
     double mean = 0.0;
     if(meanEdge != null) {
       mean = getDoubleValue(meanEdge);
@@ -117,7 +116,7 @@ public class NormalDistribution extends DoubleDistribution {
       assert varEdge == null;
       sd = sqrt(1.0/getDoubleValue(precEdge));
     }
-    var.setValue(new Normal(mean, sd, rng).nextDouble());
+    ((DoubleVariable)var).setValue(new Normal(mean, sd, getRng()).nextDouble());
   }
 
   @Override
