@@ -131,7 +131,7 @@ public class MCMC implements Serializable {
       // Use thread pool to construct models for different chains
       for(int i = 0; i < chainCount; i++) {
         final int chainId = i;
-        completionService.submit(new Callable<Object>() {
+        safeSubmit(new Callable<Object>() {
           @Override
           public Object call() throws Exception {
             Model chainModel = modelFactory.createModel(chains[chainId]);
@@ -258,7 +258,7 @@ public class MCMC implements Serializable {
     try {
       for (TaskManager taskManager : taskManagers[0]) {
         assert(taskManager.iterationCount == iterationCount);
-        completionService.submit(taskManager);
+        safeSubmit(taskManager);
       }
 
       boolean done = false;
@@ -324,22 +324,7 @@ public class MCMC implements Serializable {
       }
       
       if(complete) {
-        boolean submitted = false;
-        int sleepMillis = 1;
-        while (!submitted) {
-          try {
-            completionService.submit(this);
-            submitted = true;
-          }
-          catch (RejectedExecutionException e) {
-            try {
-              Thread.sleep(sleepMillis);
-            }
-            catch (InterruptedException e1) {
-            }
-            sleepMillis *= 2;
-          }
-        }
+        safeSubmit(this);
       }
     }
 
@@ -432,6 +417,28 @@ public class MCMC implements Serializable {
   private void throwIfInitialized() throws MC3KitException {
     if (initialized)
       throw new MC3KitException("Already initialized");
+  }
+  
+  private Future<Object> safeSubmit(Callable<Object> task) {
+
+    boolean submitted = false;
+    Future<Object> result = null;
+    int sleepMillis = 1;
+    while (!submitted) {
+      try {
+        result = completionService.submit(task);
+        submitted = true;
+      }
+      catch (RejectedExecutionException e) {
+        try {
+          Thread.sleep(sleepMillis);
+        }
+        catch (InterruptedException e1) {
+        }
+        sleepMillis *= 2;
+      }
+    }
+    return result;
   }
   
   /*** ACCESSORS ***/
