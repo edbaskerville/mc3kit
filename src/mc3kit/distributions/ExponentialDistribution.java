@@ -6,6 +6,8 @@ import mc3kit.*;
 import mc3kit.proposal.*;
 
 public class ExponentialDistribution extends DoubleDistribution {
+
+  double rate;
   
   ModelEdge rateEdge;
   ModelEdge scaleEdge;
@@ -16,7 +18,16 @@ public class ExponentialDistribution extends DoubleDistribution {
   }
   
   public ExponentialDistribution(Model model, String name) {
+    this(model, name, 1.0);
+  }
+  
+  public ExponentialDistribution(Model model, double rate) {
+    this(model, null, rate);
+  }
+  
+  public ExponentialDistribution(Model model, String name, double rate) {
     super(model, name);
+    this.rate = rate;
   }
 
   @Override
@@ -37,15 +48,15 @@ public class ExponentialDistribution extends DoubleDistribution {
   @Override
   public double getLogP(Variable v) {
     double x = ((DoubleVariable)v).getValue();
-    
-    if(rateEdge != null) {
-      assert scaleEdge == null;
-      return getLogPRate(x, getDoubleValue(rateEdge));
-    }
-    else if(scaleEdge != null) {
+
+    if(scaleEdge != null) {
+      assert rateEdge == null;
       return getLogPScale(x, getDoubleValue(scaleEdge));
     }
-    return -x; // for rate == scale == null => rate = 1
+    else {
+      assert scaleEdge == null;
+      return getLogPRate(x, rateEdge == null ? rate : getDoubleValue(rateEdge));
+    }
   }
   
   public static double getLogPRate(double x, double rate) {

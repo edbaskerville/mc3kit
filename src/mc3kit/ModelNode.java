@@ -1,6 +1,7 @@
 package mc3kit;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 import cern.jet.random.engine.RandomEngine;
 import mc3kit.graph.*;
@@ -48,8 +49,7 @@ public abstract class ModelNode extends Node {
       return null;
     }
     
-    edge = new ModelEdge(this, headNode);
-    getModel().addEdge(edge);
+    edge = new ModelEdge(getModel(), this, headNode);
     return edge;
   }
   
@@ -63,5 +63,9 @@ public abstract class ModelNode extends Node {
   
   public RandomEngine getRng() {
     return getChain().getRng();
+  }
+  
+  public Logger getLogger() {
+    return model.getChain().getLogger();
   }
 }

@@ -2,8 +2,8 @@ package mc3kit;
 
 public class DistributionEdge extends ModelEdge {
 
-  public DistributionEdge(Variable var, Distribution dist) {
-    super(var, dist);
+  public DistributionEdge(Model model, Variable var, Distribution dist) throws ModelException {
+    super(model, var, dist);
   }
   
   public Variable getVariable() {

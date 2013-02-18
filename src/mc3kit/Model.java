@@ -343,8 +343,7 @@ public class Model implements Observer, Serializable {
     }
     
     // Create a new edge
-    DistributionEdge distEdge = new DistributionEdge(var, dist);
-    addEdge(distEdge);
+    DistributionEdge distEdge = new DistributionEdge(this, var, dist);
     varDistEdgeMap.put(var, distEdge);
   }
   

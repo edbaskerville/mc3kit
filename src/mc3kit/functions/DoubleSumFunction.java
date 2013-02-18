@@ -26,8 +26,7 @@ public class DoubleSumFunction extends DoubleFunction {
       throw new IllegalArgumentException("Summand already present.");
     }
     
-    ModelEdge edge = new ModelEdge(this, summandNode);
-    getModel().addEdge(edge);
+    ModelEdge edge = new ModelEdge(getModel(), this, summandNode);
     Summand summand = new Summand(edge, coeff);
     summandMap.put(summandNode, summand);
     

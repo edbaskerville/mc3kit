@@ -3,13 +3,16 @@ package mc3kit;
 import mc3kit.graph.Edge;
 
 public class ModelEdge extends Edge {
-
-  public ModelEdge(ModelNode tail, ModelNode head) {
+  Model model;
+  
+  public ModelEdge(Model model, ModelNode tail, ModelNode head) throws ModelException {
     super(tail, head);
+    model.addEdge(this);
   }
 
-  public ModelEdge(String name, ModelNode tail, ModelNode head) {
+  public ModelEdge(Model model, String name, ModelNode tail, ModelNode head) throws ModelException {
     super(name, tail, head);
+    model.addEdge(this);
   }
   
   public ModelNode getTail() {
