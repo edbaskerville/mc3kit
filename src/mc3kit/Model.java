@@ -255,6 +255,22 @@ public class Model implements Observer, Serializable {
   
   /*** GRAPH CONSTRUCTION/MANIPULATION ***/
   
+  public <T extends ModelNode> T addNode(T node) {
+    if(node instanceof Variable) {
+      addVariable((Variable)node);
+    }
+    else if(node instanceof Function) {
+      addFunction((Function)node);
+    }
+    else if(node instanceof Distribution) {
+      addDistribution((Distribution)node);
+    }
+    else {
+      throw new IllegalArgumentException("Unknown node type.");
+    }
+    return node;
+  }
+  
   public <V extends Variable> V addVariable(V var) {
     if(var.model != null) {
       throw new IllegalArgumentException("Variable already in model");

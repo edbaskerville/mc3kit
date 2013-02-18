@@ -9,20 +9,20 @@ public class UniformDistribution extends DoubleDistribution {
   double max;
   double logP;
   
-  public UniformDistribution() {
-    this(null);
+  public UniformDistribution(Model model) {
+    this(model, null);
   }
 
-  public UniformDistribution(String name) {
-    this(name, 0.0, 1.0);
+  public UniformDistribution(Model model, String name) {
+    this(model, name, 0.0, 1.0);
   }
   
-  public UniformDistribution(double min, double max) throws IllegalArgumentException {
-    this(null, min, max);
+  public UniformDistribution(Model model, double min, double max) throws IllegalArgumentException {
+    this(model, null, min, max);
   }
   
-  public UniformDistribution(String name, double min, double max) throws IllegalArgumentException {
-    super(name);
+  public UniformDistribution(Model model, String name, double min, double max) throws IllegalArgumentException {
+    super(model, name);
     
     if(Double.isNaN(min) || Double.isNaN(max)) {
       throw new IllegalArgumentException("min or max is NaN");

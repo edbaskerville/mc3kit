@@ -15,20 +15,20 @@ public class BetaDistribution extends DoubleDistribution {
   
   double logBetaAB;
   
-  public BetaDistribution() {
-    this(null);
+  public BetaDistribution(Model model) {
+    this(model, null);
   }
 
-  public BetaDistribution(String name) {
-    this(name, 1.0, 1.0);
+  public BetaDistribution(Model model, String name) {
+    this(model, name, 1.0, 1.0);
   }
   
-  public BetaDistribution(double alpha, double beta) throws IllegalArgumentException {
-    this(null, alpha, beta);
+  public BetaDistribution(Model model, double alpha, double beta) throws IllegalArgumentException {
+    this(model, null, alpha, beta);
   }
   
-  public BetaDistribution(String name, double alpha, double beta) throws IllegalArgumentException {
-    super(name);
+  public BetaDistribution(Model model, String name, double alpha, double beta) throws IllegalArgumentException {
+    super(model, name);
     
     if(Double.isNaN(alpha) || Double.isNaN(beta)) {
       throw new IllegalArgumentException("alpha or beta is NaN");

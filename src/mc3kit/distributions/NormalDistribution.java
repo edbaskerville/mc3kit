@@ -22,20 +22,20 @@ public class NormalDistribution extends DoubleDistribution {
   ModelEdge varEdge;
   ModelEdge precEdge;
   
-  public NormalDistribution() {
-    this(null);
+  public NormalDistribution(Model model) {
+    this(model, null);
   }
   
-  public NormalDistribution(String name) {
-    this(name, 0.0, 1.0);
+  public NormalDistribution(Model model, String name) {
+    this(model, name, 0.0, 1.0);
   }
 
-  public NormalDistribution(double mean, double stdDev) {
-    this(null, mean, stdDev);
+  public NormalDistribution(Model model, double mean, double stdDev) {
+    this(model, null, mean, stdDev);
   }
   
-  public NormalDistribution(String name, double mean, double stdDev) {
-    super(name);
+  public NormalDistribution(Model model, String name, double mean, double stdDev) {
+    super(model, name);
     this.mean = mean;
     this.stdDev = stdDev;
   }

@@ -8,7 +8,9 @@ import mc3kit.graph.*;
 public abstract class ModelNode extends Node {
   Model model;
   
-  public ModelNode() { }
+  public ModelNode()
+  {
+  }
 
   public ModelNode(String name) {
     super(name);

@@ -8,12 +8,12 @@ public class DoubleSumFunction extends DoubleFunction {
   Map<DoubleValued, Summand> summandMap;
   Map<ModelEdge, Summand> edgeMap;
   
-  public DoubleSumFunction() {
-    this(null);
+  public DoubleSumFunction(Model model) {
+    this(model, null);
   }
 
-  public DoubleSumFunction(String name) {
-    super(name);
+  public DoubleSumFunction(Model model, String name) {
+    super(model, name);
     summandMap = new LinkedHashMap<DoubleValued, Summand>(2);
   }
   

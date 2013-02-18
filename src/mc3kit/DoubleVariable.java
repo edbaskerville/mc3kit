@@ -4,23 +4,68 @@ public class DoubleVariable extends Variable implements DoubleValued {
   
   private double value;
   
-  public DoubleVariable() {
-    this(null);
+  /**
+   * Constructor for an <i>observed</i> double-valued variable.
+   * @param model
+   * @param value
+   */
+  public DoubleVariable(Model model, double value) {
+    this(model, (String)null, value);
   }
   
-  public DoubleVariable(double value) {
-    this(null, value);
+  /**
+   * Constructor for an <i>unobserved</i> double-valued variable.
+   * @param model
+   * @param name
+   */
+  public DoubleVariable(Model model, String name) {
+    super(model, name, false);
   }
   
-  public DoubleVariable(String name) {
-    super(name);
-    setObserved(false);
+  /**
+   * Constructor for an <i>observed</i> double-valued variable with a name.
+   * @param model
+   * @param name
+   * @param value
+   */
+  public DoubleVariable(Model model, String name, double value) {
+    super(model, name, true);
+    this.value = value;
   }
   
-  public DoubleVariable(String name, double value) {
-    super(name);
-    setObserved(true);
-    setValue(value);
+  /**
+   * Constructor for an <i>observed</i> double-valued variable with a distribution.
+   * @param model
+   * @param name
+   * @param value
+   * @throws ModelException 
+   */
+  public DoubleVariable(Model model, double value, Distribution dist) throws ModelException {
+    this(model, null, value, dist);
+  }
+  
+  /**
+   * Constructor for an <i>observed</i> double-valued variable with a name and distribution.
+   * @param model
+   * @param name
+   * @param value
+   * @param dist
+   * @throws ModelException
+   */
+  public DoubleVariable(Model model, String name, double value, Distribution dist) throws ModelException {
+    super(model, name, true, dist);
+    this.value = value;
+  }
+  
+  /**
+   * Constructor for an <i>unobserved</i> double-valued variable with a distribution.
+   * @param model
+   * @param name
+   * @param dist
+   * @throws ModelException
+   */
+  public DoubleVariable(Model model, String name, Distribution dist) throws ModelException {
+    super(model, name, false, dist);
   }
 
   @Override
@@ -30,6 +75,10 @@ public class DoubleVariable extends Variable implements DoubleValued {
 
   @Override
   public void setValue(double value) {
+    if(isObserved()) {
+      throw new UnsupportedOperationException("Can't set value on an observed variable.");
+    }
+    
     if(this.value != value) {
       this.value = value;
       setChanged();

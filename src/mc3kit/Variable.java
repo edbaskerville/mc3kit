@@ -7,15 +7,26 @@ public abstract class Variable extends ModelNode {
   
   private double logP;
   
-  public Variable() {
+  protected Variable(Model model) {
+    this(model, null, true);
   }
   
-  public Variable(String name) {
+  protected Variable(Model model, Distribution dist) throws ModelException {
+    this(model, null, true, dist);
+  }
+  
+  protected Variable(Model model, String name, boolean observed) {
     super(name);
+    this.observed = observed;
+    
+    if(model != null) {
+      model.addVariable(this);
+    }
   }
   
-  protected void setObserved(boolean observed) {
-    this.observed = observed;
+  protected Variable(Model model, String name, boolean observed, Distribution dist) throws ModelException {
+    this(model, name, observed);
+    setDistribution(dist);
   }
   
   public boolean isObserved() {

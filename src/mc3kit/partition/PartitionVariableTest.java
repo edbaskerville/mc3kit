@@ -43,19 +43,15 @@ public class PartitionVariableTest {
         m.beginConstruction();
         
         DoubleDistribution[] d = new DoubleDistribution[2];
-        d[0] = new NormalDistribution(-1.0, 1.0);
-        m.addDistribution(d[0]);
-        d[1] = new NormalDistribution(3.0, 1.0);
-        m.addDistribution(d[1]);
+        d[0] = new NormalDistribution(m, -1.0, 1.0);
+        d[1] = new NormalDistribution(m, 3.0, 1.0);
         
         DoubleVariable[] v = new DoubleVariable[50];
         for(int i = 0; i < 50; i++) {
-          v[i] = new DoubleVariable("v" + i);
-          m.addVariable(v[i]);
+          v[i] = new DoubleVariable(m, "v" + i);
         }
         
-        PartitionVariable pv = new PartitionVariable("part", v.length, d.length);
-        m.addVariable(pv);
+        PartitionVariable pv = new PartitionVariable(m, "part", v.length, d.length);
         pv.associateVariablesWithDistributions(v, d);
         pv.sample();
         

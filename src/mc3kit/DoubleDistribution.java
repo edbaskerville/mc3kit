@@ -2,12 +2,12 @@ package mc3kit;
 
 public abstract class DoubleDistribution extends Distribution {
 
-  public DoubleDistribution() {
-    this(null);
+  public DoubleDistribution(Model model) {
+    this(model, null);
   }
   
-  public DoubleDistribution(String name) {
-    super(name);
+  public DoubleDistribution(Model model, String name) {
+    super(model, name);
   }
 
   @Override

@@ -11,12 +11,12 @@ public class ExponentialDistribution extends DoubleDistribution {
   ModelEdge scaleEdge;
   
   
-  public ExponentialDistribution() {
-    this(null);
+  public ExponentialDistribution(Model model) {
+    this(model, null);
   }
   
-  public ExponentialDistribution(String name) {
-    super(name);
+  public ExponentialDistribution(Model model, String name) {
+    super(model, name);
   }
 
   @Override

@@ -10,7 +10,7 @@ public class UniformDistributionTest {
   @Test
   public void minMaxEqual() {
     try {
-      new UniformDistribution("ud", 0.0, 0.0);
+      new UniformDistribution(null, "ud", 0.0, 0.0);
       fail();
     }
     catch(IllegalArgumentException e) {
@@ -20,7 +20,7 @@ public class UniformDistributionTest {
   @Test
   public void minLTMax() {
     try {
-      new UniformDistribution("ud", 1.0, 0.0);
+      new UniformDistribution(null, "ud", 1.0, 0.0);
       fail();
     }
     catch(IllegalArgumentException e) {
@@ -30,7 +30,7 @@ public class UniformDistributionTest {
   @Test
   public void minNaN() {
     try {
-      new UniformDistribution("ud", Double.NaN, 0.0);
+      new UniformDistribution(null, "ud", Double.NaN, 0.0);
       fail();
     }
     catch(IllegalArgumentException e) {
@@ -40,7 +40,7 @@ public class UniformDistributionTest {
   @Test
   public void maxNaN() {
     try {
-      new UniformDistribution("ud", 0.0, Double.NaN);
+      new UniformDistribution(null, "ud", 0.0, Double.NaN);
       fail();
     }
     catch(IllegalArgumentException e) {
@@ -50,7 +50,7 @@ public class UniformDistributionTest {
   @Test
   public void minInf() {
     try {
-      new UniformDistribution("ud", Double.NEGATIVE_INFINITY, 0.0);
+      new UniformDistribution(null, "ud", Double.NEGATIVE_INFINITY, 0.0);
       fail();
     }
     catch(IllegalArgumentException e) {
@@ -60,7 +60,7 @@ public class UniformDistributionTest {
   @Test
   public void maxInf() {
     try {
-      new UniformDistribution("ud", 0.0, Double.POSITIVE_INFINITY);
+      new UniformDistribution(null, "ud", 0.0, Double.POSITIVE_INFINITY);
       fail();
     }
     catch(IllegalArgumentException e) {
@@ -69,16 +69,15 @@ public class UniformDistributionTest {
   
   @Test
   public void standard() {
-    UniformDistribution ud = new UniformDistribution();
-    DoubleVariable var = new DoubleVariable();
-    var.setValue(0.5);
+    UniformDistribution ud = new UniformDistribution(null);
+    DoubleVariable var = new DoubleVariable(null, 0.5);
     double logP = ud.getLogP(var);
     assertEquals(0.0, logP, 1e-12);
   }
   
   @Test
   public void standardOutOfRange() {
-    UniformDistribution ud = new UniformDistribution();
+    UniformDistribution ud = new UniformDistribution(null);
     assertFalse(ud.valueIsValid(0.0));
     assertFalse(ud.valueIsValid(1.0));
     assertTrue(ud.valueIsValid(1e-12));
@@ -93,9 +92,8 @@ public class UniformDistributionTest {
     double[] logPs = { -2.03076449020767, -1.68110048312165, -2.07837203900915 };
     
     for(int i = 0; i < mins.length; i++) {
-      UniformDistribution ud = new UniformDistribution(mins[i], maxs[i]);
-      DoubleVariable var = new DoubleVariable();
-      var.setValue(xs[i]);
+      UniformDistribution ud = new UniformDistribution(null, mins[i], maxs[i]);
+      DoubleVariable var = new DoubleVariable(null, xs[i]);
       double logP = ud.getLogP(var);
       assertEquals(logPs[i], logP, 1e-12);
     }

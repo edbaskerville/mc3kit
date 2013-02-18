@@ -16,9 +16,9 @@ public class PartitionVariable extends Variable
 	
 	List<Association> associations;
 	
-	public PartitionVariable(String name, int n, int k) throws MC3KitException
+	public PartitionVariable(Model model, String name, int n, int k) throws MC3KitException
 	{
-		super(name);
+		super(model, name, false);
 		
 		this.n = n;
 		this.k = k;

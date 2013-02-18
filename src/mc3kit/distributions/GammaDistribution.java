@@ -13,12 +13,12 @@ public class GammaDistribution extends DoubleDistribution {
   ModelEdge scaleEdge;
   
   
-  public GammaDistribution() {
-    this(null);
+  public GammaDistribution(Model model) {
+    this(model, null);
   }
   
-  public GammaDistribution(String name) {
-    super(name);
+  public GammaDistribution(Model model, String name) {
+    super(model, name);
   }
 
   @Override

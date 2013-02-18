@@ -3,12 +3,12 @@ package mc3kit;
 public abstract class DoubleFunction extends Function implements DoubleValued {
   private double value;
   
-  public DoubleFunction() {
-    this(null);
+  public DoubleFunction(Model model) {
+    this(model, null);
   }
 
-  public DoubleFunction(String name) {
-    super(name);
+  public DoubleFunction(Model model, String name) {
+    super(model, name);
   }
 
   @Override

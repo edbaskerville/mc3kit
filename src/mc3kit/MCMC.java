@@ -454,6 +454,16 @@ public class MCMC implements Serializable {
     return heatFunction;
   }
 
+  public void setHeatFunction(double heatPower) throws MC3KitException {
+    throwIfInitialized();
+    setHeatFunction(new PowerHeatFunction(heatPower, 0.0));
+  }
+  
+  public void setHeatFunction(double heatPower, double minHeatExponent) throws MC3KitException {
+    throwIfInitialized();
+    setHeatFunction(new PowerHeatFunction(heatPower, minHeatExponent));
+  }
+  
   public void setHeatFunction(HeatFunction heatFunction) throws MC3KitException {
     throwIfInitialized();
     this.heatFunction = heatFunction;

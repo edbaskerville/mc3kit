@@ -36,8 +36,8 @@ public class MCMCTest {
         Model m = new Model(initialChain);
         
         m.beginConstruction();
-        m.addDistribution(new NormalDistribution("nd"));
-        m.addVariable(new DoubleVariable("nv"));
+        new NormalDistribution(m, "nd");
+        new DoubleVariable(m, "nv");
         m.setDistribution("nv", "nd");
         m.endConstruction();
         
@@ -93,8 +93,8 @@ public class MCMCTest {
         Model m = new Model(initialChain);
         
         m.beginConstruction();
-        m.addDistribution(new ExponentialDistribution("ed"));
-        m.addVariable(new DoubleVariable("ev"));
+        new ExponentialDistribution(m, "ed");
+        new DoubleVariable(m, "ev");
         m.setDistribution("ev", "ed");
         m.endConstruction();
         
@@ -148,8 +148,8 @@ public class MCMCTest {
         Model m = new Model(initialChain);
         
         m.beginConstruction();
-        m.addDistribution(new UniformDistribution("ed"));
-        m.addVariable(new DoubleVariable("ev"));
+        new UniformDistribution(m, "ed");
+        new DoubleVariable(m, "ev");
         m.setDistribution("ev", "ed");
         m.endConstruction();
         
@@ -206,8 +206,8 @@ public class MCMCTest {
         Model m = new Model(initialChain);
         
         m.beginConstruction();
-        m.addDistribution(new BetaDistribution("d", 2.0, 3.0));
-        m.addVariable(new DoubleVariable("v"));
+        new BetaDistribution(m, "d", 2.0, 3.0);
+        new DoubleVariable(m, "v");
         m.setDistribution("v", "d");
         m.endConstruction();
         
@@ -264,13 +264,10 @@ public class MCMCTest {
         Model m = new Model(initialChain);
         
         m.beginConstruction();
-        DoubleDistribution d = m.addDistribution(new NormalDistribution());
-        DoubleVariable v1 = m.addVariable(new DoubleVariable("v1"))
-          .setDistribution(d);
-        DoubleVariable v2 = m.addVariable(new DoubleVariable("v2"))
-          .setDistribution(d);
-        m.addFunction(new DoubleSumFunction("v12"))
-          .add(v1).add(v2);
+        DoubleDistribution d = new NormalDistribution(m);
+        DoubleVariable v1 = new DoubleVariable(m, "v1", d);
+        DoubleVariable v2 = new DoubleVariable(m, "v2", d);
+        new DoubleSumFunction(m, "v12").add(v1).add(v2);
         m.endConstruction();
         
         return m;
