@@ -19,6 +19,8 @@ public class Chain implements Serializable
 	
 	Logger logger;
 	
+	long iterationCount;
+	
 	Chain(MCMC mcmc, int chainId, int chainCount, double priorHeatExponent, double likelihoodHeatExponent, RandomEngine rng)
 	{
 		this.mcmc = mcmc;
@@ -27,6 +29,8 @@ public class Chain implements Serializable
 		this.priorHeatExponent = priorHeatExponent;
 		this.likelihoodHeatExponent = likelihoodHeatExponent;
 		this.rng = rng;
+		
+		this.iterationCount = 0;
 		
 		logger = Logger.getLogger("mc3kit.Chain." + chainId);
 	}
@@ -82,5 +86,9 @@ public class Chain implements Serializable
 	
 	public Logger getLogger() {
 	  return logger;
+	}
+	
+	public long getIterationCount() {
+	  return iterationCount;
 	}
 }

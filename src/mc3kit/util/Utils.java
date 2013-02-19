@@ -1,6 +1,8 @@
 package mc3kit.util;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import mc3kit.MC3KitException;
 
@@ -20,5 +22,30 @@ public final class Utils {
     }
     
     return map;
+  }
+  
+  @SuppressWarnings("unchecked")
+  public static Map<String, Object> makeHierarchicalMap(Map<String, Object> flatMap) {
+    Map<String, Object> hMap = new LinkedHashMap<String, Object>();
+    
+    for(String flatKey : flatMap.keySet()) {
+      String[] subKeys = flatKey.split("\\.");
+      
+      Map<String, Object> curMap = hMap;
+      int i = 0;
+      for(String subKey : subKeys) {
+        if(i == subKeys.length - 1) {
+          curMap.put(subKey, flatMap.get(flatKey));
+        }
+        else {
+          if(!curMap.containsKey(subKey)) {
+            curMap.put(subKey, new LinkedHashMap<String, Object>());
+          }
+          curMap = (Map<String, Object>)curMap.get(subKey);
+        }
+        i++;
+      }
+    }
+    return hMap;
   }
 }

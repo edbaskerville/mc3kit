@@ -63,4 +63,12 @@ public abstract class Variable extends ModelNode {
     }
     return getDistribution().makeVariableProposer(getName());
   }
+  
+  public Object makeOutputObject() {
+    throw new UnsupportedOperationException("This variable doesn't support output.");
+  }
+  
+  public String makeOutputString() {
+    throw new UnsupportedOperationException("This variable doesn't support output as string.");
+  }
 }

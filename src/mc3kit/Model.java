@@ -5,6 +5,7 @@ import java.io.*;
 
 import static java.lang.String.format;
 import static java.lang.Math.*;
+import static mc3kit.util.Utils.*;
 
 import cern.jet.random.engine.RandomEngine;
 
@@ -351,6 +352,34 @@ public class Model implements Observer, Serializable {
     Variable var = getVariable(vName);
     Distribution dist = getDistribution(dName);
     setDistribution(var, dist);
+  }
+  
+  public Map<String, Object> makeHierarchicalSample() {
+    Map<String, Object> flatMap = new LinkedHashMap<String, Object>();
+    
+    flatMap.put("iterationCount", getChain().getIterationCount());
+    flatMap.put("logPrior", logPrior);
+    flatMap.put("logLikelihood", logLikelihood);
+    
+    for(Variable var : unobservedVariables) {
+      flatMap.put(var.getName(), var.makeOutputObject());
+    }
+    
+    return makeHierarchicalMap(flatMap);
+  }
+  
+  public Map<String, String> makeFlatSample() {
+    Map<String, String> samp = new LinkedHashMap<String, String>();
+    
+    samp.put("iterationCount", Long.toString(getChain().getIterationCount()));
+    samp.put("logPrior", Double.toString(logPrior));
+    samp.put("logLikelihood", Double.toString(logLikelihood));
+    
+    for(Variable var : unobservedVariables) {
+      samp.put(var.getName(), var.makeOutputString());
+    }
+    
+    return samp;
   }
   
   /*** GETTERS ***/

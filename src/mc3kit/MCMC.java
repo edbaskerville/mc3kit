@@ -343,26 +343,18 @@ public class MCMC implements Serializable {
       }
       if (allComplete) {
         iterationCount++;
+        
+        if(isTerminationHandler) {
+          for(Chain chain : handledChains) {
+            chain.iterationCount++;
+          }
+        }
+        
         if(isTerminationHandler && iterationCount == terminationCount) {
           terminationManager.tallyComplete(task.getChainIds());
         }
         else {
-          boolean submitted = false;
-          int sleepMillis = 1;
-          while (!submitted) {
-            try {
-              completionService.submit(this);
-              submitted = true;
-            }
-            catch (RejectedExecutionException e) {
-              try {
-                Thread.sleep(sleepMillis);
-              }
-              catch (InterruptedException e1) {
-              }
-              sleepMillis *= 2;
-            }
-          }
+          safeSubmit(this);
         }
       }
     }

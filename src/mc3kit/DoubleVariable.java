@@ -107,4 +107,14 @@ public class DoubleVariable extends Variable implements DoubleValued {
     setLogP(dist.getLogP(this));
     return false;
   }
+
+  @Override
+  public Object makeOutputObject() {
+    return value;
+  }
+  
+  @Override
+  public String makeOutputString() {
+    return Double.toString(value);
+  }
 }

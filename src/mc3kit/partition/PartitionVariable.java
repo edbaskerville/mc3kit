@@ -174,4 +174,9 @@ public class PartitionVariable extends Variable
   public VariableProposer makeProposer() {
     return new PartitionProposer(getName());
   }
+
+  @Override
+  public Object makeOutputObject() {
+    return assignment.clone();
+  }
 }
