@@ -1,8 +1,6 @@
 package mc3kit.util;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import mc3kit.MC3KitException;
 
