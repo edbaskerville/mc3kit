@@ -177,6 +177,9 @@ public class PartitionVariable extends Variable
 
   @Override
   public Object makeOutputObject() {
+    if(k == 1) {
+      return null;
+    }
     return assignment.clone();
   }
 }

@@ -26,5 +26,6 @@ public class JsonsSampleWriter implements SampleWriter
 	  writer.println("---");
 		gson.toJson(model.makeHierarchicalSample(), writer);
 		writer.println();
+		writer.flush();
 	}
 }

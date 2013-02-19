@@ -1,7 +1,9 @@
 package mc3kit.output;
 
 import java.io.FileNotFoundException;
+import static java.lang.String.*;
 import java.util.*;
+
 import mc3kit.*;
 import mc3kit.output.DataLoggerFactory;
 
@@ -62,11 +64,12 @@ public class SampleOutputStep implements Step
 		@Override
 		public void step(Chain[] chains) throws MC3KitException
 		{
-			iterationCount++;
-			
+      iterationCount++;
+      
+      Chain chain = chains[0];
 			if(iterationCount % thin == 0)
 			{
-				Chain chain = chains[0];
+	      chain.getLogger().info(format("Writing sample %d", iterationCount));
 				Model model = chain.getModel();
 				
 				writer.writeSample(model);
