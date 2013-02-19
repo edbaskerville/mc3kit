@@ -10,7 +10,6 @@ import cern.jet.random.Uniform;
 import cern.jet.random.engine.RandomEngine;
 
 public class UnivariateProposalStep implements Step {
-  boolean initialized;
   
   double targetAcceptanceRate = 0.25;
   long tuneFor = 1000;
@@ -34,6 +33,8 @@ public class UnivariateProposalStep implements Step {
   /*** TASK INTERFACE IMPLEMENTATION ***/
   
   class UnivariateProposalTask implements Task {
+    boolean initialized;
+    
     int chainId;
     
     private long iterationCount;
