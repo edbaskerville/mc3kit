@@ -1,6 +1,6 @@
 package mc3kit.util;
 
-import static java.lang.Math.log;
+import static java.lang.Math.*;
 import cern.jet.random.*;
 import cern.jet.random.engine.RandomEngine;
 import cern.jet.stat.Gamma;
@@ -72,5 +72,66 @@ public final class Math {
     }
 
     return accepted;
+  }
+  
+  public static double logSumExp(double[] values)
+  {
+    double shift = Double.MIN_VALUE;
+    for(int i = 0; i < values.length; i++)
+    {
+      if(values[i] > shift)
+        shift = values[i];
+    }
+    
+    double sumExpValues = 0;
+    for(int i = 0; i < values.length; i++)
+    {
+      sumExpValues += exp(values[i] - shift);
+    }
+    return shift + log(sumExpValues);
+  }
+  
+  public static double logSumExp(double[] values, double[] coeffs)
+  {
+    double shift = Double.MIN_VALUE;
+    for(int i = 0; i < values.length; i++)
+    {
+      if(values[i] > shift)
+        shift = values[i];
+    }
+    
+    double sumExpValues = 0;
+    for(int i = 0; i < values.length; i++)
+    {
+      sumExpValues += exp(values[i] - shift) * coeffs[i];
+    }
+    return shift + log(sumExpValues);
+  }
+  
+  public static double logSumExp(double[] values, boolean[] negative)
+  {
+    double shift = Double.NEGATIVE_INFINITY;
+    for(int i = 0; i < values.length; i++)
+    {
+      assert !Double.isNaN(values[i]);
+      if(Double.isInfinite(values[i]))
+      {
+        assert values[i] < 0.0;
+        continue;
+      }
+      
+      if(values[i] > shift)
+      {
+        shift = values[i];
+      }
+    }
+    
+    double sumExpValues = 0;
+    for(int i = 0; i < values.length; i++)
+    {
+      if(Double.isInfinite(values[i])) continue;
+      sumExpValues += exp(values[i] - shift) * (negative[i] ? -1.0 : 1.0);
+    }
+    return shift + log(sumExpValues);
   }
 }

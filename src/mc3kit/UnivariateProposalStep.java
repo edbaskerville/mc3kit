@@ -16,7 +16,10 @@ public class UnivariateProposalStep implements Step {
   long tuneFor = 1000;
   long tuneEvery = 100;
 
-  public UnivariateProposalStep() {
+  public UnivariateProposalStep(double targetAcceptanceRate, long tuneFor, long tuneEvery) {
+    this.targetAcceptanceRate = targetAcceptanceRate;
+    this.tuneFor = tuneFor;
+    this.tuneEvery = tuneEvery;
   }
 
   @Override
@@ -28,47 +31,11 @@ public class UnivariateProposalStep implements Step {
     return tasks;
   }
   
-  /*** GETTERS & SETTERS ***/
-  
-  public double getTargetAcceptanceRate() {
-    return targetAcceptanceRate;
-  }
-
-  public void setTargetAcceptanceRate(double targetAcceptanceRate)
-      throws MC3KitException {
-    throwIfInitialized();
-    this.targetAcceptanceRate = targetAcceptanceRate;
-  }
-
-  public long getTuneFor() {
-    return tuneFor;
-  }
-
-  public void setTuneFor(long tuneFor) throws MC3KitException {
-    throwIfInitialized();
-    this.tuneFor = tuneFor;
-  }
-
-  public long getTuneEvery() {
-    return tuneEvery;
-  }
-
-  public void setTuneEvery(long tuneEvery) throws MC3KitException {
-    throwIfInitialized();
-    this.tuneEvery = tuneEvery;
-  }
-
-  private void throwIfInitialized() throws MC3KitException {
-    if(initialized)
-      throw new MC3KitException("Already initialized.");
-  }
-  
   /*** TASK INTERFACE IMPLEMENTATION ***/
   
   class UnivariateProposalTask implements Task {
     int chainId;
     
-    boolean initialized;
     private long iterationCount;
     
     VariableProposer[] proposers;

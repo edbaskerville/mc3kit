@@ -45,9 +45,7 @@ public class MCMCTest {
     
     mcmc.setModelFactory(mf);
     
-    UnivariateProposalStep proposalStep = new UnivariateProposalStep();
-    proposalStep.setTuneEvery(100);
-    proposalStep.setTuneFor(burnIn);
+    UnivariateProposalStep proposalStep = new UnivariateProposalStep(0.25, 100, burnIn);
     mcmc.addStep(proposalStep);
     
     // Run, collect statistics, and check moments against expected distribution
@@ -98,9 +96,7 @@ public class MCMCTest {
       }
     });
     
-    UnivariateProposalStep proposalStep = new UnivariateProposalStep();
-    proposalStep.setTuneEvery(100);
-    proposalStep.setTuneFor(burnIn);
+    UnivariateProposalStep proposalStep = new UnivariateProposalStep(0.25, 100, burnIn);
     mcmc.addStep(proposalStep);
     
     // Run, collect statistics, and check moments against expected distribution
@@ -151,9 +147,8 @@ public class MCMCTest {
       }
     });
     
-    UnivariateProposalStep proposalStep = new UnivariateProposalStep();
-    proposalStep.setTuneEvery(100);
-    proposalStep.setTuneFor(burnIn);
+
+    UnivariateProposalStep proposalStep = new UnivariateProposalStep(0.25, 100, burnIn);
     mcmc.addStep(proposalStep);
     
     // Run, collect statistics, and check moments against expected distribution
@@ -207,9 +202,8 @@ public class MCMCTest {
       }
     });
     
-    UnivariateProposalStep proposalStep = new UnivariateProposalStep();
-    proposalStep.setTuneEvery(100);
-    proposalStep.setTuneFor(burnIn);
+
+    UnivariateProposalStep proposalStep = new UnivariateProposalStep(0.25, 100, burnIn);
     mcmc.addStep(proposalStep);
     
     // Run, collect statistics, and check moments against expected distribution
@@ -266,9 +260,8 @@ public class MCMCTest {
       }
     });
     
-    UnivariateProposalStep proposalStep = new UnivariateProposalStep();
-    proposalStep.setTuneEvery(100);
-    proposalStep.setTuneFor(burnIn);
+
+    UnivariateProposalStep proposalStep = new UnivariateProposalStep(0.25, 100, burnIn);
     mcmc.addStep(proposalStep);
     
     // Run, collect statistics, and check moments against expected distribution

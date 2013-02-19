@@ -30,7 +30,7 @@ public class SwapStep implements Step
 	/*** METHODS 
 	 * @throws IOException ***/
 	
-	public SwapStep(SwapParity swapParity, String statsFilename, long statsEvery) throws IOException
+	public SwapStep(SwapParity swapParity, long statsEvery) throws IOException
 	{
 		this.swapParity = swapParity;
 		this.statsEvery = statsEvery;

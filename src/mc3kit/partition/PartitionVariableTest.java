@@ -60,10 +60,8 @@ public class PartitionVariableTest {
         return m;
       }
     });
-    
-    UnivariateProposalStep proposalStep = new UnivariateProposalStep();
-    proposalStep.setTuneEvery(100);
-    proposalStep.setTuneFor(burnIn);
+
+    UnivariateProposalStep proposalStep = new UnivariateProposalStep(0.25, 100, burnIn);
     mcmc.addStep(proposalStep);
     
     // Run, collect statistics, and check moments against expected distribution

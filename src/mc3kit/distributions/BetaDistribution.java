@@ -47,6 +47,16 @@ public class BetaDistribution extends DoubleDistribution {
     updateConstant();
   }
   
+  public <T extends ModelNode & DoubleValued> BetaDistribution setAlpha(T alphaNode) throws ModelException {
+    alphaEdge = updateEdge(alphaEdge, alphaNode);
+    return this;
+  }
+  
+  public <T extends ModelNode & DoubleValued> BetaDistribution setBeta(T betaNode) throws ModelException {
+    betaEdge = updateEdge(betaEdge, betaNode);
+    return this;
+  }
+  
   private void updateConstant() {
     logBetaAB = logBeta(alpha, beta);
   }
