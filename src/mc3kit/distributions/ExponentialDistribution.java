@@ -93,6 +93,12 @@ public class ExponentialDistribution extends DoubleDistribution {
     else {
       rate = 1.0;
     }
-    ((DoubleVariable)var).setValue(new Exponential(rate, getRng()).nextDouble());
+    double newVal = new Exponential(rate, getRng()).nextDouble();
+    
+    assert !Double.isNaN(newVal);
+    assert !Double.isInfinite(newVal);
+    assert newVal > 0.0;
+    
+    ((DoubleVariable)var).setValue(newVal);
   }
 }

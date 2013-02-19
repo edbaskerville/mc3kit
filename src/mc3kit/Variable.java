@@ -3,6 +3,8 @@ package mc3kit;
 import static java.lang.String.format;
 
 public abstract class Variable extends ModelNode {
+  private ModelEdge distEdge;
+  
   private boolean observed;
   
   private double logP;
@@ -48,12 +50,12 @@ public abstract class Variable extends ModelNode {
   }
   
   public Variable setDistribution(Distribution dist) throws ModelException {
-    getModel().setDistribution(this, dist);
+    distEdge = updateEdge(distEdge, dist);
     return this;
   }
   
   public Distribution getDistribution() {
-    return getModel().getDistributionForVariable(this);
+    return distEdge == null ? null : (Distribution)distEdge.getHead();
   }
   
   public VariableProposer makeProposer() throws MC3KitException {

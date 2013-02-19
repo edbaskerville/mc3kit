@@ -26,7 +26,6 @@ public class Model implements Observer, Serializable {
   Graph graph;
   
   List<Variable> unobservedVariables;
-  Map<Variable, DistributionEdge> varDistEdgeMap;
   
   double logPrior;
   double logLikelihood;
@@ -42,7 +41,6 @@ public class Model implements Observer, Serializable {
     this.chain = initialChain;
     graph = new Graph();
     unobservedVariables = new ArrayList<Variable>();
-    varDistEdgeMap = new HashMap<Variable, DistributionEdge>();
     state = State.UNINITIALIZED;
     changedValueVars = new HashSet<Variable>();
     newEdgeHeads = new HashSet<ModelNode>();
@@ -74,11 +72,29 @@ public class Model implements Observer, Serializable {
       throw new ModelException("endConstruction called with wrong state", this);
     }
     
+    System.err.println("NODE ORDER:");
+    for(Node node : graph.orderedNodesHeadToTail()) {
+      if(node instanceof Variable) {
+        System.err.printf("  %s\n", node.getName());
+      }
+    }
+    
+    System.err.println("EDGES:");
+    for(Edge edge : graph.getEdges()) {
+      System.err.printf("  %s -> %s\n", edge.getTail(), edge.getHead());
+    }
+    
+    assert graph.verifyOrder();
+    
     for(Node node : graph.orderedNodesHeadToTail()) {
       if(node instanceof Variable) {
         Variable var = (Variable)node;
         if(!var.isObserved() && !changedValueVars.contains(var)) {
           var.sample();
+          System.err.printf("Sampling %s: %f\n", var, ((DoubleVariable)var).getValue());
+        }
+        else if(!var.isObserved()) {
+          System.err.printf("Not sampling %s\n", var);
         }
       }
       
@@ -331,29 +347,6 @@ public class Model implements Observer, Serializable {
     graph.removeEdge(edge);
   }
   
-  public <V extends Variable, D extends Distribution> void setDistribution(V var, D dist) throws ModelException {
-    // Check for existing edge: if unchanged, return; if not, remove the edge
-    if(varDistEdgeMap.containsKey(var)) {
-      DistributionEdge distEdge = varDistEdgeMap.get(var);
-      assert(distEdge.getVariable() == var);
-      if(distEdge.getDistribution() == dist) {
-        return;
-      }
-      graph.removeEdge(distEdge);
-      varDistEdgeMap.remove(var);
-    }
-    
-    // Create a new edge
-    DistributionEdge distEdge = new DistributionEdge(this, var, dist);
-    varDistEdgeMap.put(var, distEdge);
-  }
-  
-  public void setDistribution(String vName, String dName) throws ModelException { 
-    Variable var = getVariable(vName);
-    Distribution dist = getDistribution(dName);
-    setDistribution(var, dist);
-  }
-  
   public Map<String, Object> makeHierarchicalSample() {
     Map<String, Object> flatMap = new LinkedHashMap<String, Object>();
     
@@ -410,18 +403,6 @@ public class Model implements Observer, Serializable {
   
   public Distribution getDistribution(String name) {
     return (Distribution)graph.getNode(name);
-  }
-  
-  public Distribution getDistributionForVariable(Variable var) {
-    DistributionEdge distEdge = varDistEdgeMap.get(var);
-    if(distEdge == null) {
-      return null;
-    }
-    return distEdge.getDistribution();
-  }
-  
-  public Distribution getDistributionForVariable(String varName) {
-    return getDistributionForVariable(getVariable(varName));
   }
   
   private enum State {

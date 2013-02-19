@@ -134,7 +134,12 @@ public class NormalDistribution extends DoubleDistribution {
       assert varEdge == null;
       sd = sqrt(1.0/getDoubleValue(precEdge));
     }
-    ((DoubleVariable)var).setValue(new Normal(mean, sd, getRng()).nextDouble());
+    
+    double newVal = new Normal(mean, sd, getRng()).nextDouble();
+    assert !Double.isNaN(newVal);
+    assert !Double.isInfinite(newVal);
+    
+    ((DoubleVariable)var).setValue(newVal);
   }
 
   @Override

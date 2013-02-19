@@ -36,9 +36,7 @@ public class MCMCTest {
         Model m = new Model(initialChain);
         
         m.beginConstruction();
-        new NormalDistribution(m, "nd");
-        new DoubleVariable(m, "nv");
-        m.setDistribution("nv", "nd");
+        new DoubleVariable(m, "nv", new NormalDistribution(m, "nd"));
         m.endConstruction();
         
         return m;
@@ -93,9 +91,7 @@ public class MCMCTest {
         Model m = new Model(initialChain);
         
         m.beginConstruction();
-        new ExponentialDistribution(m, "ed");
-        new DoubleVariable(m, "ev");
-        m.setDistribution("ev", "ed");
+        new DoubleVariable(m, "ev", new ExponentialDistribution(m, "ed"));
         m.endConstruction();
         
         return m;
@@ -148,9 +144,7 @@ public class MCMCTest {
         Model m = new Model(initialChain);
         
         m.beginConstruction();
-        new UniformDistribution(m, "ed");
-        new DoubleVariable(m, "ev");
-        m.setDistribution("ev", "ed");
+        new DoubleVariable(m, "ev", new UniformDistribution(m, "ed"));
         m.endConstruction();
         
         return m;
@@ -206,9 +200,7 @@ public class MCMCTest {
         Model m = new Model(initialChain);
         
         m.beginConstruction();
-        new BetaDistribution(m, "d", 2.0, 3.0);
-        new DoubleVariable(m, "v");
-        m.setDistribution("v", "d");
+        new DoubleVariable(m, "v", new BetaDistribution(m, "d", 2.0, 3.0));
         m.endConstruction();
         
         return m;

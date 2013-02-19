@@ -70,8 +70,13 @@ public class BetaDistribution extends DoubleDistribution {
 
   @Override
   public void sample(Variable var) {
-    Beta betaGen = new Beta(alpha, beta, getRng());
-    ((DoubleVariable)var).setValue(betaGen.nextDouble());
+    double newVal = new Beta(alpha, beta, getRng()).nextDouble();
+    
+    assert !Double.isNaN(newVal);
+    assert newVal > 0.0;
+    assert newVal < 1.0;
+    
+    ((DoubleVariable)var).setValue(newVal);
   }
 
   @Override

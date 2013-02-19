@@ -3,10 +3,11 @@ package mc3kit.distributions;
 import static org.junit.Assert.*;
 
 import mc3kit.DoubleVariable;
+
 import org.junit.Test;
 
 public class UniformDistributionTest {
-
+  
   @Test
   public void minMaxEqual() {
     try {

@@ -15,7 +15,7 @@ public class Graph extends Observable {
   Map<String, Node> nodeNameMap;
   
   Map<Node, Integer> nodeOrderMap;
-  SortedMap<Integer, Node> orderNodeMap;
+  NavigableMap<Integer, Node> orderNodeMap;
   
   Set<Edge> edges;
   Map<String, Edge> edgeNameMap;
@@ -26,13 +26,13 @@ public class Graph extends Observable {
   private Logger logger;
   
   public Graph() {
-    nodes = new HashSet<Node>();
+    nodes = new LinkedHashSet<Node>();
     nodeNameMap = new HashMap<String, Node>();
     
     nodeOrderMap = new HashMap<Node, Integer>();
     orderNodeMap = new TreeMap<Integer, Node>();
     
-    edges = new HashSet<Edge>();
+    edges = new LinkedHashSet<Edge>();
     edgeNameMap = new HashMap<String, Edge>();
 
     tailNodeMap = new HashMap<Node, Set<Edge>>();
@@ -262,7 +262,7 @@ public class Graph extends Observable {
 
     // Get sorted list of all indexes
     applyNewIndexes(fwNodes, bwNodes);
-    logger.finest(format("new order: tail %d, head %d", tailOrder, headOrder));
+    logger.finest(format("new order: tail %d, head %d", tail.getOrder(), head.getOrder()));
   }
 
   private Set<Node> findAffectedForwardNodes(Edge edge) throws IllegalArgumentException {
@@ -308,7 +308,7 @@ public class Graph extends Observable {
         if(top.getOrder() > edge.tail.getOrder()) {
           outOfOrder.add(top);
           for(Edge topEdge : getTailEdges(top)) {
-            stack.push(topEdge.getTail());
+            stack.push(topEdge.getHead());
           }
         }
       }
@@ -351,5 +351,26 @@ public class Graph extends Observable {
       setOrder(node, indexes[i++]);
     for (Node node : fwNodesSorted)
       setOrder(node, indexes[i++]);
+  }
+  
+  public Set<Edge> getEdges() {
+    return edges;
+  }
+  
+  public boolean verifyOrder() {
+    boolean valid = true;
+    Set<Node> visited = new HashSet<Node>();
+    for(Node node : orderNodeMap.values()) {
+      for(Edge edge : tailNodeMap.get(node)) {
+        Node head = edge.getHead();
+        if(!visited.contains(head)) {
+          System.err.printf("node %s: dependency %s not yet visited\n", node, head);
+          valid = false;
+        }
+      }
+      
+      visited.add(node);
+    }
+    return valid;
   }
 }

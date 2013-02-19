@@ -58,7 +58,14 @@ public class UniformDistribution extends DoubleDistribution {
 
   @Override
   public void sample(Variable var) {
-    ((DoubleVariable)var).setValue(min + (max - min) * getRng().nextDouble());
+    double newVal = min + (max - min) * getRng().nextDouble();
+    
+    assert !Double.isNaN(newVal);
+    assert !Double.isInfinite(newVal);
+    assert newVal > min;
+    assert newVal < max;
+    
+    ((DoubleVariable)var).setValue(newVal);
   }
 
   @Override
