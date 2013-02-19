@@ -106,14 +106,12 @@ public class MCMC implements Serializable {
     
     // Use thread pool to construct models for different chains
     for(int i = 0; i < chainCount; i++) {
-      System.err.println("SUBMITTING MODEL CREATION");
       final int chainId = i;
       safeSubmit(new Callable<Object>() {
         @Override
         public Object call() throws Exception {
           
           Model model = modelFactory.createModel(chains[chainId]);
-          System.err.println("HERE HERE HERE");
           assert model != null;
           chains[chainId].setModel(model);
           model.setChain(chains[chainId]);

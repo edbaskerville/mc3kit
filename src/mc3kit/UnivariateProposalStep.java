@@ -113,7 +113,9 @@ public class UnivariateProposalStep implements Step {
 
       // If we're still in the tuning period, tune
       if((iterationCount <= tuneFor) && iterationCount % tuneEvery == 0) {
+        chain.getLogger().info("VARIABLE ACCEPTANCE RATES:");
         for(VariableProposer proposer : proposers) {
+          chain.getLogger().info(format("%s: %f", proposer.getName(), proposer.getAcceptanceRate()));
           proposer.tune(targetAcceptanceRate);
           proposer.resetTuningPeriod();
         }

@@ -1,6 +1,7 @@
 package mc3kit;
 
 import java.util.*;
+import java.util.logging.*;
 import java.io.*;
 
 import static java.lang.String.format;
@@ -72,16 +73,18 @@ public class Model implements Observer, Serializable {
       throw new ModelException("endConstruction called with wrong state", this);
     }
     
-    System.err.println("NODE ORDER:");
-    for(Node node : graph.orderedNodesHeadToTail()) {
-      if(node instanceof Variable) {
-        System.err.printf("  %s\n", node.getName());
+    if(getLogger().isLoggable(Level.FINE)) {
+      getLogger().fine("NODE ORDER:");
+      for(Node node : graph.orderedNodesHeadToTail()) {
+        if(node instanceof Variable) {
+          getLogger().fine(format("  %s", node.getName()));
+        }
       }
-    }
-    
-    System.err.println("EDGES:");
-    for(Edge edge : graph.getEdges()) {
-      System.err.printf("  %s -> %s\n", edge.getTail(), edge.getHead());
+      
+      getLogger().fine("EDGES:");
+      for(Edge edge : graph.getEdges()) {
+        getLogger().fine(format("  %s -> %s", edge.getTail(), edge.getHead()));
+      }
     }
     
     assert graph.verifyOrder();
@@ -91,10 +94,10 @@ public class Model implements Observer, Serializable {
         Variable var = (Variable)node;
         if(!var.isObserved() && !changedValueVars.contains(var)) {
           var.sample();
-          System.err.printf("Sampling %s: %f\n", var, ((DoubleVariable)var).getValue());
+          getLogger().fine(format("Sampling %s: %f", var, ((DoubleVariable)var).getValue()));
         }
         else if(!var.isObserved()) {
-          System.err.printf("Not sampling %s\n", var);
+          getLogger().fine(format("Not sampling %s", var));
         }
       }
       
@@ -439,5 +442,9 @@ public class Model implements Observer, Serializable {
   
   public RandomEngine getRng() {
     return chain.getRng();
+  }
+  
+  public Logger getLogger() {
+    return chain.getLogger();
   }
 }

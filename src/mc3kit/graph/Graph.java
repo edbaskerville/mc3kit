@@ -364,7 +364,7 @@ public class Graph extends Observable {
       for(Edge edge : tailNodeMap.get(node)) {
         Node head = edge.getHead();
         if(!visited.contains(head)) {
-          System.err.printf("node %s: dependency %s not yet visited\n", node, head);
+          Logger.getLogger("mc3kit.graph.Graph").severe(format("node %s: dependency %s not yet visited\n", node, head));
           valid = false;
         }
       }
