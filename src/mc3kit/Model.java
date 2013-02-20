@@ -94,7 +94,7 @@ public class Model implements Observer, Serializable {
         Variable var = (Variable)node;
         if(!var.isObserved() && !changedValueVars.contains(var)) {
           var.sample();
-          getLogger().fine(format("Sampling %s: %f", var, ((DoubleVariable)var).getValue()));
+          getLogger().fine(format("Sampling %s: %s", var, var.makeOutputString()));
         }
         else if(!var.isObserved()) {
           getLogger().fine(format("Not sampling %s", var));
@@ -394,6 +394,10 @@ public class Model implements Observer, Serializable {
   
   public Variable getVariable(String name) {
     return (Variable)graph.getNode(name);
+  }
+  
+  public BinaryVariable getBinaryVariable(String name) {
+    return (BinaryVariable)graph.getNode(name);
   }
   
   public DoubleVariable getDoubleVariable(String name) {

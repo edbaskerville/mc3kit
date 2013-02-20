@@ -41,7 +41,7 @@ public class DoubleVariable extends Variable implements DoubleValued {
    * @param value
    * @throws ModelException 
    */
-  public DoubleVariable(Model model, double value, Distribution dist) throws ModelException {
+  public DoubleVariable(Model model, double value, DoubleDistribution dist) throws ModelException {
     this(model, null, value, dist);
   }
   
@@ -53,7 +53,7 @@ public class DoubleVariable extends Variable implements DoubleValued {
    * @param dist
    * @throws ModelException
    */
-  public DoubleVariable(Model model, String name, double value, Distribution dist) throws ModelException {
+  public DoubleVariable(Model model, String name, double value, DoubleDistribution dist) throws ModelException {
     super(model, name, true, dist);
     this.value = value;
   }
@@ -65,7 +65,7 @@ public class DoubleVariable extends Variable implements DoubleValued {
    * @param dist
    * @throws ModelException
    */
-  public DoubleVariable(Model model, String name, Distribution dist) throws ModelException {
+  public DoubleVariable(Model model, String name, DoubleDistribution dist) throws ModelException {
     super(model, name, false, dist);
     this.value = Double.NaN;
   }
