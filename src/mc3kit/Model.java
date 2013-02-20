@@ -23,16 +23,15 @@ import mc3kit.graph.*;
 public class Model implements Observer, Serializable {
   
   Chain chain;
-  
   Graph graph;
   
   List<Variable> unobservedVariables;
   
-  double logPrior;
-  double logLikelihood;
+  private double logPrior;
+  private double logLikelihood;
   
-  double oldLogPrior;
-  double oldLogLikelihood;
+  private double oldLogPrior;
+  private double oldLogLikelihood;
   
   State state;
   Set<Variable> changedValueVars;
@@ -65,7 +64,7 @@ public class Model implements Observer, Serializable {
     state = State.IN_CONSTRUCTION;
   }
   
-  public void endConstruction() throws ModelException {
+  public void endConstruction() throws MC3KitException {
     logPrior = 0.0;
     logLikelihood = 0.0;
     
@@ -121,8 +120,8 @@ public class Model implements Observer, Serializable {
   }
   
   public void recalculate() throws MC3KitException {
-    oldLogPrior = logPrior;
-    oldLogLikelihood = logLikelihood;
+    double preLogPrior = logPrior;
+    double preLogLike = logLikelihood;
     
     logPrior = 0.0;
     logLikelihood = 0.0;
@@ -141,12 +140,12 @@ public class Model implements Observer, Serializable {
       }
     }
     
-    double logPriorDiff = abs(oldLogPrior - logPrior);
-    double logLikeDiff = abs(oldLogLikelihood - logLikelihood);
+    double logPriorDiff = abs(preLogPrior - logPrior);
+    double logLikeDiff = abs(preLogLike - logLikelihood);
     
     if(logPriorDiff > 1e-8 || logLikeDiff > 1e-8) {
       throw new MC3KitException(format("Too much error in prior (%f, should be %f, diff %f) or likelihood (%f, should be %f, diff %f)", 
-          oldLogPrior, logPrior, logPriorDiff, oldLogLikelihood, logLikelihood, logLikeDiff)
+          preLogPrior, logPrior, logPriorDiff, preLogLike, logLikelihood, logLikeDiff)
       );
     }
   }
@@ -155,7 +154,9 @@ public class Model implements Observer, Serializable {
     if(state != State.READY) {
       throw new ModelException("beginProposal called with wrong state", this);
     }
-    
+
+    oldLogPrior = logPrior;
+    oldLogLikelihood = logLikelihood;
     state = State.IN_PROPOSAL;
   }
   
@@ -164,8 +165,6 @@ public class Model implements Observer, Serializable {
       throw new ModelException("endProposal called with wrong state", this);
     }
     
-    oldLogPrior = logPrior;
-    oldLogLikelihood = logLikelihood;
     propagateChanges(true);
     
     state = State.PROPOSAL_COMPLETE;
@@ -192,8 +191,8 @@ public class Model implements Observer, Serializable {
     }
     
     propagateChanges(false);
-    logLikelihood = oldLogLikelihood;
     logPrior = oldLogPrior;
+    logLikelihood = oldLogLikelihood;
     
     state = State.READY;
   }
