@@ -20,6 +20,7 @@ public class DoubleVariable extends Variable implements DoubleValued {
    */
   public DoubleVariable(Model model, String name) {
     super(model, name, false);
+    this.value = Double.NaN;
   }
   
   /**
@@ -66,6 +67,7 @@ public class DoubleVariable extends Variable implements DoubleValued {
    */
   public DoubleVariable(Model model, String name, Distribution dist) throws ModelException {
     super(model, name, false, dist);
+    this.value = Double.NaN;
   }
 
   @Override
