@@ -244,7 +244,7 @@ public class MCMC implements Serializable {
         Future<Object> completedTask = completionService.take();
         Object result = completedTask.get();
         if(result == terminationManager) {
-          logger.fine("Got termination task.");
+          logger.info("Got termination task.");
           done = true;
           assert(iterationCount == terminationCount);
         }
@@ -476,6 +476,22 @@ public class MCMC implements Serializable {
     logger.setLevel(level);
     for(Handler handler : logger.getHandlers()) {
       handler.setLevel(level);
+    }
+  }
+  
+  public static void setLogFilename(String filename) throws SecurityException, IOException {
+    
+    for(Handler handler : Logger.getLogger("").getHandlers()) {
+      Logger.getLogger("").removeHandler(handler);
+    }
+    
+    if(filename == null || filename.equals("-") || filename.equals("")) {
+      ConsoleHandler handler = new ConsoleHandler();
+      Logger.getLogger("").addHandler(handler);
+    }
+    else {
+      FileHandler handler = new FileHandler(filename);
+      Logger.getLogger("").addHandler(handler);
     }
   }
   
