@@ -4,41 +4,59 @@ import static java.lang.Math.pow;
 
 public class PowerHeatFunction implements HeatFunction
 {
-	double heatPower = 1.0;
-  double minHeatExponent = 0.0;
+	double likeHeatPower = 1.0;
+  double minLikeHeatExponent = 0.0;
+  
+  double priorHeatPower = 1.0;
+  double minPriorHeatExponent = 1.0;
+  
+  public PowerHeatFunction(double likeHeatPower, double minLikeHeatExponent, double priorHeatPower, double minPriorHeatExponent) {
+    this.likeHeatPower = likeHeatPower;
+    this.minLikeHeatExponent = minLikeHeatExponent;
+    this.priorHeatPower = priorHeatPower;
+    this.minPriorHeatExponent = minPriorHeatExponent;
+  }
   
   public PowerHeatFunction(double heatPower, double minHeatExponent) {
-    this.heatPower = heatPower;
-    this.minHeatExponent = minHeatExponent;
+    this.likeHeatPower = heatPower;
+    this.minLikeHeatExponent = minHeatExponent;
   }
   
 	public double getHeatPower()
 	{
-		return heatPower;
+		return likeHeatPower;
 	}
 
 	public void setHeatPower(double heatPower)
 	{
-		this.heatPower = heatPower;
+		this.likeHeatPower = heatPower;
 	}
 
 	public double getMinHeatExponent()
 	{
-		return minHeatExponent;
+		return minLikeHeatExponent;
 	}
 	
 	public void setMinHeatExponent(double minHeatExponent)
 	{
-		this.minHeatExponent = minHeatExponent;
+		this.minLikeHeatExponent = minHeatExponent;
 	}
 	
 	@Override
 	public double[] getPriorHeatExponents(int chainCount)
 	{
-		double[] heatExponents = new double[chainCount];
-		for(int i = 0; i < chainCount; i++)
-			heatExponents[i] = 1.0;
-		return heatExponents;
+    double[] heatExponents = new double[chainCount];
+    heatExponents[0] = 1.0;
+    if(chainCount > 1)
+    {
+      for(int i = 1; i < chainCount; i++)
+      {
+        double linearValue = 1.0 - i / ((double)chainCount-1);
+        heatExponents[i] = minPriorHeatExponent + pow(linearValue, priorHeatPower) * (1.0 - minPriorHeatExponent);
+      }
+    }
+      
+    return heatExponents;
 	}
 
 	@Override
@@ -51,7 +69,7 @@ public class PowerHeatFunction implements HeatFunction
 			for(int i = 1; i < chainCount; i++)
 			{
 				double linearValue = 1.0 - i / ((double)chainCount-1);
-				heatExponents[i] = minHeatExponent + pow(linearValue, heatPower) * (1.0 - minHeatExponent);
+				heatExponents[i] = minLikeHeatExponent + pow(linearValue, likeHeatPower) * (1.0 - minLikeHeatExponent);
 			}
 		}
 			

@@ -1,7 +1,7 @@
 package mc3kit.proposal;
 
 import static java.lang.Math.*;
-import static mc3kit.util.Math.shouldAcceptMetropolisHastings;
+import static mc3kit.util.Math.*;
 import static java.lang.String.format;
 import cern.jet.random.engine.RandomEngine;
 import mc3kit.*;

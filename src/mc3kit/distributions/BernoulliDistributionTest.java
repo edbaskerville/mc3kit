@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.logging.Level;
 
 import mc3kit.*;
+import mc3kit.proposal.UnivariateProposalStep;
 
 import org.junit.After;
 import org.junit.Before;

@@ -1,10 +1,18 @@
-package mc3kit;
+package mc3kit.proposal;
 
 import static mc3kit.util.Math.getRandomPermutation;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import mc3kit.Chain;
+import mc3kit.MC3KitException;
+import mc3kit.Model;
+import mc3kit.Step;
+import mc3kit.Task;
+import mc3kit.Variable;
+import mc3kit.VariableProposer;
 
 import cern.jet.random.Uniform;
 import cern.jet.random.engine.RandomEngine;

@@ -9,8 +9,8 @@ import mc3kit.MC3KitException;
 import mc3kit.MCMC;
 import mc3kit.Model;
 import mc3kit.ModelFactory;
-import mc3kit.UnivariateProposalStep;
 import mc3kit.distributions.NormalDistribution;
+import mc3kit.proposal.UnivariateProposalStep;
 
 import org.junit.After;
 import org.junit.Before;

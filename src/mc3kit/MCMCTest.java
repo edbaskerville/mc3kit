@@ -8,6 +8,7 @@ import static org.junit.Assert.*;
 
 import mc3kit.distributions.*;
 import mc3kit.functions.DoubleSumFunction;
+import mc3kit.proposal.UnivariateProposalStep;
 import static java.lang.Math.*;
 
 public class MCMCTest {

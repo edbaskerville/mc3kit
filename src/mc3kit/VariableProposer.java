@@ -43,23 +43,4 @@ public abstract class VariableProposer
 	public abstract void step(Model model)
 	    throws MC3KitException;
 	public void tune(double targetRate) throws MC3KitException {}
-	
-
-  
-  public static double adjustTuningParameter(double param, double measuredRate, double targetRate)
-  {
-    if(measuredRate == 0)
-    {
-      return param / 2;
-    }
-    else if(measuredRate == 1)
-    {
-      return param * 2;
-    }
-    
-    // Infer target rate using linear interpolation between
-    // (lambda = 0, rate = 1) and (lambda = lambda, rate = measuredRate):
-    // lambda is updated to be the value on that line where rate = targetRate.
-    return param * (1.0 - targetRate) / (1.0 - measuredRate);
-  }
 }

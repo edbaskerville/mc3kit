@@ -244,7 +244,7 @@ public class MCMC implements Serializable {
         Future<Object> completedTask = completionService.take();
         Object result = completedTask.get();
         if(result == terminationManager) {
-          logger.info("Got termination task.");
+          logger.fine("Got termination task.");
           done = true;
           assert(iterationCount == terminationCount);
         }
@@ -456,6 +456,12 @@ public class MCMC implements Serializable {
   public void setHeatFunction(double heatPower, double minHeatExponent) throws MC3KitException {
     throwIfInitialized();
     setHeatFunction(new PowerHeatFunction(heatPower, minHeatExponent));
+  }
+  
+  public void setHeatFunction(double likeHeatPower, double minLikeHeatExponent, double priorHeatPower, double minPriorHeatExponent)
+      throws MC3KitException {
+    throwIfInitialized();
+    setHeatFunction(new PowerHeatFunction(likeHeatPower, minLikeHeatExponent, priorHeatPower, minPriorHeatExponent));
   }
   
   public void setHeatFunction(HeatFunction heatFunction) throws MC3KitException {
