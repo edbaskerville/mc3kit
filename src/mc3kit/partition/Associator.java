@@ -17,23 +17,11 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ***/
 
-package mc3kit;
+package mc3kit.partition;
 
-@SuppressWarnings("serial")
-public abstract class DoubleDistribution extends Distribution {
+import mc3kit.ModelException;
+import mc3kit.ModelNode;
 
-  protected DoubleDistribution() { }
-  
-  public DoubleDistribution(Model model) {
-    this(model, null);
-  }
-  
-  public DoubleDistribution(Model model, String name) {
-    super(model, name);
-  }
-
-  @Override
-  public abstract VariableProposer makeVariableProposer(String varName);
-  
-  public abstract boolean valueIsValid(double value);
+public interface Associator {
+  void associate(ModelNode tail, ModelNode head) throws ModelException;
 }

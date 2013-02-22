@@ -1,5 +1,25 @@
+/***
+  This file is part of mc3kit.
+  
+  Copyright (C) 2013 Edward B. Baskerville
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+***/
+
 package mc3kit.graph;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -10,7 +30,8 @@ import static java.lang.String.format;
  * @author Ed Baskerville
  *
  */
-public class Graph extends Observable {
+@SuppressWarnings("serial")
+public class Graph extends Observable implements Serializable {
   Set<Node> nodes;
   Map<String, Node> nodeNameMap;
   
@@ -22,8 +43,6 @@ public class Graph extends Observable {
 
   Map<Node, Set<Edge>> tailNodeMap;
   Map<Node, Set<Edge>> headNodeMap;
-  
-  private Logger logger;
   
   public Graph() {
     nodes = new LinkedHashSet<Node>();
@@ -37,8 +56,6 @@ public class Graph extends Observable {
 
     tailNodeMap = new HashMap<Node, Set<Edge>>();
     headNodeMap = new HashMap<Node, Set<Edge>>();
-    
-    logger = Logger.getLogger("mc3kit.graph.Graph");
   }
   
   /**
@@ -247,7 +264,7 @@ public class Graph extends Observable {
     int tailOrder = tail.getOrder();
     int headOrder = head.getOrder();
     assert tailOrder != headOrder;
-    logger.finest(format("old order: tail %d, head %d", tailOrder, headOrder));
+    getLogger().finest(format("old order: tail %d, head %d", tailOrder, headOrder));
     if(headOrder < tailOrder) {
       // If the head already has a lower order, then do nothing
       return;
@@ -256,13 +273,13 @@ public class Graph extends Observable {
     // Find affected forward & backward nodes
     // (delta_xy^F, delta_xy^B in paper)
     Set<Node> fwNodes = findAffectedForwardNodes(edge);
-    logger.finest(format("affected fw: %s", fwNodes));
+    getLogger().finest(format("affected fw: %s", fwNodes));
     Set<Node> bwNodes = findAffectedBackwardNodes(edge);
-    logger.finest(format("affected bw: %s", bwNodes));
+    getLogger().finest(format("affected bw: %s", bwNodes));
 
     // Get sorted list of all indexes
     applyNewIndexes(fwNodes, bwNodes);
-    logger.finest(format("new order: tail %d, head %d", tail.getOrder(), head.getOrder()));
+    getLogger().finest(format("new order: tail %d, head %d", tail.getOrder(), head.getOrder()));
   }
 
   private Set<Node> findAffectedForwardNodes(Edge edge) throws IllegalArgumentException {
@@ -330,7 +347,7 @@ public class Graph extends Observable {
     for (Node node : fwNodes)
       indexes[i++] = node.getOrder();
     Arrays.sort(indexes);
-    logger.finest(format("indexes: %s", Arrays.toString(indexes)));
+    getLogger().finest(format("indexes: %s", Arrays.toString(indexes)));
     
     Comparator<Node> comparator = new Comparator<Node>() {
       @Override
@@ -372,5 +389,9 @@ public class Graph extends Observable {
       visited.add(node);
     }
     return valid;
+  }
+  
+  private Logger getLogger() {
+    return Logger.getLogger("mc3kit.graph.Graph");
   }
 }

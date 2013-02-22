@@ -1,5 +1,25 @@
+/***
+  This file is part of mc3kit.
+  
+  Copyright (C) 2013 Edward B. Baskerville
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+***/
+
 package mc3kit;
 
+import java.io.File;
 import java.util.logging.Level;
 
 import org.junit.*;
@@ -21,6 +41,18 @@ public class MCMCTest {
   public void tearDown() throws Exception {
   }
 
+  @Test
+  public void testSerialization() throws Throwable {
+    File tmpFile = File.createTempFile("MCMCTest.bin", null);
+    String path = tmpFile.getCanonicalPath();
+    
+    System.err.printf("path: %s\n", path);
+    
+    MCMC mcmc = new MCMC();
+    mcmc.writeToFile(tmpFile.getCanonicalPath());
+    tmpFile.deleteOnExit();
+  }
+  
   @Test
   public void testStandardNormal() throws Throwable {
     long burnIn = 5000;

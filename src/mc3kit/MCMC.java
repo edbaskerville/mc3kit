@@ -1,16 +1,35 @@
+/***
+  This file is part of mc3kit.
+  
+  Copyright (C) 2013 Edward B. Baskerville
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as
+  published by the Free Software Foundation, either version 3 of the
+  License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+***/
+
 package mc3kit;
 
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
 import java.io.*;
+
 import static java.lang.String.format;
 
 import cern.jet.random.engine.*;
 
 @SuppressWarnings("serial")
 public class MCMC implements Serializable {
-
   
   /*** SETTABLE FIELDS ***/
   
@@ -22,37 +41,39 @@ public class MCMC implements Serializable {
   private double[] likelihoodHeatExponents;
 
   private Long randomSeed = null;
-  
   private List<Step> steps;
   
   /*** STATE ***/
-  
-  Logger logger;
   
   boolean initialized;
   long iterationCount;
   long terminationCount;
   TerminationManager terminationManager;
 
-  /*** THREAD POOL MANAGEMENT ***/
-
-  ThreadPoolExecutor threadPool;
-  ExecutorCompletionService<Object> completionService;
-
   RandomSeedGenerator seedGen;
   Chain[] chains;
 
   TaskManager[][] taskManagers;
 
+  /*** THREAD POOL MANAGEMENT ***/
+
+  transient ThreadPoolExecutor threadPool;
+  transient ExecutorCompletionService<Object> completionService;
+
   public MCMC() {
     steps = new ArrayList<Step>();
-    logger = Logger.getLogger("mc3kit.MCMC");
   }
-
+  
+  public Logger getLogger() {
+    return Logger.getLogger("mc3kit.MCMC");
+  }
+  
   private void initialize() throws Throwable {
     if(initialized) {
       return;
     }
+    
+    initializeThreadPool();
     
     if(heatFunction == null) {
       heatFunction = new ConstantHeatFunction();
@@ -62,14 +83,9 @@ public class MCMC implements Serializable {
     likelihoodHeatExponents = heatFunction.getLikelihoodHeatExponents(chainCount);
 
     for (int i = 0; i < chainCount; i++) {
-      logger.info(format("chain %d: prior heat exp. %f, like heat exp %f", i,
+      getLogger().info(format("chain %d: prior heat exp. %f, like heat exp %f", i,
           priorHeatExponents[i], likelihoodHeatExponents[i]));
     }
-
-    threadPool = new ThreadPoolExecutor(chainCount, 2 * chainCount, 60,
-        TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
-    completionService = new ExecutorCompletionService<Object>(threadPool);
-    logger.info("Thread pool created.");
 
     // Initialize a top-level RNG to generate start seed-table
     // start locations for each replicate
@@ -84,6 +100,19 @@ public class MCMC implements Serializable {
     initializeSteps();
     
     initialized = true;
+  }
+  
+  private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    in.defaultReadObject();
+    if(initialized) {
+      initializeThreadPool();
+    }
+  }
+  
+  private void initializeThreadPool() {
+    threadPool = new ThreadPoolExecutor(chainCount, 2 * chainCount, 60,
+        TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
+    completionService = new ExecutorCompletionService<Object>(threadPool);
   }
 
   private void initializeChains() throws Throwable {
@@ -126,7 +155,7 @@ public class MCMC implements Serializable {
       completedTask.get();
     }
     
-    logger.info("Chains created.");
+    getLogger().info("Chains created.");
   }
 
   private void initializeSteps() throws MC3KitException {
@@ -195,14 +224,32 @@ public class MCMC implements Serializable {
         taskManager.nextTaskManagers = nextTaskManagers;
       }
     }
-    logger.info("Steps set up.");
+    getLogger().info("Steps set up.");
+  }
+  
+  public static MCMC loadFromFile(String filename) {
+    return null;
+  }
+  
+  /**
+   * @throws IOException 
+   * @throws FileNotFoundException 
+   * 
+   */
+  public synchronized void writeToFile(String filename) throws FileNotFoundException, IOException {
+    File tmpFile = File.createTempFile(filename, null);
+    
+    ObjectOutputStream stream = new ObjectOutputStream(new FileOutputStream(tmpFile));
+    stream.writeObject(this);
+    stream.close();
+    tmpFile.renameTo(new File(filename));
   }
   
   /**
    * Run MCMC for a single step.
    * @throws MC3KitException 
    */
-  public void step() throws Throwable {
+  public synchronized void step() throws Throwable {
     runFor(1);
   }
   
@@ -227,11 +274,11 @@ public class MCMC implements Serializable {
     assert(terminationCount > iterationCount);
     initialize();
     
-    logger.fine(format("Running until %d", terminationCount));
+    getLogger().fine(format("Running until %d", terminationCount));
     
     terminationManager = new TerminationManager();
     
-    logger.fine("Starting run.");
+    getLogger().fine("Starting run.");
 
     try {
       for (TaskManager taskManager : taskManagers[0]) {
@@ -244,12 +291,12 @@ public class MCMC implements Serializable {
         Future<Object> completedTask = completionService.take();
         Object result = completedTask.get();
         if(result == terminationManager) {
-          logger.fine("Got termination task.");
+          getLogger().fine("Got termination task.");
           done = true;
           assert(iterationCount == terminationCount);
         }
         else {
-          logger.finer("Got non-termination task.");
+          getLogger().finer("Got non-termination task.");
         }
       }
     }
@@ -473,11 +520,12 @@ public class MCMC implements Serializable {
     return randomSeed;
   }
 
-  public void setRandomSeed(Long randomSeed) {
+  public void setRandomSeed(Long randomSeed) throws MC3KitException {
+    throwIfInitialized();
     this.randomSeed = randomSeed;
   }
   
-  public static void setLogLevel(Level level) {
+  public synchronized static void setLogLevel(Level level) {
     Logger logger = Logger.getLogger("");
     logger.setLevel(level);
     for(Handler handler : logger.getHandlers()) {
@@ -485,8 +533,7 @@ public class MCMC implements Serializable {
     }
   }
   
-  public static void setLogFilename(String filename) throws SecurityException, IOException {
-    
+  public synchronized static void setLogFilename(String filename) throws SecurityException, IOException {
     for(Handler handler : Logger.getLogger("").getHandlers()) {
       Logger.getLogger("").removeHandler(handler);
     }
@@ -501,7 +548,7 @@ public class MCMC implements Serializable {
     }
   }
   
-  public static void addLogHandler(Handler handler) {
+  public synchronized static void addLogHandler(Handler handler) {
     Logger.getLogger("").addHandler(handler);
   }
 }
