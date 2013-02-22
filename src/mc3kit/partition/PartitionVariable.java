@@ -66,7 +66,7 @@ public class PartitionVariable extends Variable
 	public void associateVariablesWithDistributions(ModelNode[] vars, ModelNode[] dists) {
 	  associate(vars, dists, new Associator() {
       @Override
-      public void associate(ModelNode tail, ModelNode head) throws ModelException {
+      public void associate(ModelNode tail, ModelNode head) throws MC3KitException {
         ((Variable)tail).setDistribution((Distribution)head);
       }
 	  });
@@ -82,7 +82,7 @@ public class PartitionVariable extends Variable
 		return assignment[i];
 	}
 	
-	public void setGroup(int i, int g) throws ModelException
+	public void setGroup(int i, int g) throws MC3KitException
 	{
 		groups[assignment[i]].clear(i);
 		groups[g].set(i);
@@ -98,7 +98,7 @@ public class PartitionVariable extends Variable
 	}
 
 	@Override
-	public void sample() throws ModelException
+	public void sample() throws MC3KitException
 	{
 		Distribution dist = getDistribution();
 		if(dist == null)
@@ -186,7 +186,7 @@ public class PartitionVariable extends Variable
 			this.associator = associator;
 		}
 		
-		public void setGroup(int i, int g) throws ModelException
+		public void setGroup(int i, int g) throws MC3KitException
 		{
 		  associator.associate(tails[i], heads[g]);
 		}

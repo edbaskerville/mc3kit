@@ -19,9 +19,9 @@
 
 package mc3kit.partition;
 
-import mc3kit.ModelException;
+import mc3kit.MC3KitException;
 import mc3kit.ModelNode;
 
 public interface Associator {
-  void associate(ModelNode tail, ModelNode head) throws ModelException;
+  void associate(ModelNode tail, ModelNode head) throws MC3KitException;
 }

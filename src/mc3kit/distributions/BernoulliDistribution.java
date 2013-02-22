@@ -49,7 +49,7 @@ public class BernoulliDistribution extends BinaryDistribution {
   }
   
   
-  public <T extends ModelNode & DoubleValued> BernoulliDistribution setP(T node) throws ModelException {
+  public <T extends ModelNode & DoubleValued> BernoulliDistribution setP(T node) throws MC3KitException {
     pEdge = updateEdge(pEdge, node);
     return this;
   }

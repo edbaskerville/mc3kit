@@ -27,12 +27,12 @@ public class ModelEdge extends Edge {
   
   protected ModelEdge() { }
   
-  public ModelEdge(Model model, ModelNode tail, ModelNode head) throws ModelException {
+  public ModelEdge(Model model, ModelNode tail, ModelNode head) throws MC3KitException {
     super(tail, head);
     model.addEdge(this);
   }
 
-  public ModelEdge(Model model, String name, ModelNode tail, ModelNode head) throws ModelException {
+  public ModelEdge(Model model, String name, ModelNode tail, ModelNode head) throws MC3KitException {
     super(name, tail, head);
     model.addEdge(this);
   }

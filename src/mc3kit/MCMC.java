@@ -274,6 +274,15 @@ public class MCMC implements Serializable {
     run();
   }
   
+  /**
+   * Shut down the thread pool so the program can exit.
+   */
+  public synchronized void shutdown() throws Throwable {
+    if(initialized) {
+      threadPool.shutdown();
+    }
+  }
+  
   public synchronized long getIterationCount() {
     return iterationCount;
   }

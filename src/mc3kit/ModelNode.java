@@ -55,7 +55,7 @@ public abstract class ModelNode extends Node {
     return model;
   }
   
-  protected ModelEdge updateEdge(ModelEdge edge, ModelNode headNode) throws ModelException {
+  protected ModelEdge updateEdge(ModelEdge edge, ModelNode headNode) throws MC3KitException {
     if(edge != null) {
       if(edge.getHead() == headNode) {
         return edge;

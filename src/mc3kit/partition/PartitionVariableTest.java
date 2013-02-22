@@ -45,6 +45,7 @@ public class PartitionVariableTest {
   public void tearDown() throws Exception {
   }
 
+  @SuppressWarnings("serial")
   @Test
   public void normalMixture() throws Throwable {
     long burnIn = 5000;

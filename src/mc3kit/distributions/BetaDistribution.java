@@ -69,12 +69,12 @@ public class BetaDistribution extends DoubleDistribution {
     updateConstant();
   }
   
-  public <T extends ModelNode & DoubleValued> BetaDistribution setAlpha(T alphaNode) throws ModelException {
+  public <T extends ModelNode & DoubleValued> BetaDistribution setAlpha(T alphaNode) throws MC3KitException {
     alphaEdge = updateEdge(alphaEdge, alphaNode);
     return this;
   }
   
-  public <T extends ModelNode & DoubleValued> BetaDistribution setBeta(T betaNode) throws ModelException {
+  public <T extends ModelNode & DoubleValued> BetaDistribution setBeta(T betaNode) throws MC3KitException {
     betaEdge = updateEdge(betaEdge, betaNode);
     return this;
   }

@@ -19,7 +19,9 @@
 
 package mc3kit;
 
-public interface ModelFactory
+import java.io.Serializable;
+
+public interface ModelFactory extends Serializable
 {
 	Model createModel(Chain initialChain) throws MC3KitException;
 }

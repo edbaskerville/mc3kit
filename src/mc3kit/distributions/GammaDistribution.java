@@ -28,8 +28,12 @@ import mc3kit.proposal.*;
 @SuppressWarnings("serial")
 public class GammaDistribution extends DoubleDistribution {
   
+  double shape;
   ModelEdge shapeEdge;
+  
+  double rate;
   ModelEdge rateEdge;
+  
   ModelEdge scaleEdge;
   
   protected GammaDistribution() { }
@@ -39,26 +43,36 @@ public class GammaDistribution extends DoubleDistribution {
   }
   
   public GammaDistribution(Model model, String name) {
-    super(model, name);
+    this(model, name, 1.0, 1.0);
   }
-
+  
+  public GammaDistribution(Model model, double shape, double rate) {
+    this(model, null, shape, rate);
+  }
+  
+  public GammaDistribution(Model model, String name, double shape, double rate) {
+    super(model, name);
+    this.shape = shape;
+    this.rate = rate;
+  }
+  
   @Override
   public VariableProposer makeVariableProposer(String varName) {
     return new MHMultiplierProposer(varName);
   }
   
-  public <T extends ModelNode & DoubleValued> GammaDistribution setShape(T shapeNode) throws ModelException {
+  public <T extends ModelNode & DoubleValued> GammaDistribution setShape(T shapeNode) throws MC3KitException {
     shapeEdge = updateEdge(shapeEdge, shapeNode);
     return this;
   }
   
-  public <T extends ModelNode & DoubleValued> GammaDistribution setRate(T rateNode) throws ModelException {
+  public <T extends ModelNode & DoubleValued> GammaDistribution setRate(T rateNode) throws MC3KitException {
     scaleEdge = updateEdge(scaleEdge, null);
     rateEdge = updateEdge(rateEdge, rateNode);
     return this;
   }
   
-  public <T extends ModelNode & DoubleValued> GammaDistribution setScale(T scaleNode) throws ModelException {
+  public <T extends ModelNode & DoubleValued> GammaDistribution setScale(T scaleNode) throws MC3KitException {
     rateEdge = updateEdge(rateEdge, null);
     scaleEdge = updateEdge(scaleEdge, scaleNode);
     return this;
@@ -68,19 +82,15 @@ public class GammaDistribution extends DoubleDistribution {
   public double getLogP(Variable v) {
     double x = ((DoubleVariable)v).getValue();
     
-    double shape = 1.0;
-    if(shapeEdge != null) {
-      shape = getDoubleValue(shapeEdge);
+    double shape = shapeEdge == null ? this.shape : getDoubleValue(shapeEdge);
+    
+    if(scaleEdge != null) {
+      assert rateEdge == null;
+      getLogPScale(x, shape, getDoubleValue(scaleEdge));
     }
     
-    if(rateEdge != null) {
-      assert scaleEdge == null;
-      return getLogPRate(x, shape, getDoubleValue(rateEdge));
-    }
-    else if(scaleEdge != null) {
-      return getLogPScale(x, shape, getDoubleValue(scaleEdge));
-    }
-    return -x; // for rate == scale == null => rate = 1
+    double rate = rateEdge == null ? this.rate : getDoubleValue(rateEdge);
+    return getLogPRate(x, shape, rate);
   }
   
   public static double getLogPRate(double x, double shape, double rate) {

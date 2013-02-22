@@ -39,16 +39,16 @@ public class BinaryVariable extends Variable implements BinaryValued {
     this.value = value;
   }
   
-  public BinaryVariable(Model model, boolean value, BinaryDistribution dist) throws ModelException {
+  public BinaryVariable(Model model, boolean value, BinaryDistribution dist) throws MC3KitException {
     this(model, null, value, dist);
   }
   
-  public BinaryVariable(Model model, String name, boolean value, BinaryDistribution dist) throws ModelException {
+  public BinaryVariable(Model model, String name, boolean value, BinaryDistribution dist) throws MC3KitException {
     super(model, name, true, dist);
     this.value = value;
   }
   
-  public BinaryVariable(Model model, String name, BinaryDistribution dist) throws ModelException {
+  public BinaryVariable(Model model, String name, BinaryDistribution dist) throws MC3KitException {
     super(model, name, false, dist);
   }
 
@@ -69,7 +69,7 @@ public class BinaryVariable extends Variable implements BinaryValued {
   }
   
   @Override
-  public BinaryVariable setDistribution(Distribution dist) throws ModelException {
+  public BinaryVariable setDistribution(Distribution dist) throws MC3KitException {
     super.setDistribution(dist);
     return this;
   }

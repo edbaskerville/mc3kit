@@ -39,11 +39,11 @@ public class DoubleSumFunction extends DoubleFunction {
     summandMap = new LinkedHashMap<DoubleValued, Summand>(2);
   }
   
-  public <T extends ModelNode & DoubleValued> DoubleSumFunction add(T summandNode) throws ModelException {
+  public <T extends ModelNode & DoubleValued> DoubleSumFunction add(T summandNode) throws MC3KitException {
     return add(summandNode, 1.0);
   }
   
-  public <T extends ModelNode & DoubleValued> DoubleSumFunction add(T summandNode, double coeff) throws ModelException {
+  public <T extends ModelNode & DoubleValued> DoubleSumFunction add(T summandNode, double coeff) throws MC3KitException {
     if(summandMap.containsKey(summandNode)) {
       throw new IllegalArgumentException("Summand already present.");
     }
@@ -55,7 +55,7 @@ public class DoubleSumFunction extends DoubleFunction {
     return this;
   }
   
-  public <T extends ModelNode & DoubleValued> DoubleSumFunction remove(T summandNode) throws ModelException {
+  public <T extends ModelNode & DoubleValued> DoubleSumFunction remove(T summandNode) throws MC3KitException {
     Summand summand = summandMap.remove(summandNode);
     if(summand == null) {
       throw new IllegalArgumentException("Summand not present.");

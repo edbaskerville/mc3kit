@@ -35,7 +35,7 @@ public abstract class Variable extends ModelNode {
     this(model, null, true);
   }
   
-  protected Variable(Model model, Distribution dist) throws ModelException {
+  protected Variable(Model model, Distribution dist) throws MC3KitException {
     this(model, null, true, dist);
   }
   
@@ -48,7 +48,7 @@ public abstract class Variable extends ModelNode {
     }
   }
   
-  protected Variable(Model model, String name, boolean observed, Distribution dist) throws ModelException {
+  protected Variable(Model model, String name, boolean observed, Distribution dist) throws MC3KitException {
     this(model, name, observed);
     setDistribution(dist);
   }
@@ -65,13 +65,13 @@ public abstract class Variable extends ModelNode {
     return logP;
   }
   
-  public void sample() throws ModelException {
+  public void sample() throws MC3KitException {
     getDistribution().sample(this);
     setChanged();
     notifyObservers();
   }
   
-  public Variable setDistribution(Distribution dist) throws ModelException {
+  public Variable setDistribution(Distribution dist) throws MC3KitException {
     distEdge = updateEdge(distEdge, dist);
     return this;
   }

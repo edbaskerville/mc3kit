@@ -84,9 +84,9 @@ public class Model implements Observer, Serializable {
   
   /*** CALCULATIONS ***/
   
-  public void beginConstruction() throws ModelException {
+  public void beginConstruction() throws MC3KitException {
     if(state != State.UNINITIALIZED) {
-      throw new ModelException("beginConstruction called with wrong state", this);
+      throw new MC3KitException("beginConstruction called with wrong state");
     }
     
     state = State.IN_CONSTRUCTION;
@@ -97,7 +97,7 @@ public class Model implements Observer, Serializable {
     logLikelihood = 0.0;
     
     if(state != State.IN_CONSTRUCTION) {
-      throw new ModelException("endConstruction called with wrong state", this);
+      throw new MC3KitException("endConstruction called with wrong state");
     }
     
     if(getLogger().isLoggable(Level.FINE)) {
@@ -178,9 +178,9 @@ public class Model implements Observer, Serializable {
     }
   }
   
-  public void beginProposal() throws ModelException {
+  public void beginProposal() throws MC3KitException {
     if(state != State.READY) {
-      throw new ModelException("beginProposal called with wrong state", this);
+      throw new MC3KitException("beginProposal called with wrong state");
     }
 
     oldLogPrior = logPrior;
@@ -188,9 +188,9 @@ public class Model implements Observer, Serializable {
     state = State.IN_PROPOSAL;
   }
   
-  public void endProposal() throws ModelException {
+  public void endProposal() throws MC3KitException {
     if(state != State.IN_PROPOSAL) {
-      throw new ModelException("endProposal called with wrong state", this);
+      throw new MC3KitException("endProposal called with wrong state");
     }
     
     propagateChanges(true);
@@ -198,24 +198,24 @@ public class Model implements Observer, Serializable {
     state = State.PROPOSAL_COMPLETE;
   }
   
-  public void acceptProposal() throws ModelException {
+  public void acceptProposal() throws MC3KitException {
     if(state != State.PROPOSAL_COMPLETE) {
-      throw new ModelException("acceptProposal called with wrong state", this);
+      throw new MC3KitException("acceptProposal called with wrong state");
     }
     state = State.READY;
   }
   
-  public void beginRejection() throws ModelException {
+  public void beginRejection() throws MC3KitException {
     if(state != State.PROPOSAL_COMPLETE) {
-      throw new ModelException("beginRejection called with wrong state", this);
+      throw new MC3KitException("beginRejection called with wrong state");
     }
     
     state = State.IN_REJECTION;
   }
   
-  public void endRejection() throws ModelException {
+  public void endRejection() throws MC3KitException {
     if(state != State.IN_REJECTION) {
-      throw new ModelException("endRejection called with wrong state", this);
+      throw new MC3KitException("endRejection called with wrong state");
     }
     
     propagateChanges(false);
@@ -225,7 +225,7 @@ public class Model implements Observer, Serializable {
     state = State.READY;
   }
   
-  private void propagateChanges(boolean isProposal) throws ModelException {
+  private void propagateChanges(boolean isProposal) throws MC3KitException {
     Set<ModelEdge> emptyEdgeSet = new HashSet<ModelEdge>(0);
     
     // Map of nodes to parent edges that have changed, for the sake of efficient updating
@@ -359,18 +359,23 @@ public class Model implements Observer, Serializable {
     return dist;
   }
   
-  public void addEdge(ModelEdge edge) throws ModelException {
+  public ModelEdge addEdge(ModelNode tail, ModelNode head) throws MC3KitException {
+    ModelEdge edge = new ModelEdge(this, tail, head);
+    return edge;
+  }
+  
+  public void addEdge(ModelEdge edge) throws MC3KitException {
     if(!(state == State.IN_CONSTRUCTION || state == State.IN_PROPOSAL || state == State.IN_REJECTION)) {
-      throw new ModelException("Adding edge in wrong state", this);
+      throw new MC3KitException("Adding edge in wrong state");
     }
     
     graph.addEdge(edge);
     newEdgeHeads.add(edge.getHead());
   }
   
-  public void removeEdge(ModelEdge edge) throws ModelException {
+  public void removeEdge(ModelEdge edge) throws MC3KitException {
     if(!(state == State.IN_CONSTRUCTION || state == State.IN_PROPOSAL || state == State.IN_REJECTION)) {
-      throw new ModelException("Removing edge in wrong state", this);
+      throw new MC3KitException("Removing edge in wrong state");
     }
     
     graph.removeEdge(edge);

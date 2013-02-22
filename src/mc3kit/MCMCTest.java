@@ -32,6 +32,7 @@ import mc3kit.functions.DoubleSumFunction;
 import mc3kit.proposal.UnivariateProposalStep;
 import static java.lang.Math.*;
 
+@SuppressWarnings("serial")
 public class MCMCTest {
 
   @Before
@@ -59,7 +60,6 @@ public class MCMCTest {
     tmpFile.deleteOnExit();
   }
   
-  @SuppressWarnings("serial")
   static class SerializableModelFactory implements ModelFactory, Serializable {
 
     @Override
