@@ -67,6 +67,13 @@ public class Model implements Observer, Serializable {
     newEdgeHeads = new HashSet<ModelNode>();
   }
   
+  private void readObject(java.io.ObjectInputStream stream) throws IOException, ClassNotFoundException {
+    stream.defaultReadObject();
+    for(Variable var : unobservedVariables) {
+      var.addObserver(this);
+    }
+  }
+  
   public String[] getUnobservedVariableNames() {
     String[] varNames = new String[unobservedVariables.size()];
     for(int i = 0; i < varNames.length; i++) {
@@ -324,9 +331,8 @@ public class Model implements Observer, Serializable {
         throw new IllegalArgumentException("Unobserved random variables must have a name.");
       }
       unobservedVariables.add(var);
+      var.addObserver(this);
     }
-    
-    var.addObserver(this);
     
     return var;
   }

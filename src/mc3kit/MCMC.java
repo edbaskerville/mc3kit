@@ -23,6 +23,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
 import java.io.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 
 import static java.lang.String.format;
 
@@ -47,8 +49,6 @@ public class MCMC implements Serializable {
   
   boolean initialized;
   long iterationCount;
-  long terminationCount;
-  TerminationManager terminationManager;
 
   RandomSeedGenerator seedGen;
   Chain[] chains;
@@ -59,6 +59,8 @@ public class MCMC implements Serializable {
 
   transient ThreadPoolExecutor threadPool;
   transient ExecutorCompletionService<Object> completionService;
+  transient TerminationManager terminationManager;
+  transient long terminationCount;
 
   public MCMC() {
     steps = new ArrayList<Step>();
@@ -227,8 +229,12 @@ public class MCMC implements Serializable {
     getLogger().info("Steps set up.");
   }
   
-  public static MCMC loadFromFile(String filename) {
-    return null;
+  public static MCMC loadFromFile(String filename) throws ClassNotFoundException, IOException {
+    ObjectInput input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(filename)));
+    MCMC mcmc = (MCMC)input.readObject();
+    input.close();
+    
+    return mcmc;
   }
   
   /**
@@ -236,13 +242,15 @@ public class MCMC implements Serializable {
    * @throws FileNotFoundException 
    * 
    */
-  public synchronized void writeToFile(String filename) throws FileNotFoundException, IOException {
-    File tmpFile = File.createTempFile(filename, null);
+  public synchronized void writeToFile(String filePath) throws FileNotFoundException, IOException {
+    Path path = FileSystems.getDefault().getPath(filePath);
+    String filename = path.getName(path.getNameCount() - 1).toString();
     
+    File tmpFile = File.createTempFile(filename, null);
     ObjectOutputStream stream = new ObjectOutputStream(new FileOutputStream(tmpFile));
     stream.writeObject(this);
     stream.close();
-    tmpFile.renameTo(new File(filename));
+    tmpFile.renameTo(new File(filePath));
   }
   
   /**
@@ -326,7 +334,7 @@ public class MCMC implements Serializable {
     return new MersenneTwister(seedGen.nextSeed());
   }
   
-  class TerminationManager implements Callable<Object> {
+  class TerminationManager implements Callable<Object>, Serializable {
     BitSet completedChains;
     
     public TerminationManager() {
@@ -360,7 +368,7 @@ public class MCMC implements Serializable {
     }
   }
   
-  class TaskManager implements Callable<Object> {
+  class TaskManager implements Callable<Object>, Serializable {
     long iterationCount;
     int completedChainCount;
     Task task;

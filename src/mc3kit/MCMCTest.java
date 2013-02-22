@@ -20,6 +20,7 @@
 package mc3kit;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.logging.Level;
 
 import org.junit.*;
@@ -42,15 +43,100 @@ public class MCMCTest {
   }
 
   @Test
-  public void testSerialization() throws Throwable {
-    File tmpFile = File.createTempFile("MCMCTest.bin", null);
+  public void testSimpleWrite() throws Throwable {
+    File tmpFile = File.createTempFile("test", null);
     String path = tmpFile.getCanonicalPath();
     
     System.err.printf("path: %s\n", path);
     
     MCMC mcmc = new MCMC();
+    mcmc.chainCount = 234;
     mcmc.writeToFile(tmpFile.getCanonicalPath());
+    
+    mcmc = MCMC.loadFromFile(path);
+    assertTrue(mcmc.chainCount == 234);
+    
     tmpFile.deleteOnExit();
+  }
+  
+  @SuppressWarnings("serial")
+  static class SerializableModelFactory implements ModelFactory, Serializable {
+
+    @Override
+    public Model createModel(Chain initialChain) throws MC3KitException {
+      Model m = new Model(initialChain);
+      
+      m.beginConstruction();
+      new DoubleVariable(m, "nv", new NormalDistribution(m, "nd"));
+      m.endConstruction();
+      
+      return m;
+    }
+    
+  }
+  
+  @Test
+  public void testRunAndReanimate() throws Throwable {
+    long burnIn = 5000;
+    long iterCount = 10000;
+    
+    MCMC mcmc = new MCMC();
+    mcmc.setRandomSeed(100L);
+    
+    MCMC.setLogLevel(Level.INFO);
+    
+    ModelFactory mf = new SerializableModelFactory();
+    
+    mcmc.setModelFactory(mf);
+    
+    UnivariateProposalStep proposalStep = new UnivariateProposalStep(0.25, 100, burnIn);
+    mcmc.addStep(proposalStep);
+    
+    // Run for a while
+    mcmc.runFor(iterCount);
+    
+    double varVal = mcmc.getModel().getDoubleVariable("nv").getValue();
+    System.err.printf("variable: %f\n", varVal);
+
+    // Write to file and reload
+    File tmpFile = File.createTempFile("test", null);
+    String path = tmpFile.getCanonicalPath();
+    mcmc.writeToFile(tmpFile.getCanonicalPath());
+    mcmc = MCMC.loadFromFile(path);
+    
+    assertTrue(mcmc.initialized);
+    assertTrue(mcmc.getModel().getLogPrior() != 0.0);
+    
+    assertEquals(varVal, mcmc.getModel().getDoubleVariable("nv").getValue(), 0.0);
+    
+    mcmc.getModel().recalculate();
+    
+    // Run, collect statistics, and check moments against expected distribution
+    double sum = 0;
+    double sumSq = 0;
+    for(long i = 0; i < iterCount; i++) {
+      mcmc.step();
+      mcmc.getModel().recalculate();
+      
+      assertEquals(iterCount + i + 1, mcmc.getIterationCount());
+      
+      if(i >= burnIn) {
+        double val = mcmc.getModel().getDoubleVariable("nv").getValue();
+        sum += val;
+        sumSq += val * val;
+      }
+    }
+    
+    double N = iterCount - burnIn;
+    
+    double mean = sum / N;
+    System.err.printf("mean = %f\n", mean);
+    assertEquals(0.0, mean, 0.02);
+    
+    double sd = sqrt(N / (N - 1) * (sumSq/N - mean * mean));
+    System.err.printf("sd = %f\n", sd);
+    assertEquals(1.0, sd, 0.02);
+    
   }
   
   @Test

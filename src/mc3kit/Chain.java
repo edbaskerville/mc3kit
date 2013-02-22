@@ -36,8 +36,6 @@ public class Chain implements Serializable
 	
 	Model model;
 	
-	Logger logger;
-	
 	long iterationCount;
 	
 	protected Chain() { }
@@ -52,8 +50,6 @@ public class Chain implements Serializable
 		this.rng = rng;
 		
 		this.iterationCount = 0;
-		
-		logger = Logger.getLogger("mc3kit.Chain." + chainId);
 	}
 	
 	public MCMC getMCMC()
@@ -106,7 +102,7 @@ public class Chain implements Serializable
 	}
 	
 	public Logger getLogger() {
-	  return logger;
+	  return Logger.getLogger("mc3kit.Chain." + chainId);
 	}
 	
 	public long getIterationCount() {
