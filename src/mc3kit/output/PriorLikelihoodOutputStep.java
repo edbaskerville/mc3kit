@@ -100,7 +100,7 @@ public class PriorLikelihoodOutputStep implements Step, Serializable
 		}
 	}
 	
-	private class LogPriorLikelihoodValue
+	private class LogPriorLikelihoodValue implements Serializable
 	{
 		double logPrior;
 		double logLikelihood;
