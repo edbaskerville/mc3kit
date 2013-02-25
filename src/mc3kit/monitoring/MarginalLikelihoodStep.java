@@ -1,4 +1,4 @@
-package monitoring;
+package mc3kit.monitoring;
 
 import java.io.*;
 import java.util.*;
