@@ -31,6 +31,7 @@ public abstract class DoubleFunction extends Function implements DoubleValued {
 
   public DoubleFunction(Model model, String name) {
     super(model, name);
+    this.value = Double.NaN;
   }
 
   @Override
