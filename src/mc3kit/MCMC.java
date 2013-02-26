@@ -22,9 +22,8 @@ package mc3kit;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
+import java.util.regex.Pattern;
 import java.io.*;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
 
 import static java.lang.String.format;
 
@@ -266,8 +265,8 @@ public class MCMC implements Serializable {
    * 
    */
   public synchronized void writeToFile(String filePath) throws FileNotFoundException, IOException {
-    Path path = FileSystems.getDefault().getPath(filePath);
-    String filename = path.getName(path.getNameCount() - 1).toString();
+    String[] pathComponents = filePath.split(Pattern.quote(System.getProperty("path.separator")));
+    String filename = pathComponents[pathComponents.length - 1];
     
     File tmpFile = File.createTempFile(filename, null);
     ObjectOutputStream stream = new ObjectOutputStream(new FileOutputStream(tmpFile));
