@@ -23,7 +23,11 @@ import static mc3kit.util.Math.getRandomPermutation;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import mc3kit.Chain;
 import mc3kit.MC3KitException;
@@ -90,6 +94,7 @@ public class UnivariateProposalStep implements Step {
       assert (chains.length == 1);
 
       Chain chain = chains[0];
+      Logger logger = chain.getLogger();
       
       Model model = chain.getModel();
       initialize(model);
@@ -104,12 +109,20 @@ public class UnivariateProposalStep implements Step {
       }
 
       iterationCount++;
-
+      
+      // Write out acceptance rates
+      if(iterationCount % tuneEvery == 0 && logger.isLoggable(Level.INFO)) {
+        Map<String, Double> acceptanceRates = new LinkedHashMap<String, Double>();
+        for(VariableProposer proposer : proposers) {
+          acceptanceRates.put(proposer.getName(), proposer.getAcceptanceRate());
+        }
+        logger.log(Level.INFO, "UnivariateProposalStep acceptance rates", acceptanceRates);
+      }
+      
       // If we're still in the tuning period, tune
       if((iterationCount <= tuneFor) && iterationCount % tuneEvery == 0) {
-        chain.getLogger().info("VARIABLE ACCEPTANCE RATES:");
+        chain.getLogger().info("acceptance rates");
         for(VariableProposer proposer : proposers) {
-          chain.getLogger().info(format("%s: %f", proposer.getName(), proposer.getAcceptanceRate()));
           proposer.tune(targetAcceptanceRate);
           proposer.resetTuningPeriod();
         }

@@ -105,7 +105,7 @@ public class Chain implements Serializable
 	
 	public Logger getLogger() {
 	  if(_logger == null) {
-	   _logger = Logger.getLogger("mc3kit.Chain." + chainId);
+	   _logger = mcmc.getLogger("mc3kit.Chain." + chainId);
 	  }
 	  return _logger;
 	}
