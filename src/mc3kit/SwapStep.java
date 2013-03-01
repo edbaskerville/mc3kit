@@ -62,7 +62,7 @@ public class SwapStep implements Step
 		this.swapParity = swapParity;
 		this.statsEvery = statsEvery;
 	}
-
+	
 	@Override
 	public List<Task> makeTasks(int chainCount)
 	{
@@ -168,7 +168,7 @@ public class SwapStep implements Step
 				List<SwapStats> statsList = collector.takeValue(iterationCount, chainIds[0] / 2,
 					new SwapStats(chainIds, acceptanceCount));
 				
-				Logger logger = chains[0].getLogger();
+				Logger logger = chains[0].getMCMC().getLogger("mc3kit.SwapStep");
 				if(statsList != null && logger.isLoggable(Level.INFO))
 				{
 				  Map<String, Object> swapStats = new LinkedHashMap<String, Object>();
@@ -181,7 +181,7 @@ public class SwapStep implements Step
 	          );
 					}
 					
-					chains[0].getLogger().log(Level.INFO,
+					logger.log(Level.INFO,
 					  "SwapStep acceptance rates",
 					  makeMap("swapParity", swapParity.toString(), "swapStats", swapStats)
 					);

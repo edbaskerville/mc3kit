@@ -20,6 +20,7 @@
 package mc3kit.proposal;
 
 import static mc3kit.util.Math.getRandomPermutation;
+import static mc3kit.util.Utils.makeMap;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
@@ -116,12 +117,16 @@ public class UnivariateProposalStep implements Step {
         for(VariableProposer proposer : proposers) {
           acceptanceRates.put(proposer.getName(), proposer.getAcceptanceRate());
         }
-        logger.log(Level.INFO, "UnivariateProposalStep acceptance rates", acceptanceRates);
+        Map<String, Object> infoObj = makeMap(
+          "iteration", iterationCount,
+          "chainId", chainId,
+          "acceptanceRates", acceptanceRates
+        );
+        logger.log(Level.INFO, "UnivariateProposalStep acceptance rates", infoObj);
       }
       
       // If we're still in the tuning period, tune
       if((iterationCount <= tuneFor) && iterationCount % tuneEvery == 0) {
-        chain.getLogger().info("acceptance rates");
         for(VariableProposer proposer : proposers) {
           proposer.tune(targetAcceptanceRate);
           proposer.resetTuningPeriod();

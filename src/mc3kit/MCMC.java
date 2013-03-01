@@ -57,6 +57,7 @@ public class MCMC implements Serializable {
 
   Level logLevel;
   String logFilename;
+  boolean logAllChains;
   
   transient Logger _logger;
   transient Map<String, Logger> _loggers;
@@ -87,21 +88,23 @@ public class MCMC implements Serializable {
   }
   
   public Logger getLogger(String name) {
-    String[] pieces = name.split("\\.");
-    if(!pieces[0].equals("mc3kit")) {
-      throw new IllegalArgumentException("name must begin with mc3kit.");
-    }
-    String subName = "mc3kit";
-    for(int i = 1; i < pieces.length; i++) {
-      subName = subName + "." + pieces[i];
-      if(!_loggers.containsKey(subName)) {
-        _loggers.put(subName, Logger.getLogger(subName));
+    synchronized(_loggers) {
+      String[] pieces = name.split("\\.");
+      if(!pieces[0].equals("mc3kit")) {
+        throw new IllegalArgumentException("name must begin with mc3kit.");
       }
+      String subName = "mc3kit";
+      for(int i = 1; i < pieces.length; i++) {
+        subName = subName + "." + pieces[i];
+        if(!_loggers.containsKey(subName)) {
+          _loggers.put(subName, Logger.getLogger(subName));
+        }
+      }
+      
+      assert _loggers.containsKey(name);
+      
+      return _loggers.get(name);
     }
-    
-    assert _loggers.containsKey(name);
-    
-    return _loggers.get(name);
   }
   
   private void initialize() throws Throwable {
@@ -580,7 +583,7 @@ public class MCMC implements Serializable {
     setLogLevelPrivate(level);
   }
   
-  private synchronized void setLogLevelPrivate(Level level) throws MC3KitException {
+  private void setLogLevelPrivate(Level level) throws MC3KitException {
     this.logLevel = level;
     _logger.setLevel(level);
     for(Handler handler : _logger.getHandlers()) {
@@ -593,7 +596,7 @@ public class MCMC implements Serializable {
     setLogFilenamePrivate(filename);
   }
   
-  private synchronized void setLogFilenamePrivate(String filename) throws SecurityException, IOException, MC3KitException {
+  private void setLogFilenamePrivate(String filename) throws SecurityException, IOException, MC3KitException {
     this.logFilename = filename;
     
     for(Handler handler : _logger.getHandlers()) {
@@ -612,5 +615,10 @@ public class MCMC implements Serializable {
       handler.setFormatter(formatter);
       _logger.addHandler(handler);
     }
+  }
+  
+  public synchronized void setLogAllChains(boolean logAllChains) throws MC3KitException {
+    throwIfInitialized();
+    this.logAllChains = logAllChains;
   }
 }
