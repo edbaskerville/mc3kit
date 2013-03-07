@@ -140,11 +140,6 @@ public class PartitionRecombinationStep implements Step {
       int[] oldAssign1 = var1.assignment.clone();
       int[][] newAssign = generateNewAssignments(rng, unif, var0.getGroupCount(), oldAssign0, oldAssign1);
       
-      System.err.printf("old0: %s\n", Arrays.toString(oldAssign0));
-      System.err.printf("new0: %s\n", Arrays.toString(newAssign[0]));
-      System.err.printf("old1: %s\n", Arrays.toString(oldAssign1));
-      System.err.printf("new1: %s\n", Arrays.toString(newAssign[1]));
-      
       
       // Make proposals
       model0.beginProposal();
@@ -167,7 +162,6 @@ public class PartitionRecombinationStep implements Step {
       double logR = tp0 * newLP0 + tl0 * newLL0 + tp1 * newLP1 + tl1 * newLL1
                   - tp0 * oldLP0 - tl0 * oldLL0 - tp1 * oldLP1 - tl1 * oldLL1;
       boolean accepted = (logR >= 0.0) || (log(rng.nextDouble()) < logR);
-      System.err.printf("logR = %f; accepted = %b\n", logR, accepted);
       
       if(accepted) {
         model0.acceptProposal();
@@ -202,7 +196,6 @@ public class PartitionRecombinationStep implements Step {
         int nRecomb = 2;
         IterableBitSet recombPtBS = mc3kit.util.Random.uniformRandomSubset(unif, n, nRecomb);
         int[] recombPts = recombPtBS.getSetBits();
-        System.err.printf("recombPts: %s\n", Arrays.toString(recombPts));
         
         int[] newCount0 = new int[groupCount];
         int[] newCount1 = new int[groupCount];
