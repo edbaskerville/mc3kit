@@ -139,6 +139,9 @@ public class Model implements Observer, Serializable {
       }
       
       ((ModelNode)node).update();
+      if(logger.isLoggable(Level.FINE)) {
+        logger.fine(format("Updating %s", node));
+      }
       
       if(node instanceof Variable) {
         Variable var = (Variable)node;
@@ -297,7 +300,7 @@ public class Model implements Observer, Serializable {
       // If the node changed, add all the edges representing dependencies
       // on it (the head) to the visited-edge map for the dependent nodes
       // (the tails)
-      if(changed || changedValueVars.contains(node)) {
+      if(changed || changedValueVars.contains(node) || newEdgeHeads.contains(node)) {
         for(Edge edge : node.getHeadEdges()) {
           ModelNode tail = (ModelNode)edge.getTail();
           if(!visitedEdges.containsKey(tail)) {
@@ -374,6 +377,10 @@ public class Model implements Observer, Serializable {
   }
   
   public ModelEdge addEdge(ModelNode tail, ModelNode head) throws MC3KitException {
+    if(!(state == State.IN_CONSTRUCTION || state == State.IN_PROPOSAL || state == State.IN_REJECTION)) {
+      throw new MC3KitException("Adding edge in wrong state");
+    }
+    
     ModelEdge edge = new ModelEdge(this, tail, head);
     return edge;
   }
