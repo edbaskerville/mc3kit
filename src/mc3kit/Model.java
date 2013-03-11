@@ -160,7 +160,7 @@ public class Model implements Observer, Serializable {
     state = State.READY;
   }
   
-  public void recalculate() throws MC3KitException {
+  public void recalculate(double tol) throws MC3KitException {
     double preLogPrior = logPrior;
     double preLogLike = logLikelihood;
     
@@ -184,7 +184,7 @@ public class Model implements Observer, Serializable {
     double logPriorDiff = abs(preLogPrior - logPrior);
     double logLikeDiff = abs(preLogLike - logLikelihood);
     
-    if(logPriorDiff > 1e-8 || logLikeDiff > 1e-8) {
+    if(logPriorDiff > tol || logLikeDiff > tol) {
       throw new MC3KitException(format("Too much error in prior (%f, should be %f, diff %f) or likelihood (%f, should be %f, diff %f)", 
           preLogPrior, logPrior, logPriorDiff, preLogLike, logLikelihood, logLikeDiff)
       );
