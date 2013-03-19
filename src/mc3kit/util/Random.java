@@ -19,7 +19,13 @@
 
 package mc3kit.util;
 
+import static mc3kit.util.Math.*;
+
+import java.util.Arrays;
+
+import static java.lang.Math.exp;
 import cern.jet.random.Uniform;
+import cern.jet.random.engine.RandomEngine;
 
 public final class Random {
   public static int nextIntFromToExcept(Uniform unif, int start, int end, int except)
@@ -41,5 +47,18 @@ public final class Random {
       successes.set(success);
     }
     return successes;
+  }
+  
+  public static int nextDiscreteLinearSearch(RandomEngine rng, double[] weights) {
+    double sumWeights = sum(weights);
+    double u = rng.nextDouble() * sumWeights;
+    double cumSum = 0.0;
+    for(int i = 0; i < weights.length; i++) {
+      cumSum += weights[i];
+      if(u < cumSum) {
+        return i;
+      }
+    }
+    return weights.length - 1;
   }
 }

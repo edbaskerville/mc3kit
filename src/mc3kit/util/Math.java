@@ -36,6 +36,10 @@ public final class Math {
       return 0.0;
     return Gamma.logGamma(x);
   }
+  
+  public static double logFactorial(int x) {
+    return logGamma(x + 1);
+  }
 
   public static double logBeta(double x, double y) {
     return logGamma(x) + logGamma(y) - logGamma(x + y);
@@ -193,6 +197,13 @@ public final class Math {
     double mean = mean(x);
     for(int i = 0; i < x.length; i++)
       x[i] -= mean;
+    return mean;
+  }
+  
+  public static double center(DoubleMatrix1D x) {
+    double mean = mean(x);
+    for(int i = 0; i < x.size(); i++)
+      x.setQuick(i, x.getQuick(i) - mean);
     return mean;
   }
 
