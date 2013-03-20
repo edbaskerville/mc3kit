@@ -104,4 +104,10 @@ public abstract class Variable extends ModelNode {
   public boolean canManipulateGraph() {
     return false;
   }
+
+  @Override
+  public boolean update() {
+    setLogP(getDistribution().getLogP(this));
+    return false;
+  }
 }

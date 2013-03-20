@@ -81,13 +81,6 @@ public class IntArrayVariable extends Variable implements IntArrayValued {
     super.setDistribution(dist);
     return this;
   }
-
-  @Override
-  public boolean update() {
-    IntArrayDistribution dist = (IntArrayDistribution)getDistribution();
-    setLogP(dist.getLogP(this));
-    return false;
-  }
   
   @Override
   public Object makeOutputObject() {
