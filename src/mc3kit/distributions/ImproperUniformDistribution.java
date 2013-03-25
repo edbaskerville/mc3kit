@@ -20,7 +20,6 @@
 package mc3kit.distributions;
 
 import mc3kit.*;
-import mc3kit.proposal.MHMultiplierProposer;
 import mc3kit.proposal.MHNormalProposer;
 
 @SuppressWarnings("serial")

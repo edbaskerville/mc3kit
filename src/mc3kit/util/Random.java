@@ -20,10 +20,6 @@
 package mc3kit.util;
 
 import static mc3kit.util.Math.*;
-
-import java.util.Arrays;
-
-import static java.lang.Math.exp;
 import cern.jet.random.Uniform;
 import cern.jet.random.engine.RandomEngine;
 

@@ -24,8 +24,6 @@ import java.util.*;
 
 import static java.lang.Math.*;
 import static mc3kit.util.Random.*;
-import cern.jet.random.Empirical;
-import cern.jet.random.EmpiricalWalker;
 import cern.jet.random.Uniform;
 import cern.jet.random.engine.RandomEngine;
 import mc3kit.*;
