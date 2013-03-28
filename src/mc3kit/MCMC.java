@@ -23,6 +23,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import mc3kit.util.JsonsLogFormatter;
 
@@ -42,13 +44,18 @@ public class MCMC implements Serializable {
   private double[] priorHeatExponents;
   private double[] likelihoodHeatExponents;
 
-  private Long randomSeed = null;
+  private Long randomSeed;
   private List<Step> steps;
+  
+  private long thin = 1;
+  private long burnIn = 0;
+  
+  private Path dbPath;
   
   /*** STATE ***/
   
   boolean initialized;
-  long iterationCount;
+  long iteration;
 
   RandomSeedGenerator seedGen;
   Chain[] chains;
@@ -71,6 +78,7 @@ public class MCMC implements Serializable {
   
   public MCMC() {
     steps = new ArrayList<Step>();
+    steps.add(new FirstStep());
     
     initializeLoggers();
   }
@@ -136,7 +144,14 @@ public class MCMC implements Serializable {
     random.setSeed(randomSeed);
     int randomSeedStartLocation = random.nextInt(Integer.MAX_VALUE);
     seedGen = new RandomSeedGenerator(randomSeedStartLocation, 0);
-
+    
+    thin = 1L;
+    if(dbPath == null) {
+      dbPath = Paths.get("db");
+    }
+    dbPath.toFile().mkdirs();
+    dbPath.resolve("chains").toFile().mkdirs();
+    
     initializeChains();
     initializeSteps();
     
@@ -180,7 +195,7 @@ public class MCMC implements Serializable {
     chains = new Chain[chainCount];
     for(int i = 0; i < chainCount; i++) {
       RandomEngine rng = makeRandomEngine();
-      chains[i] = new Chain(this, i, chainCount, priorHeatExponents[i],
+      chains[i] = new Chain(this, i, priorHeatExponents[i],
           likelihoodHeatExponents[i], rng);
     }
     
@@ -278,37 +293,8 @@ public class MCMC implements Serializable {
     getLogger().info("Steps set up.");
   }
   
-  public static MCMC loadFromFile(String filename) throws ClassNotFoundException, IOException {
-    ObjectInput input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(filename)));
-    MCMC mcmc = (MCMC)input.readObject();
-    input.close();
-    
-    return mcmc;
-  }
-  
-  /**
-   * @throws IOException 
-   * @throws FileNotFoundException 
-   * 
-   */
-  public synchronized void writeToFile(String filename) throws FileNotFoundException, IOException {
-    File file = new File(filename);
-    File tmpFile = new File(filename + ".partial");
-    
-    ObjectOutputStream stream = new ObjectOutputStream(new FileOutputStream(tmpFile));
-    stream.writeObject(this);
-    stream.close();
-    
-    if(file.exists()) {
-      file.delete();
-    }
-    if(!tmpFile.renameTo(file)) {
-      getLogger().severe("COULD NOT MOVE CHECKPOINT FILE");
-    }
-    assert tmpFile.getName().endsWith(".partial");
-    if(tmpFile.exists()) {
-      tmpFile.delete();
-    }
+  Path getDbPath() {
+    return dbPath;
   }
   
   /**
@@ -321,14 +307,14 @@ public class MCMC implements Serializable {
   
   /**
    * Run MCMC for multiple steps.
-   * @param iterationCount
+   * @param runForCount
    * @throws MC3KitException 
    */
   public synchronized void runFor(long runForCount) throws Throwable {
     if(runForCount == 0)
       return;
     
-    terminationCount = iterationCount + runForCount;
+    terminationCount = iteration + runForCount;
     run();
   }
   
@@ -342,11 +328,11 @@ public class MCMC implements Serializable {
   }
   
   public synchronized long getIterationCount() {
-    return iterationCount;
+    return iteration;
   }
   
   private synchronized void run() throws Throwable {
-    assert(terminationCount > iterationCount);
+    assert(terminationCount > iteration);
     initialize();
     
     getLogger().fine(format("Running until %d", terminationCount));
@@ -357,7 +343,7 @@ public class MCMC implements Serializable {
 
     try {
       for (TaskManager taskManager : taskManagers[0]) {
-        assert(taskManager.iterationCount == iterationCount);
+        assert(taskManager.iterationCount == iteration);
         safeSubmit(taskManager);
       }
 
@@ -368,7 +354,7 @@ public class MCMC implements Serializable {
         if(result == terminationManager) {
           getLogger().fine("Got termination task.");
           done = true;
-          assert(iterationCount == terminationCount);
+          assert(iteration == terminationCount);
         }
         else {
           getLogger().finer("Got non-termination task.");
@@ -434,7 +420,7 @@ public class MCMC implements Serializable {
 
     @Override
     public Object call() throws Exception {
-      iterationCount = terminationCount;
+      iteration = terminationCount;
       return this;
     }
   }
@@ -471,19 +457,7 @@ public class MCMC implements Serializable {
       }
       if (allComplete) {
         iterationCount++;
-        
-        if(isTerminationHandler) {
-          for(Chain chain : handledChains) {
-            chain.iterationCount++;
-          }
-        }
-        
-        if(isTerminationHandler && iterationCount == terminationCount) {
-          terminationManager.tallyComplete(task.getChainIds());
-        }
-        else {
-          safeSubmit(this);
-        }
+        safeSubmit(this);
       }
     }
 
@@ -495,11 +469,16 @@ public class MCMC implements Serializable {
       catch (Exception e) {
         throw new MC3KitException("Exception thrown from task", e);
       }
-
-      // Let the next step for this chain know we're complete;
-      // it will start itself up once all its chains are ready
-      for (TaskManager manager : nextTaskManagers)
-        manager.tallyComplete();
+      
+      if(isTerminationHandler && iterationCount == terminationCount) {
+        terminationManager.tallyComplete(task.getChainIds());
+      }
+      else {
+        // Let the next step for this chain know we're complete;
+        // it will start itself up once all its chains are ready
+        for (TaskManager manager : nextTaskManagers)
+          manager.tallyComplete();
+      }
 
       return this;
     }
@@ -538,7 +517,26 @@ public class MCMC implements Serializable {
   }
   
   /*** ACCESSORS ***/
-
+  
+  public synchronized void setThin(long thin) throws MC3KitException {
+    throwIfInitialized();
+    this.thin = thin;
+  }
+  
+  public long getThin() {
+    return thin;
+  }
+  
+  public synchronized void setBurnIn(long burnIn) throws MC3KitException {
+    throwIfInitialized();
+    this.burnIn = burnIn;
+  }
+  
+  public long getBurnIn() {
+    return thin;
+  }
+  
+  
   public synchronized void setModelFactory(ModelFactory modelFactory) throws MC3KitException {
     throwIfInitialized();
     this.modelFactory = modelFactory;

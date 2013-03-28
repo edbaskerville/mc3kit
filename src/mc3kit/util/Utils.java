@@ -19,6 +19,7 @@
 
 package mc3kit.util;
 
+import java.nio.*;
 import java.util.*;
 
 public final class Utils {
@@ -62,5 +63,21 @@ public final class Utils {
       }
     }
     return hMap;
+  }
+  
+  public static byte[] toBytes(double[] x) {
+    ByteBuffer buf = ByteBuffer.allocateDirect(x.length * 8);
+    buf.position(0);
+    buf.asDoubleBuffer().put(x);
+    byte[] bytes = new byte[x.length * 8];
+    buf.get(bytes);
+    return bytes;
+  }
+  
+  public static double[] fromBytes(byte[] x) {
+    ByteBuffer buf = ByteBuffer.wrap(x);
+    double[] dbls = new double[x.length / 8];
+    buf.asDoubleBuffer().get(dbls);
+    return dbls;
   }
 }

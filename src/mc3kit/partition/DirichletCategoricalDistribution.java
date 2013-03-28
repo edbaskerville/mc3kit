@@ -1,5 +1,7 @@
 package mc3kit.partition;
 
+import java.util.Arrays;
+
 import cern.jet.random.Empirical;
 import cern.jet.random.EmpiricalWalker;
 import cern.jet.random.Gamma;
@@ -91,6 +93,8 @@ public class DirichletCategoricalDistribution extends PartitionDistribution {
     }
     int N = partVar.getElementCount();
     logP += logGamma(sumAlpha) - logGamma(N + sumAlpha);
+    
+//    System.err.printf("logP = %f (alpha = %f, part = %s)\n", logP, getAlpha(0), Arrays.toString(partVar.assignment));
     
     return logP;
   }

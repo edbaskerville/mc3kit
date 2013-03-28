@@ -19,40 +19,135 @@
 
 package mc3kit;
 
-import java.io.Serializable;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static java.lang.String.format;
+
+import org.tmatesoft.sqljet.core.*;
+import org.tmatesoft.sqljet.core.table.*;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import cern.jet.random.engine.RandomEngine;
 
-@SuppressWarnings("serial")
-public class Chain implements Serializable
-{
+public class Chain {
+  
 	MCMC mcmc;
 	int chainId;
-	int chainCount;
 	double priorHeatExponent;
 	double likelihoodHeatExponent;
 	RandomEngine rng;
 	
+  boolean initialized;
+  long iteration;
+  
 	Model model;
+	Logger logger;
 	
-	long iterationCount;
+	SqlJetDb db;
+	Gson gson;
 	
-	transient Logger _logger;
+	Map<Integer, String> paramIdNameMap;
+	Map<String, Integer> paramNameIdMap;
+	Map<String, Double> sumMap;
+	Map<String, Double> sumSqMap;
 	
-	protected Chain() { }
-	
-	Chain(MCMC mcmc, int chainId, int chainCount, double priorHeatExponent, double likelihoodHeatExponent, RandomEngine rng)
-	{
+	Chain(MCMC mcmc, int chainId, double priorHeatExponent, double likelihoodHeatExponent, RandomEngine rng) {
 		this.mcmc = mcmc;
 		this.chainId = chainId;
-		this.chainCount = chainCount;
 		this.priorHeatExponent = priorHeatExponent;
 		this.likelihoodHeatExponent = likelihoodHeatExponent;
 		this.rng = rng;
-		
-		this.iterationCount = 0;
+		logger = mcmc.getLogger("mc3kit.Chain." + chainId);
+    if(chainId != 0 && !mcmc.logAllChains) {
+      logger.setLevel(Level.OFF);
+    }
+	}
+	
+	void initialize() throws MC3KitException {
+	  if(initialized) {
+	    return;
+	  }
+	  initialized = true;
+	  
+	  Path dbPath = mcmc.getDbPath().resolve(Paths.get("chains", format("%d.sqlite", chainId)));
+	  File dbFile = dbPath.toFile();
+	  
+	  // TODO: load from database if supposed to
+	  
+	  // Set up initial chain state
+	  if(dbFile.exists()) {
+	    throw new MC3KitException(format("File %s already exists", dbPath));
+	  }
+	  
+	  try {
+	    db = new SqlJetDb(dbFile, true);
+      db.open();
+      db.beginTransaction(SqlJetTransactionMode.WRITE);
+
+      // Populate parameters table and record var id
+      paramIdNameMap = new HashMap<Integer, String>();
+      paramNameIdMap = new HashMap<String, Integer>();
+      
+      db.createTable("CREATE TABLE parameters (pid INTEGER PRIMARY KEY, pname TEXT)");
+      ISqlJetTable pTable = db.getTable("parameters");
+      
+      int pid = 1;
+      paramIdNameMap.put(pid++, "logPrior");
+      paramIdNameMap.put(pid++, "logLikelihood");
+      for(Variable var : getModel().getUnobservedVariables()) {
+        paramIdNameMap.put(pid++, var.getName());
+      }
+      
+      for(Map.Entry<Integer, String> entry : paramIdNameMap.entrySet()) {
+        pid = entry.getKey();
+        String pname = entry.getValue();
+        paramNameIdMap.put(pname, pid);
+        pTable.insert(pid, pname);
+      }
+      
+      // Create empty samples table
+      db.createTable(
+        "CREATE TABLE samples (iteration INTEGER, pid INTEGER, value TEXT)"
+      );
+      db.commit();
+    }
+    catch(SqlJetException e) {
+      throw new MC3KitException(format("SqlJetException opening %s", dbFile), e);
+    }
+    
+    gson = new GsonBuilder().disableHtmlEscaping().serializeSpecialFloatingPointValues().create();
+	  
+	  
+	  iteration = 0; 
+	}
+	
+	void writeToDb() throws MC3KitException {
+	  try {
+  	  db.beginTransaction(SqlJetTransactionMode.WRITE);
+  	  
+  	  ISqlJetTable table = db.getTable("samples");
+  	  table.insert(iteration, paramNameIdMap.get("logPrior"), model.getLogPrior());
+  	  table.insert(iteration, paramNameIdMap.get("logLikelihood"), model.getLogLikelihood());
+  	  
+  	  for(Map.Entry<String, String> entry : model.makeDbSample(gson).entrySet()) {
+  	    table.insert(iteration, paramNameIdMap.get(entry.getKey()), entry.getValue());
+  	  }
+  	  
+  	  db.commit();
+	  }
+	  catch(SqlJetException e) {
+	    throw new MC3KitException(format("SqlJetException writing sample %d on chain %d.", iteration, chainId), e);
+	  }
 	}
 	
 	public MCMC getMCMC()
@@ -82,7 +177,7 @@ public class Chain implements Serializable
 	
 	public int getChainCount()
 	{
-		return chainCount;
+		return mcmc.chainCount;
 	}
 	
 	public double getPriorHeatExponent()
@@ -95,26 +190,15 @@ public class Chain implements Serializable
 		return likelihoodHeatExponent;
 	}
 	
-	public Chain getChainAbove()
-	{
-		if(chainId < chainCount - 1)
-		{
-			return mcmc.getChain(chainId + 1);
-		}
-		return null;
+	public long getIteration() {
+	  return iteration;
 	}
 	
 	public Logger getLogger() {
-	  if(_logger == null) {
-	   _logger = mcmc.getLogger("mc3kit.Chain." + chainId);
-	   if(chainId != 0 && !mcmc.logAllChains) {
-	     _logger.setLevel(Level.OFF);
-	   }
-	  }
-	  return _logger;
+	  return logger;
 	}
 	
-	public long getIterationCount() {
-	  return iterationCount;
+	public SqlJetDb getDb() {
+	  return db;
 	}
 }

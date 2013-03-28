@@ -21,6 +21,8 @@ package mc3kit;
 
 import static java.lang.String.format;
 
+import com.google.gson.Gson;
+
 @SuppressWarnings("serial")
 public abstract class Variable extends ModelNode {
   private ModelEdge distEdge;
@@ -101,13 +103,29 @@ public abstract class Variable extends ModelNode {
     throw new UnsupportedOperationException(format("Variable %s doesn't support output as string.", this));
   }
   
+  public String toJson(Gson gson) {
+    throw new UnsupportedOperationException(format("Variable %s doesn't support JSON output.", this));
+  }
+  
   public boolean canManipulateGraph() {
     return false;
   }
 
   @Override
-  public boolean update() {
-    setLogP(getDistribution().getLogP(this));
+  public boolean update() throws MC3KitException {
+    Distribution dist = getDistribution();
+    if(dist == null) {
+      if(observed) {
+        setLogP(0.0);
+      }
+      else {
+        throw new MC3KitException(format("Variable %s doesn't have a distribution", this));
+      }
+    }
+    else {
+      setLogP(dist.getLogP(this));
+    }
+    
     return false;
   }
 }

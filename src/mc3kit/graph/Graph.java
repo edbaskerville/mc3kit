@@ -75,7 +75,7 @@ public class Graph extends Observable implements Serializable {
     }
     
     if(node.name != null && nodeNameMap.containsKey(node.name)) {
-      throw new IllegalArgumentException("Node with this name already in graph.");
+      throw new IllegalArgumentException(format("Node named %s already in graph.", node.name));
     }
     
     node.graph = this;

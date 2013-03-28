@@ -23,6 +23,8 @@ import java.util.*;
 import java.util.logging.*;
 import java.io.*;
 
+import com.google.gson.Gson;
+
 import static java.lang.String.format;
 import static java.lang.Math.*;
 import static mc3kit.util.Utils.*;
@@ -434,7 +436,7 @@ public class Model implements Observer, Serializable {
   public Map<String, Object> makeHierarchicalSample() {
     Map<String, Object> flatMap = new LinkedHashMap<String, Object>();
     
-    flatMap.put("iterationCount", getChain().getIterationCount() + 1);
+    flatMap.put("iterationCount", getChain().getIteration() + 1);
     flatMap.put("logPrior", logPrior);
     flatMap.put("logLikelihood", logLikelihood);
     
@@ -448,7 +450,7 @@ public class Model implements Observer, Serializable {
   public Map<String, String> makeFlatSample() {
     Map<String, String> samp = new LinkedHashMap<String, String>();
     
-    samp.put("iterationCount", Long.toString(getChain().getIterationCount()));
+    samp.put("iterationCount", Long.toString(getChain().getIteration()));
     samp.put("logPrior", Double.toString(logPrior));
     samp.put("logLikelihood", Double.toString(logLikelihood));
     
@@ -456,6 +458,14 @@ public class Model implements Observer, Serializable {
       samp.put(var.getName(), var.makeOutputString());
     }
     
+    return samp;
+  }
+  
+  public Map<String, String> makeDbSample(Gson gson) {
+    Map<String, String> samp = new LinkedHashMap<String, String>(unobservedVariables.size());
+    for(Variable var : unobservedVariables) {
+      samp.put(var.getName(), var.toJson(gson));
+    }
     return samp;
   }
   

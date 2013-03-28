@@ -19,10 +19,9 @@
 
 package mc3kit;
 
-import java.io.Serializable;
 import java.util.*;
 
-public interface Step extends Serializable
+public interface Step
 {
 	List<Task> makeTasks(int chainCount) throws MC3KitException;
 }

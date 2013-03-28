@@ -263,4 +263,9 @@ public class PartitionVariable extends Variable
   public String makeOutputString() { 
     return new Gson().toJson(assignment);
   }
+  
+  @Override
+  public String toJson(Gson gson) {
+    return gson.toJson(assignment);
+  }
 }

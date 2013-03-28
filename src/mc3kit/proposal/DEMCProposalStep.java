@@ -22,15 +22,17 @@ package mc3kit.proposal;
 import static java.lang.Math.*;
 import static mc3kit.util.Math.*;
 import static java.lang.String.format;
-import static mc3kit.util.Utils.makeMap;
+import static mc3kit.util.Utils.*;
 import mc3kit.*;
 import mc3kit.util.*;
 
 import java.io.Serializable;
 import java.util.*;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
+
+import org.tmatesoft.sqljet.core.*;
+import org.tmatesoft.sqljet.core.table.*;
 
 import cern.colt.*;
 import cern.colt.function.*;
@@ -151,15 +153,13 @@ public class DEMCProposalStep implements Step {
   
   class DEMCProposalTask implements Task {
     boolean initialized;
-    List<String> varNames;
-    List<DoubleMatrix1D> history;
-    double[] historySums;
-    double[] historySumSqs;
-    double[] historyMeans;
-    double[] historyStdDevs;
     
     int chainId;
-    private long iterationCount;
+    List<String> varNames;
+    
+    long historyCount;
+    double[] sums;
+    double[] sumSqs;
     
     List<BlockSizeManager> blockSizeManagers;
     
@@ -176,8 +176,6 @@ public class DEMCProposalStep implements Step {
 
     @Override
     public void step(Chain[] chains) throws MC3KitException {
-      iterationCount++;
-      
       assert (chains.length == 1);
 
       Chain chain = chains[0];
@@ -185,39 +183,38 @@ public class DEMCProposalStep implements Step {
       if(logger.isLoggable(Level.FINE)) {
         logger.fine(format("DEMCProposalStep stepping %d", chainId));
       }
-      Model model = chain.getModel();
       
-      initialize(model);
+      initialize(chain);
       
-      assert(chains.length == 1);
+      long iteration = chain.getIteration();
       
       // Only iterate if we have enough initial values
-      if(history.size() >= initialHistoryCount) {
+      Model model = chain.getModel();
+      if(historyCount >= initialHistoryCount) {
         for(BlockSizeManager bsm : blockSizeManagers) {
           bsm.step(chain, model);
         }
       }
       
-      // Record history
-      if(iterationCount >= recordHistoryAfter && iterationCount % historyThin == 0) {
-        recordHistory(model);
+      if(iteration > recordHistoryAfter) {
+        recordHistory(chain);
       }
     }
     
     /*** PRIVATE METHODS ***/
     
-    private void recordHistory(Model model)
-    {
-      DoubleMatrix1D vec = makeVector(model);
-      history.add(vec);
-      
-      for(int i = 0; i < vec.size(); i++)
-      {
-        double xi = vec.getQuick(i);
-        historySums[i] += xi;
-        historySumSqs[i] += xi * xi;
-        historyMeans[i] = historySums[i] / history.size();
-        historyStdDevs[i] = historySumSqs[i] / history.size() - historyMeans[i] * historyMeans[i];
+    long getHistoryCount(Chain chain) throws MC3KitException {
+      try {
+        SqlJetDb db = chain.getDb();
+        db.beginTransaction(SqlJetTransactionMode.READ_ONLY);
+        
+        ISqlJetTable table = db.getTable("demcHistory");
+        long rowCount = table.open().getRowCount();
+        db.commit();
+        return rowCount;
+      }
+      catch(SqlJetException e) {
+        throw new MC3KitException(format("Got exception trying to count history (chain %d)", chain.getChainId()), e);
       }
     }
     
@@ -254,9 +251,22 @@ public class DEMCProposalStep implements Step {
       }
     }
     
-    private void initialize(Model model) throws MC3KitException {
+    private void initialize(Chain chain) throws MC3KitException {
       if(initialized) return;
       initialized = true;
+      
+      // Initialize table with one row per iteration for fast access to past samples
+      try {
+        SqlJetDb db = chain.getDb();
+        db.beginTransaction(SqlJetTransactionMode.WRITE);
+        db.createTable("CREATE TABLE demcHistory (sample BLOB)");
+        db.commit();
+      }
+      catch(SqlJetException e) {
+        throw new MC3KitException(format("Couldn't create demc_history table on chain %d", chain.getChainId()), e);
+      }
+      
+      Model model = chain.getModel();
       
       varNames = new ArrayList<String>();
       for(String varName : model.getUnobservedVariableNames()) {
@@ -265,11 +275,8 @@ public class DEMCProposalStep implements Step {
         }
       }
       
-      history = new ArrayList<DoubleMatrix1D>();
-      historySums = new double[varNames.size()];
-      historySumSqs = new double[varNames.size()];
-      historyMeans = new double[varNames.size()];
-      historyStdDevs = new double[varNames.size()];
+      sums = new double[varNames.size()];
+      sumSqs = new double[varNames.size()];
       
       // Create managers for each block size.
       // Block sizes are minBlockSize, 2*minBlockSize, 4*minBlockSize, ...
@@ -285,21 +292,43 @@ public class DEMCProposalStep implements Step {
       }
     }
     
-    private DoubleMatrix1D[] getRandomSamples(RandomEngine rng, int count)
+    private void recordHistory(Chain chain) throws MC3KitException {
+      Model model = chain.getModel();
+      
+      double[] values = new double[varNames.size()];
+      for(int i = 0; i < values.length; i++) {
+        values[i] = model.getDoubleVariable(varNames.get(i)).getValue();
+        sums[i] += values[i];
+        sumSqs[i] += values[i] * values[i];
+      }
+      
+      try {
+        SqlJetDb db = chain.getDb();
+        db.beginTransaction(SqlJetTransactionMode.WRITE);
+        ISqlJetTable table = db.getTable("demcHistory");
+        table.insert(toBytes(values));
+        db.commit();
+      }
+      catch(SqlJetException e) {
+        throw new MC3KitException(format("Error recording history on chain %d", chain.getChainId()), e);
+      }
+      
+      historyCount++;
+    }
+    
+    private DoubleMatrix1D[] getRandomSamples(Chain chain, RandomEngine rng, int count) throws MC3KitException
     {
       Uniform unif = new Uniform(rng);
       
-      int[] indexes = new int[count];
+      long[] indexes = new long[count];
       DoubleMatrix1D[] samples = new DoubleMatrix1D[count];
       
-      int historyCount = history.size();
-      assert(historyCount >= count);
       for(int i = 0; i < count; i++)
       {
         boolean done = false;
         while(!done)
         {
-          indexes[i] = unif.nextIntFromTo(0, historyCount - 1);
+          indexes[i] = unif.nextLongFromTo(0, historyCount - 1);
           done = true;
           for(int j = 0; j < i; j++)
           {
@@ -310,10 +339,27 @@ public class DEMCProposalStep implements Step {
             }
           }
         }
-        samples[i] = history.get(indexes[i]);
+        samples[i] = getSample(chain, indexes[i]);
       }
       
       return samples;
+    }
+    
+    private DoubleMatrix1D getSample(Chain chain, long index) throws MC3KitException {
+      try {
+        SqlJetDb db = chain.getDb();
+        db.beginTransaction(SqlJetTransactionMode.READ_ONLY);
+        ISqlJetTable table = db.getTable("demcHistory");
+        ISqlJetCursor c = table.open();
+        c.goToRow(index+1);
+        double[] values = fromBytes(c.getBlobAsArray("sample")); 
+        db.commit();
+        
+        return new DenseDoubleMatrix1D(values);
+      }
+      catch(SqlJetException e) {
+        throw new MC3KitException(e);
+      }
     }
     
     /*** MANAGER FOR PROPOSALS FOR A SINGLE BLOCK SIZE ***/
@@ -354,9 +400,10 @@ public class DEMCProposalStep implements Step {
       
       void recordStats(Chain chain, int chainId) throws MC3KitException
       {
-        if(history.size() > initialHistoryCount && iterationCount % tuneEvery == 0) {
+        long iteration = chain.getIteration();
+        if(iteration % tuneEvery == 0) {
           Map<String, Object> infoObj = makeMap(
-            "iteration", iterationCount,
+            "iteration", iteration,
             "chainId", chainId,
             "blockSize", blockSize,
             "snookerGammaFactor", snookerGammaFactor,
@@ -371,11 +418,12 @@ public class DEMCProposalStep implements Step {
       
       void tune(Chain chain, int chainId) throws MC3KitException
       {
-        if(history.size() > initialHistoryCount && iterationCount % tuneEvery == 0)
+        long iteration = chain.getIteration();
+        if(iteration % tuneEvery == 0)
         {
           Logger logger = chain.getLogger();
           
-          if(iterationCount <= tuneFor)
+          if(iteration <= tuneFor)
           {
             if(logger.isLoggable(Level.FINE)) {
               logger.fine(format("Tuning for %d...", blockSize));
@@ -450,7 +498,7 @@ public class DEMCProposalStep implements Step {
         RandomEngine rng = chain.getRng();
         
         // Random sample from past to determine variable order and alignment
-        DoubleMatrix1D refVec = getRandomSamples(rng, 1)[0];
+        DoubleMatrix1D refVec = getRandomSamples(chain, rng, 1)[0];
         
         // Get order of entries in a way that makes covarying/anti-covarying
         // entries tend to get lumped together
@@ -471,18 +519,19 @@ public class DEMCProposalStep implements Step {
           int[] block = Arrays.copyOfRange(entryOrder, i, blockEnd);
           
           if(useParallel) {
-            proposeBlockDEMCParallel(priorHeatExp, likeHeatExp, false, block, xModel, rng);
+            proposeBlockDEMCParallel(chain, priorHeatExp, likeHeatExp, false, block, xModel, rng);
             if(useLarge) {
-              proposeBlockDEMCParallel(priorHeatExp, likeHeatExp, true, block, xModel, rng);
+              proposeBlockDEMCParallel(chain, priorHeatExp, likeHeatExp, true, block, xModel, rng);
             }
           }
           if(useSnooker) {
-            proposeBlockDEMCSnooker(priorHeatExp, likeHeatExp, block, xModel, rng);
+            proposeBlockDEMCSnooker(chain, priorHeatExp, likeHeatExp, block, xModel, rng);
           }
         }
       }
       
       void proposeBlockDEMCSnooker(
+        Chain chain,
         double priorHeatExp, double likeHeatExp,
         int[] block,
         Model xModel,
@@ -492,10 +541,11 @@ public class DEMCProposalStep implements Step {
         // adjusted by factor to target this distribution
         double gamma = snookerGammaFactor * 1.7;
         
-        proposeBlockDEMC(priorHeatExp, likeHeatExp, gamma, false, true, block, xModel, rng);
+        proposeBlockDEMC(chain, priorHeatExp, likeHeatExp, gamma, false, true, block, xModel, rng);
       }
       
       void proposeBlockDEMCParallel(
+          Chain chain,
           double priorHeatExp, double likeHeatExp,
           boolean isLarge,
           int[] block,
@@ -510,10 +560,11 @@ public class DEMCProposalStep implements Step {
         if(isLarge)
           gamma *= 2.0;
         
-        proposeBlockDEMC(priorHeatExp, likeHeatExp, gamma, isLarge, false, block, xModel, rng);
+        proposeBlockDEMC(chain, priorHeatExp, likeHeatExp, gamma, isLarge, false, block, xModel, rng);
       }
       
       void proposeBlockDEMC(
+          Chain chain,
           double priorHeatExp, double likeHeatExp,
           double gamma,
           boolean isLarge,
@@ -540,7 +591,7 @@ public class DEMCProposalStep implements Step {
             // Get three random samples:
             // * z: to define projection vector (x - z)
             // * zR1, zR2: to project onto (x - z) to define difference
-            samps = getRandomSamples(rng, 3);
+            samps = getRandomSamples(chain, rng, 3);
             
             z = samps[0].viewSelection(block);
             xMinusZOld = subtract(xOld, z);
@@ -557,7 +608,7 @@ public class DEMCProposalStep implements Step {
         }
         else { 
           // Get two random samples to define difference
-          DoubleMatrix1D[] samps = getRandomSamples(rng, 2);
+          DoubleMatrix1D[] samps = getRandomSamples(chain, rng, 2);
           z1 = samps[0].viewSelection(block);
           z2 = samps[1].viewSelection(block);
         }
@@ -667,15 +718,20 @@ public class DEMCProposalStep implements Step {
         // Generate original order and x values standardized by mean/stddev estimates
         for(int i = 0; i < xRel.length; i++)
         {
+          double N = historyCount;
+          double iMean = sums[i] / N;
+          double iSD = N / (N - 1.0) * (sumSqs[i] / N - iMean * iMean);
+          
           order[i] = i;
-          if(historyStdDevs[i] == 0)
+          if(iSD == 0)
             xRel[i] = 0;
           else
-            xRel[i] = abs((x.getQuick(i) - historyMeans[i]) / historyStdDevs[i]);
+            xRel[i] = abs((x.getQuick(i) - iMean) / iSD);
           
           if(Double.isInfinite(xRel[i]) || Double.isNaN(xRel[i])) {
-            logger.warning(format("Got infinite or NaN xRel for entry %d: (%f - %f)/%f",
-              x.getQuick(i), historyMeans[i], historyStdDevs[i]
+            logger.warning(format("Got infinite or NaN xRel for entry %s(%d): (%f - %f)/%f",
+              varNames.get(i), i,
+              x.getQuick(i), iMean, iSD
             ));
             xRel[i] = 0;
           }

@@ -19,6 +19,8 @@
 
 package mc3kit;
 
+import com.google.gson.Gson;
+
 @SuppressWarnings("serial")
 public class DoubleVariable extends Variable implements DoubleValued {
   
@@ -133,5 +135,10 @@ public class DoubleVariable extends Variable implements DoubleValued {
   @Override
   public String makeOutputString() {
     return Double.toString(value);
+  }
+  
+  @Override
+  public String toJson(Gson gson) {
+    return gson.toJson(value);
   }
 }

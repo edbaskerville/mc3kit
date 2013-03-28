@@ -35,19 +35,19 @@ public abstract class ModelNode extends Node {
     super(name);
   }
   
-  public boolean update() {
+  public boolean update() throws MC3KitException {
     return true;
   }
   
-  public boolean update(Set<ModelEdge> fromEdges) {
+  public boolean update(Set<ModelEdge> fromEdges) throws MC3KitException {
     return update();
   }
   
-  public boolean updateAfterRejection() {
+  public boolean updateAfterRejection() throws MC3KitException {
     return update();
   }
   
-  public boolean updateAfterRejection(Set<ModelEdge> fromEdges) {
+  public boolean updateAfterRejection(Set<ModelEdge> fromEdges) throws MC3KitException {
     return update(fromEdges);
   }
   

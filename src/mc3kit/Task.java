@@ -19,9 +19,7 @@
 
 package mc3kit;
 
-import java.io.Serializable;
-
-public interface Task extends Serializable
+public interface Task
 {
 	int[] getChainIds();
 	void step(Chain[] chains) throws MC3KitException;
