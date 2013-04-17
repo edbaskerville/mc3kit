@@ -36,7 +36,7 @@ class FirstStep implements Step {
       Chain chain = chains[0];
       chain.initialize();
       
-      if(chain.getIteration() % chain.getMCMC().getThin() == 0) {
+      if((chain.getIteration() % chain.getMCMC().getThin()) == 0) {
         chain.writeToDb();
       }
       

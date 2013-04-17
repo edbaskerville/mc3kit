@@ -196,7 +196,7 @@ public class DEMCProposalStep implements Step {
         }
       }
       
-      if(iteration > recordHistoryAfter) {
+      if(iteration > recordHistoryAfter && iteration % historyThin == 0) {
         recordHistory(chain);
       }
     }

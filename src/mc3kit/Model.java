@@ -436,7 +436,7 @@ public class Model implements Observer, Serializable {
   public Map<String, Object> makeHierarchicalSample() {
     Map<String, Object> flatMap = new LinkedHashMap<String, Object>();
     
-    flatMap.put("iterationCount", getChain().getIteration() + 1);
+    flatMap.put("iteration", getChain().getIteration());
     flatMap.put("logPrior", logPrior);
     flatMap.put("logLikelihood", logLikelihood);
     

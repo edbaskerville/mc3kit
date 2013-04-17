@@ -26,7 +26,6 @@ import java.util.*;
 import mc3kit.*;
 import mc3kit.output.SampleWriterFactory;
 
-@SuppressWarnings("serial")
 public class SampleOutputStep implements Step
 {
   String filename;
@@ -63,8 +62,6 @@ public class SampleOutputStep implements Step
 	{
 		SampleWriter writer;
 		
-		private long iterationCount;
-		
 		@Override
 		public int[] getChainIds()
 		{
@@ -84,12 +81,11 @@ public class SampleOutputStep implements Step
 		@Override
 		public void step(Chain[] chains) throws MC3KitException
 		{
-      iterationCount++;
-      
       Chain chain = chains[0];
-			if(iterationCount % thin == 0)
+      long iteration = chain.getIteration();
+			if(iteration % thin == 0)
 			{
-	      chain.getLogger().fine(format("Writing sample %d", iterationCount));
+	      chain.getLogger().fine(format("Writing sample %d", iteration));
 				Model model = chain.getModel();
 				
 				writer.writeSample(model);
