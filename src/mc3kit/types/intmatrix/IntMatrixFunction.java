@@ -19,7 +19,6 @@
 
 package mc3kit.types.intmatrix;
 
-import mc3kit.*;
 import mc3kit.model.Function;
 import mc3kit.model.Model;
 

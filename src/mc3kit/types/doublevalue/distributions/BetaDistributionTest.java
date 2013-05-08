@@ -20,9 +20,7 @@
 package mc3kit.types.doublevalue.distributions;
 
 import static org.junit.Assert.*;
-
-import mc3kit.*;
-import mc3kit.types.doublevalue.DoubleVariable;
+import mc3kit.types.doublevalue.*;
 
 import org.junit.Test;
 

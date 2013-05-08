@@ -1,4 +1,4 @@
-package mc3kit.partition;
+package mc3kit.types.partition;
 
 import static java.lang.String.format;
 import static mc3kit.util.Utils.makeMap;
@@ -21,7 +21,6 @@ import mc3kit.model.Model;
 import mc3kit.model.Variable;
 import mc3kit.util.*;
 
-@SuppressWarnings("serial")
 public class PartitionRecombinationStep implements Step {
   ChainParity parity;
   long statsEvery;
@@ -145,7 +144,7 @@ public class PartitionRecombinationStep implements Step {
       Uniform unif = new Uniform(rng);
       int[] oldAssign0 = var0.assignment.clone();
       int[] oldAssign1 = var1.assignment.clone();
-      int[][] newAssign = generateNewAssignments(rng, unif, var0.getGroupCount(), oldAssign0, oldAssign1, var0.allowsEmptyGroups);
+      int[][] newAssign = generateNewAssignments(rng, unif, var0.getGroupCount(), oldAssign0, oldAssign1, var0.allowsEmptyGroups());
       
       
       // Make proposals

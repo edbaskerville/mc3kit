@@ -1,4 +1,4 @@
-package mc3kit.partition;
+package mc3kit.types.partition;
 
 import mc3kit.*;
 

@@ -18,12 +18,9 @@
 ***/
 
 package mc3kit.util;
-
-import java.io.Serializable;
 import java.util.*;
 
-@SuppressWarnings("serial")
-public class MultiCounter<T extends Enum<?>> implements Serializable
+public class MultiCounter<T extends Enum<?>>
 {
 	long count;
 	Map<T, Long> counts;
@@ -55,7 +52,7 @@ public class MultiCounter<T extends Enum<?>> implements Serializable
 		counts.clear();
 	}
 	
-	public void record(T... types)
+	public void record(@SuppressWarnings("unchecked") T... types)
 	{
 		count++;
 		for(T type : types)

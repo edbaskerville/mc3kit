@@ -26,18 +26,12 @@ import org.junit.*;
 
 import static org.junit.Assert.*;
 
-import mc3kit.MC3KitException;
-import mc3kit.distributions.*;
-import mc3kit.functions.DoubleSumFunction;
-import mc3kit.model.Model;
-import mc3kit.model.ModelFactory;
-import mc3kit.step.univariate.UnivariateProposalStep;
-import mc3kit.types.doublevalue.DoubleDistribution;
-import mc3kit.types.doublevalue.DoubleVariable;
-import mc3kit.types.doublevalue.distributions.BetaDistribution;
-import mc3kit.types.doublevalue.distributions.ExponentialDistribution;
-import mc3kit.types.doublevalue.distributions.NormalDistribution;
-import mc3kit.types.doublevalue.distributions.UniformDistribution;
+import mc3kit.*;
+import mc3kit.model.*;
+import mc3kit.step.univariate.*;
+import mc3kit.types.doublevalue.*;
+import mc3kit.types.doublevalue.distributions.*;
+import mc3kit.types.doublevalue.functions.*;
 import static java.lang.Math.*;
 
 public class MCMCTest {
@@ -316,7 +310,7 @@ public class MCMCTest {
 				DoubleDistribution d = new NormalDistribution(m);
 				DoubleVariable v1 = new DoubleVariable(m, "v1", d);
 				DoubleVariable v2 = new DoubleVariable(m, "v2", d);
-				new DoubleSumFunction(m, "v12").add(v1).add(v2);
+				new DoubleSum(m, "v12").add(v1).add(v2);
 				m.endConstruction();
 				
 				return m;

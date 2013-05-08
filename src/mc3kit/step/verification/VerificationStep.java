@@ -26,7 +26,6 @@ import mc3kit.mcmc.Chain;
 import mc3kit.mcmc.Step;
 import mc3kit.mcmc.Task;
 
-@SuppressWarnings("serial")
 public class VerificationStep implements Step {
   long runEvery;
   double tol;

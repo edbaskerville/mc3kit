@@ -33,7 +33,6 @@ import cern.jet.random.Beta;
 import static mc3kit.util.Math.*;
 import static java.lang.Math.*;
 
-@SuppressWarnings("serial")
 public class BetaDistribution extends DoubleDistribution {
   ModelEdge alphaEdge;
   double alpha;

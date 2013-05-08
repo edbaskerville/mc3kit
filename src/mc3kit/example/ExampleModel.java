@@ -20,19 +20,13 @@
 package mc3kit.example;
 
 import mc3kit.*;
-import mc3kit.distributions.*;
-import mc3kit.mcmc.Chain;
-import mc3kit.model.Model;
-import mc3kit.model.Variable;
-import mc3kit.types.doublevalue.DoubleDistribution;
-import mc3kit.types.doublevalue.DoubleVariable;
-import mc3kit.types.doublevalue.distributions.GammaDistribution;
-import mc3kit.types.doublevalue.distributions.NormalDistribution;
-import mc3kit.types.doublevalue.distributions.UniformDistribution;
+import mc3kit.mcmc.*;
+import mc3kit.model.*;
+import mc3kit.types.doublevalue.*;
+import mc3kit.types.doublevalue.distributions.*;
 import static java.lang.String.format;
 import static mc3kit.util.Math.*;
 
-@SuppressWarnings("serial")
 public class ExampleModel extends Model {
   double[] data;
   
@@ -42,8 +36,6 @@ public class ExampleModel extends Model {
   LikelihoodVariable likeVar;
   
   double oldLogP; // to be restored upon rejection
-  
-  protected ExampleModel() { }
 
   public ExampleModel(Chain initialChain, double[] data) throws MC3KitException {
     super(initialChain);

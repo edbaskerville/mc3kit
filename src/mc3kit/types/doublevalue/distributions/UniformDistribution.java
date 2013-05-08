@@ -19,7 +19,6 @@
 
 package mc3kit.types.doublevalue.distributions;
 
-import mc3kit.*;
 import mc3kit.model.Model;
 import mc3kit.model.Variable;
 import mc3kit.step.univariate.VariableProposer;
@@ -28,7 +27,6 @@ import mc3kit.types.doublevalue.DoubleVariable;
 import mc3kit.types.doublevalue.proposers.MHUniformProposer;
 import static java.lang.Math.*;
 
-@SuppressWarnings("serial")
 public class UniformDistribution extends DoubleDistribution {
   double min;
   double max;

@@ -1,14 +1,12 @@
-package mc3kit.functions;
+package mc3kit.types.doublearray.functions;
 
 import java.util.Arrays;
 
 import mc3kit.*;
-import mc3kit.model.Model;
-import mc3kit.model.ModelNode;
-import mc3kit.types.doublearray.DoubleArrayFunction;
-import mc3kit.types.doublevalue.DoubleValued;
+import mc3kit.model.*;
+import mc3kit.types.doublearray.*;
+import mc3kit.types.doublevalue.*;
 
-@SuppressWarnings("serial")
 public class DoubleSorter extends DoubleArrayFunction {
   
   DoubleValued[] values;

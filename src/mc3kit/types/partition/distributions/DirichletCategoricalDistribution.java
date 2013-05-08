@@ -1,6 +1,4 @@
-package mc3kit.partition;
-
-import java.util.Arrays;
+package mc3kit.types.partition.distributions;
 
 import cern.jet.random.Empirical;
 import cern.jet.random.EmpiricalWalker;
@@ -13,9 +11,10 @@ import mc3kit.model.ModelNode;
 import mc3kit.model.Variable;
 import mc3kit.types.doublearray.DoubleArrayValued;
 import mc3kit.types.doublevalue.DoubleValued;
+import mc3kit.types.partition.PartitionDistribution;
+import mc3kit.types.partition.PartitionVariable;
 import static mc3kit.util.Math.*;
 
-@SuppressWarnings("serial")
 public class DirichletCategoricalDistribution extends PartitionDistribution {
   
   double alpha;
@@ -109,10 +108,10 @@ public class DirichletCategoricalDistribution extends PartitionDistribution {
   public void sample(Variable var) throws MC3KitException {
     PartitionVariable partVar = (PartitionVariable)var;
     
-    assert partVar.allowsEmptyGroups == true;
+    assert partVar.allowsEmptyGroups() == true;
     
-    int n = partVar.n;
-    int k = partVar.k;
+    int n = partVar.getElementCount();
+    int k = partVar.getGroupCount();
     
     RandomEngine rng = getRng();
     

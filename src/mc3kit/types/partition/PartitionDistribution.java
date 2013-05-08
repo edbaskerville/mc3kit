@@ -1,11 +1,8 @@
-package mc3kit.partition;
+package mc3kit.types.partition;
 
-import mc3kit.*;
-import mc3kit.model.Distribution;
-import mc3kit.model.Model;
-import mc3kit.step.univariate.VariableProposer;
+import mc3kit.model.*;
+import mc3kit.step.univariate.*;
 
-@SuppressWarnings("serial")
 public abstract class PartitionDistribution extends Distribution {
   
   protected PartitionDistribution() { }

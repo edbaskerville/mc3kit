@@ -17,7 +17,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ***/
 
-package mc3kit.partition;
+package mc3kit.types.partition;
 
 import mc3kit.*;
 import mc3kit.model.Distribution;
@@ -26,22 +26,18 @@ import mc3kit.model.ModelNode;
 import mc3kit.model.Variable;
 import mc3kit.step.univariate.VariableProposer;
 import mc3kit.util.*;
-
-import java.io.Serializable;
 import java.util.*;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 
 import cern.jet.random.Uniform;
 
-@SuppressWarnings("serial")
 public class PartitionVariable extends Variable
 {
 	int n;
 	int k;
   
-  boolean allowsEmptyGroups;
+  private boolean allowsEmptyGroups;
   boolean useGibbs;
   
 	int[] assignment;
@@ -66,7 +62,7 @@ public class PartitionVariable extends Variable
 		
 		this.n = n;
 		this.k = k;
-		this.allowsEmptyGroups = allowsEmptyGroups;
+		this.setAllowsEmptyGroups(allowsEmptyGroups);
 		this.useGibbs = useGibbs;
 		
 		assignment = new int[n];
@@ -78,6 +74,14 @@ public class PartitionVariable extends Variable
 		associations = new ArrayList<Association>();
 	}
 	
+	public boolean allowsEmptyGroups() {
+		return allowsEmptyGroups;
+	}
+
+	public void setAllowsEmptyGroups(boolean allowsEmptyGroups) {
+		this.allowsEmptyGroups = allowsEmptyGroups;
+	}
+
 	public void associate(IndexAssociator associator) {
 	  indexAssociators.add(associator);
 	}
@@ -226,7 +230,7 @@ public class PartitionVariable extends Variable
 		return groups[assignment[i]].cardinality();
 	}
 	
-	private class Association implements Serializable
+	private class Association
 	{
 		ModelNode[] tails;
 		ModelNode[] heads;
@@ -245,7 +249,7 @@ public class PartitionVariable extends Variable
 		}
 	}
 	
-  private class DistributionAssociator implements Associator, Serializable {
+  private class DistributionAssociator implements Associator {
     @Override
     public void associate(ModelNode tail, ModelNode head) throws MC3KitException {
       ((Variable)tail).setDistribution((Distribution)head);

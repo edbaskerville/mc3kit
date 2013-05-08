@@ -15,40 +15,48 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.example;
+
+import java.util.Map;
 
 import mc3kit.*;
 import mc3kit.mcmc.Chain;
 import mc3kit.model.Model;
 import mc3kit.model.ModelFactory;
 
-@SuppressWarnings("serial")
 public class ExampleModelFactory implements ModelFactory {
-  double[] data;
-  
-  public ExampleModelFactory(double[] data)
-  {
-    this.data = data;
-  }
-
-  @Override
-  public Model createModel(Chain initialChain) throws MC3KitException {
-    // Models can also be created without subclassing directly in this method,
-    // although subclassing makes it more convenient to keep track of
-    // objects within the model. E.g., you could just do
-    // 
-    // Model m = new Model(initialChain);
-    // m.beginConstruction();
-    // DoubleDistribution d = new NormalDistribution(m);
-    // DoubleVariable v = new DoubleVariable(m, "v", d);
-    // v.setValue(-10 + 20 * m.getRng().nextDouble());
-    // m.endConstruction();
-    // return m;
-    //
-    // Construction must be bounded by beginConstruction() and endConstruction().
-    
-    return new ExampleModel(initialChain, data);
-  }
+	double[] data;
+	
+	public ExampleModelFactory(double[] data) {
+		this.data = data;
+	}
+	
+	@Override
+	public Model createModel(Chain initialChain) throws MC3KitException {
+		// Models can also be created without subclassing directly in this
+		// method,
+		// although subclassing makes it more convenient to keep track of
+		// objects within the model. E.g., you could just do
+		//
+		// Model m = new Model(initialChain);
+		// m.beginConstruction();
+		// DoubleDistribution d = new NormalDistribution(m);
+		// DoubleVariable v = new DoubleVariable(m, "v", d);
+		// v.setValue(-10 + 20 * m.getRng().nextDouble());
+		// m.endConstruction();
+		// return m;
+		//
+		// Construction must be bounded by beginConstruction() and
+		// endConstruction().
+		
+		return new ExampleModel(initialChain, data);
+	}
+	
+	@Override
+	public Model createModel(Chain initialChain, Map<String, Object> sample)
+			throws MC3KitException {
+		return null;
+	}
 }

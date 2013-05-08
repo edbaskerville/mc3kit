@@ -22,7 +22,6 @@ package mc3kit.types.binary;
 import mc3kit.model.Distribution;
 import mc3kit.model.Model;
 
-@SuppressWarnings("serial")
 public abstract class BinaryDistribution extends Distribution {
 
   protected BinaryDistribution() { }

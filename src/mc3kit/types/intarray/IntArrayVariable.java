@@ -25,8 +25,6 @@ import mc3kit.MC3KitException;
 import mc3kit.model.Model;
 import mc3kit.model.Variable;
 
-import com.google.gson.Gson;
-
 public class IntArrayVariable extends Variable implements IntArrayValued {
   
   private int[] value;

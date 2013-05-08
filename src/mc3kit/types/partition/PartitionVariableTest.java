@@ -17,9 +17,11 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ***/
 
-package mc3kit.partition;
+package mc3kit.types.partition;
 
 import static org.junit.Assert.*;
+
+import java.util.Map;
 
 import mc3kit.MC3KitException;
 import mc3kit.mcmc.Chain;
@@ -45,7 +47,6 @@ public class PartitionVariableTest {
   public void tearDown() throws Exception {
   }
 
-  @SuppressWarnings("serial")
   @Test
   public void normalMixture() throws Throwable {
     long burnIn = 5000;
@@ -79,6 +80,12 @@ public class PartitionVariableTest {
         
         return m;
       }
+
+	@Override
+	public Model createModel(Chain initialChain, Map<String, Object> sample)
+			throws MC3KitException {
+		return null;
+	}
     });
 
     UnivariateProposalStep proposalStep = new UnivariateProposalStep(0.25, 100, burnIn);

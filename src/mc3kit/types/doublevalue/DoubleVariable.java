@@ -24,8 +24,6 @@ import mc3kit.model.Distribution;
 import mc3kit.model.Model;
 import mc3kit.model.Variable;
 
-import com.google.gson.Gson;
-
 public class DoubleVariable extends Variable implements DoubleValued {
   
   private double value;

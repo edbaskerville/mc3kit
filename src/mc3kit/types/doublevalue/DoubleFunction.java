@@ -22,7 +22,6 @@ package mc3kit.types.doublevalue;
 import mc3kit.model.Function;
 import mc3kit.model.Model;
 
-@SuppressWarnings("serial")
 public abstract class DoubleFunction extends Function implements DoubleValued {
   private double value;
   

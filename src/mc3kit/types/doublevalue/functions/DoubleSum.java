@@ -17,7 +17,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ***/
 
-package mc3kit.functions;
+package mc3kit.types.doublevalue.functions;
 
 import mc3kit.*;
 import mc3kit.model.Model;
@@ -28,25 +28,25 @@ import mc3kit.types.doublevalue.DoubleValued;
 
 import java.util.*;
 
-public class DoubleSumFunction extends DoubleFunction {
+public class DoubleSum extends DoubleFunction {
   Map<DoubleValued, Summand> summandMap;
   
-  protected DoubleSumFunction() { }
+  protected DoubleSum() { }
   
-  public DoubleSumFunction(Model model) {
+  public DoubleSum(Model model) {
     this(model, null);
   }
 
-  public DoubleSumFunction(Model model, String name) {
+  public DoubleSum(Model model, String name) {
     super(model, name);
     summandMap = new LinkedHashMap<DoubleValued, Summand>(2);
   }
   
-  public DoubleSumFunction add(DoubleValued summandNode) throws MC3KitException {
+  public DoubleSum add(DoubleValued summandNode) throws MC3KitException {
     return add(summandNode, 1.0);
   }
   
-  public DoubleSumFunction add(DoubleValued summandNode, double coeff) throws MC3KitException {
+  public DoubleSum add(DoubleValued summandNode, double coeff) throws MC3KitException {
     if(summandMap.containsKey(summandNode)) {
       throw new IllegalArgumentException("Summand already present.");
     }

@@ -20,7 +20,6 @@
 package mc3kit.types.doublevalue.distributions;
 
 import cern.jet.random.Normal;
-import mc3kit.*;
 
 import static java.lang.Math.*;
 import static mc3kit.util.Math.*;
@@ -30,14 +29,12 @@ import mc3kit.model.Model;
 import mc3kit.model.ModelEdge;
 import mc3kit.model.ModelNode;
 import mc3kit.model.Variable;
-import mc3kit.step.demc.*;
 import mc3kit.step.univariate.VariableProposer;
 import mc3kit.types.doublevalue.DoubleDistribution;
 import mc3kit.types.doublevalue.DoubleValued;
 import mc3kit.types.doublevalue.DoubleVariable;
 import mc3kit.types.doublevalue.proposers.MHNormalProposer;
 
-@SuppressWarnings("serial")
 public class NormalDistribution extends DoubleDistribution {
 
   double mean;

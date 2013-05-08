@@ -26,7 +26,6 @@ import mc3kit.step.univariate.VariableProposer;
 import mc3kit.types.doublevalue.DoubleDistribution;
 import mc3kit.types.doublevalue.proposers.MHNormalProposer;
 
-@SuppressWarnings("serial")
 public class ImproperUniformDistribution extends DoubleDistribution {
   protected ImproperUniformDistribution() { }
   

@@ -22,7 +22,6 @@ package mc3kit.types.doublearray;
 import mc3kit.model.Function;
 import mc3kit.model.Model;
 
-@SuppressWarnings("serial")
 public abstract class DoubleArrayFunction extends Function implements DoubleArrayValued {
   private double[] value;
   

@@ -5,7 +5,6 @@ import mc3kit.model.Model;
 import mc3kit.model.ModelNode;
 import mc3kit.types.doublevalue.DoubleFunction;
 
-@SuppressWarnings("serial")
 public class DoubleArrayEntry extends DoubleFunction {
   private DoubleArrayValued array;
   private int index; 

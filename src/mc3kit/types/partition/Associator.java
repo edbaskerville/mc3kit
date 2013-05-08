@@ -17,13 +17,11 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ***/
 
-package mc3kit.partition;
-
-import java.io.Serializable;
+package mc3kit.types.partition;
 
 import mc3kit.MC3KitException;
 import mc3kit.model.ModelNode;
 
-public interface Associator extends Serializable {
+public interface Associator {
   void associate(ModelNode tail, ModelNode head) throws MC3KitException;
 }

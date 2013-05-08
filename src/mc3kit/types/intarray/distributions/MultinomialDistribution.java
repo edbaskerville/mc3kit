@@ -13,7 +13,6 @@ import mc3kit.types.doublearray.DoubleArrayValued;
 import mc3kit.types.intarray.IntArrayDistribution;
 import mc3kit.types.intarray.IntArrayVariable;
 
-@SuppressWarnings("serial")
 public class MultinomialDistribution extends IntArrayDistribution {
   private ModelEdge pEdge;
   

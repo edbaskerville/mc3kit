@@ -24,7 +24,6 @@ import mc3kit.model.Distribution;
 import mc3kit.model.Model;
 import mc3kit.model.Variable;
 
-@SuppressWarnings("serial")
 public class BinaryVariable extends Variable implements BinaryValued {
   
   private boolean value;

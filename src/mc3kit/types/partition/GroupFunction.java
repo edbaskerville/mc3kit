@@ -1,11 +1,10 @@
-package mc3kit.partition;
+package mc3kit.types.partition;
 
 import mc3kit.MC3KitException;
 import mc3kit.model.Function;
 import mc3kit.model.Model;
 import mc3kit.util.IterableBitSet;
 
-@SuppressWarnings("serial")
 public class GroupFunction extends Function {
   private PartitionVariable partVar;
   private int groupNum;

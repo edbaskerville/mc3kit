@@ -17,22 +17,20 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ***/
 
-package mc3kit.partition;
+package mc3kit.types.partition;
 
 import java.util.*;
-//import java.util.logging.*;
 
 import static java.lang.Math.*;
 import static mc3kit.util.Random.*;
 import cern.jet.random.Uniform;
 import cern.jet.random.engine.RandomEngine;
 import mc3kit.*;
-import mc3kit.mcmc.Chain;
-import mc3kit.model.Model;
-import mc3kit.step.univariate.VariableProposer;
+import mc3kit.mcmc.*;
+import mc3kit.model.*;
+import mc3kit.step.univariate.*;
 import static mc3kit.util.Math.*;
 
-@SuppressWarnings("serial")
 public class PartitionProposer extends VariableProposer
 {
   
@@ -51,7 +49,7 @@ public class PartitionProposer extends VariableProposer
     if(var.getGroupCount() == 1)
       return;
     
-    if(var.allowsEmptyGroups) {
+    if(var.allowsEmptyGroups()) {
       if(var.useGibbs) {
         stepGibbsAllowingEmpty(model, chain, rng, var);
       }

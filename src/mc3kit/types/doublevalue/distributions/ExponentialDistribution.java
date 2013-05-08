@@ -26,14 +26,12 @@ import mc3kit.model.Model;
 import mc3kit.model.ModelEdge;
 import mc3kit.model.ModelNode;
 import mc3kit.model.Variable;
-import mc3kit.step.demc.*;
 import mc3kit.step.univariate.VariableProposer;
 import mc3kit.types.doublevalue.DoubleDistribution;
 import mc3kit.types.doublevalue.DoubleValued;
 import mc3kit.types.doublevalue.DoubleVariable;
 import mc3kit.types.doublevalue.proposers.MHMultiplierProposer;
 
-@SuppressWarnings("serial")
 public class ExponentialDistribution extends DoubleDistribution {
 
   double rate;

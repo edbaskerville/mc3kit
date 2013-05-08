@@ -24,20 +24,15 @@ import java.util.Date;
 
 import com.google.gson.*;
 
-import cern.jet.random.Normal;
-import cern.jet.random.engine.MersenneTwister;
-import cern.jet.random.engine.RandomEngine;
-import mc3kit.*;
-import mc3kit.mcmc.ChainParity;
-import mc3kit.mcmc.MCMC;
-import mc3kit.mcmc.Step;
-import mc3kit.monitoring.MarginalLikelihoodStep;
-import mc3kit.output.PriorLikelihoodOutputStep;
-import mc3kit.output.SampleOutputStep;
-import mc3kit.step.demc.DEMCProposalStep;
-import mc3kit.step.swap.SwapStep;
-import mc3kit.step.univariate.UnivariateProposalStep;
-import mc3kit.step.verification.VerificationStep;
+import cern.jet.random.*;
+import cern.jet.random.engine.*;
+import mc3kit.mcmc.*;
+import mc3kit.output.*;
+import mc3kit.step.demc.*;
+import mc3kit.step.statistics.*;
+import mc3kit.step.swap.*;
+import mc3kit.step.univariate.*;
+import mc3kit.step.verification.*;
 
 public class ExampleMain {
   /*
@@ -59,6 +54,9 @@ public class ExampleMain {
   static final long thin = 100;
   static final long burnIn = 20000;
   static final long tuneEvery = 200;
+  static final long recordHistoryAfter = 5000;
+  static final long iterateAfter = 10000;
+  
   static final double targetAcceptanceRate = 0.25;
   
   static final double heatPower = 3.0;
@@ -119,19 +117,7 @@ public class ExampleMain {
       // Proposes at multiple scales: 8, 16, 32, ... variables at a time.
       // (Since this model only has 5 parameters, it'll just do all 5.)
       // For details of method and parameters, see source for DEMCProposalStep and methods paper
-      Step demcStep = new DEMCProposalStep(
-          targetAcceptanceRate,
-          burnIn, // Only tune during the burn-in period
-          tuneEvery,
-          thin, // Thin historical samples for DEMC in memory
-          initialHistoryCount, // Collect this many samples before starting DEMC proposals
-          0, // How many samples to wait before recording history (to prevent initial transients from being involved)
-          8, // Minimum number of variables to propose at a time
-          128, // Maximum number of variables to propose at a time
-          true, // Use standard "parallel" DEMC proposals (no projection)
-          true, // Also use double-size parallel DEMC proposals
-          true // Also use snooker proposals
-      );
+      Step demcStep = new DEMCProposalStep(burnIn, tuneEvery, recordHistoryAfter, iterateAfter);
       
       // Swap steps: even (0/1, 2/3, 4/5) and odd (1/2, 3/4, 5/6);
       // alternating these sets of pairs of chains ensures up to chainCount/2
