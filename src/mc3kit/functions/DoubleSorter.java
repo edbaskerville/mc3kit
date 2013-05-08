@@ -3,6 +3,10 @@ package mc3kit.functions;
 import java.util.Arrays;
 
 import mc3kit.*;
+import mc3kit.model.Model;
+import mc3kit.model.ModelNode;
+import mc3kit.types.doublearray.DoubleArrayFunction;
+import mc3kit.types.doublevalue.DoubleValued;
 
 @SuppressWarnings("serial")
 public class DoubleSorter extends DoubleArrayFunction {

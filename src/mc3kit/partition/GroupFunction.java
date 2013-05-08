@@ -1,8 +1,8 @@
 package mc3kit.partition;
 
-import mc3kit.Function;
 import mc3kit.MC3KitException;
-import mc3kit.Model;
+import mc3kit.model.Function;
+import mc3kit.model.Model;
 import mc3kit.util.IterableBitSet;
 
 @SuppressWarnings("serial")

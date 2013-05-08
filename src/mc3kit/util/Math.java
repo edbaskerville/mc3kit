@@ -293,15 +293,23 @@ public final class Math {
 
     return xp;
   }
-
-  public static double min(double... x) {
-    double min = Double.MIN_VALUE;
-    for(double xi : x)
+  
+  public static long max(long... x) {
+    long max = Long.MIN_VALUE;
+    for(long xi : x)
+      if(xi > max)
+        max = xi;
+    return max;
+  }
+  
+  public static long min(long... x) {
+    long min = Long.MAX_VALUE;
+    for(long xi : x)
       if(xi < min)
         min = xi;
     return min;
   }
-
+  
   public static double logisticSigmoid(double x) {
     return 1.0 / (1.0 + exp(-x));
   }

@@ -1,6 +1,9 @@
 package mc3kit.partition;
 
 import mc3kit.*;
+import mc3kit.model.Distribution;
+import mc3kit.model.Model;
+import mc3kit.step.univariate.VariableProposer;
 
 @SuppressWarnings("serial")
 public abstract class PartitionDistribution extends Distribution {

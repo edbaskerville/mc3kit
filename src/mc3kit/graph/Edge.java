@@ -19,11 +19,9 @@
 
 package mc3kit.graph;
 
-import java.io.Serializable;
 import java.util.Observable;
 
-@SuppressWarnings("serial")
-public class Edge extends Observable implements Serializable {
+public class Edge extends Observable {
   Node tail;
   Node head;
   String name;

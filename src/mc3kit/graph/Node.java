@@ -19,11 +19,9 @@
 
 package mc3kit.graph;
 
-import java.io.Serializable;
 import java.util.*;
 
-@SuppressWarnings("serial")
-public class Node extends Observable  implements Serializable {
+public class Node extends Observable  {
   String name;
   Graph graph;
   

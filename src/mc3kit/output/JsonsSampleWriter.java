@@ -22,6 +22,7 @@ package mc3kit.output;
 import java.io.*;
 
 import mc3kit.*;
+import mc3kit.model.Model;
 
 import com.google.gson.*;
 

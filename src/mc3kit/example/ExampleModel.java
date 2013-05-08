@@ -21,6 +21,14 @@ package mc3kit.example;
 
 import mc3kit.*;
 import mc3kit.distributions.*;
+import mc3kit.mcmc.Chain;
+import mc3kit.model.Model;
+import mc3kit.model.Variable;
+import mc3kit.types.doublevalue.DoubleDistribution;
+import mc3kit.types.doublevalue.DoubleVariable;
+import mc3kit.types.doublevalue.distributions.GammaDistribution;
+import mc3kit.types.doublevalue.distributions.NormalDistribution;
+import mc3kit.types.doublevalue.distributions.UniformDistribution;
 import static java.lang.String.format;
 import static mc3kit.util.Math.*;
 

@@ -4,6 +4,9 @@ import java.io.*;
 import java.util.*;
 
 import mc3kit.*;
+import mc3kit.mcmc.Chain;
+import mc3kit.mcmc.Step;
+import mc3kit.mcmc.Task;
 import mc3kit.util.*;
 import static mc3kit.util.Math.*;
 

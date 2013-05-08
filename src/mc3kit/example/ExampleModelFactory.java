@@ -20,6 +20,9 @@
 package mc3kit.example;
 
 import mc3kit.*;
+import mc3kit.mcmc.Chain;
+import mc3kit.model.Model;
+import mc3kit.model.ModelFactory;
 
 @SuppressWarnings("serial")
 public class ExampleModelFactory implements ModelFactory {

@@ -4,6 +4,10 @@ import java.util.*;
 import java.io.*;
 
 import mc3kit.*;
+import mc3kit.mcmc.Chain;
+import mc3kit.mcmc.Step;
+import mc3kit.mcmc.Task;
+import mc3kit.model.Model;
 import mc3kit.util.*;
 
 @SuppressWarnings("serial")

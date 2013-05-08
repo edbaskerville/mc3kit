@@ -7,6 +7,12 @@ import cern.jet.random.EmpiricalWalker;
 import cern.jet.random.Gamma;
 import cern.jet.random.engine.RandomEngine;
 import mc3kit.*;
+import mc3kit.model.Model;
+import mc3kit.model.ModelEdge;
+import mc3kit.model.ModelNode;
+import mc3kit.model.Variable;
+import mc3kit.types.doublearray.DoubleArrayValued;
+import mc3kit.types.doublevalue.DoubleValued;
 import static mc3kit.util.Math.*;
 
 @SuppressWarnings("serial")
@@ -56,7 +62,7 @@ public class DirichletCategoricalDistribution extends PartitionDistribution {
     return this;
   }
   
-  private double getAlpha(int index) {
+  private double getAlpha(int index) throws MC3KitException{
     if(alphaEdge != null) {
       assert alphaArrayEdge == null;
       
@@ -79,7 +85,7 @@ public class DirichletCategoricalDistribution extends PartitionDistribution {
   }
   
   @Override
-  public double getLogP(Variable var) {
+  public double getLogP(Variable var) throws MC3KitException {
     PartitionVariable partVar = (PartitionVariable)var;
     
     double logP = 0.0;
@@ -115,6 +121,20 @@ public class DirichletCategoricalDistribution extends PartitionDistribution {
     Gamma gamma = new Gamma(1.0, 1.0, rng);
     for(int g = 0; g < k; g++) {
       weights[g] = gamma.nextDouble(getAlpha(g), 1.0);
+    }
+    
+    // If they all come out to be zero, make them all the same.
+    boolean allZero = true;
+    for(int g = 0; g < k; g++) {
+    	if(weights[g] > 0.0) {
+    		allZero = false;
+    		break;
+    	}
+    }
+    if(allZero) {
+    	for(int g = 0; g < g; g++) {
+    		weights[g] = 1.0;
+    	}
     }
     
     // Draw group membership from categorical distribution with Dirichlet-drawn weights

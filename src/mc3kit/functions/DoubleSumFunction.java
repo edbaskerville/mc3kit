@@ -20,14 +20,16 @@
 package mc3kit.functions;
 
 import mc3kit.*;
+import mc3kit.model.Model;
+import mc3kit.model.ModelEdge;
+import mc3kit.model.ModelNode;
+import mc3kit.types.doublevalue.DoubleFunction;
+import mc3kit.types.doublevalue.DoubleValued;
 
-import java.io.Serializable;
 import java.util.*;
 
-@SuppressWarnings("serial")
 public class DoubleSumFunction extends DoubleFunction {
   Map<DoubleValued, Summand> summandMap;
-  Map<ModelEdge, Summand> edgeMap;
   
   protected DoubleSumFunction() { }
   
@@ -70,7 +72,7 @@ public class DoubleSumFunction extends DoubleFunction {
     return false;
   }
   
-  private class Summand implements Serializable {
+  private class Summand {
     double coeff;
     ModelEdge edge;
     

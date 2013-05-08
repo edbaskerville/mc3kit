@@ -24,6 +24,10 @@ import static java.lang.String.*;
 import java.util.*;
 
 import mc3kit.*;
+import mc3kit.mcmc.Chain;
+import mc3kit.mcmc.Step;
+import mc3kit.mcmc.Task;
+import mc3kit.model.Model;
 import mc3kit.output.SampleWriterFactory;
 
 public class SampleOutputStep implements Step

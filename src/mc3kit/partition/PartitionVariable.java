@@ -20,12 +20,18 @@
 package mc3kit.partition;
 
 import mc3kit.*;
+import mc3kit.model.Distribution;
+import mc3kit.model.Model;
+import mc3kit.model.ModelNode;
+import mc3kit.model.Variable;
+import mc3kit.step.univariate.VariableProposer;
 import mc3kit.util.*;
 
 import java.io.Serializable;
 import java.util.*;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import cern.jet.random.Uniform;
 
@@ -263,9 +269,14 @@ public class PartitionVariable extends Variable
   public String makeOutputString() { 
     return new Gson().toJson(assignment);
   }
-  
+
   @Override
-  public String toJson(Gson gson) {
-    return gson.toJson(assignment);
+  public Object toDbValue() {
+    return getGson().toJson(assignment);
+  }
+
+  @Override
+  public void loadFromDbValue(Object value) throws MC3KitException {
+    setGroups(getGson().fromJson((String)value, int[].class));
   }
 }

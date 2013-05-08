@@ -19,7 +19,6 @@
 
 package mc3kit.graph;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,8 +30,7 @@ import static java.lang.String.format;
  * @author Ed Baskerville
  *
  */
-@SuppressWarnings("serial")
-public class Graph extends Observable implements Serializable {
+public class Graph extends Observable {
   Set<Node> nodes;
   Map<String, Node> nodeNameMap;
   

@@ -28,11 +28,16 @@ import cern.jet.random.Normal;
 import cern.jet.random.engine.MersenneTwister;
 import cern.jet.random.engine.RandomEngine;
 import mc3kit.*;
+import mc3kit.mcmc.ChainParity;
+import mc3kit.mcmc.MCMC;
+import mc3kit.mcmc.Step;
 import mc3kit.monitoring.MarginalLikelihoodStep;
 import mc3kit.output.PriorLikelihoodOutputStep;
 import mc3kit.output.SampleOutputStep;
-import mc3kit.proposal.DEMCProposalStep;
-import mc3kit.proposal.UnivariateProposalStep;
+import mc3kit.step.demc.DEMCProposalStep;
+import mc3kit.step.swap.SwapStep;
+import mc3kit.step.univariate.UnivariateProposalStep;
+import mc3kit.step.verification.VerificationStep;
 
 public class ExampleMain {
   /*

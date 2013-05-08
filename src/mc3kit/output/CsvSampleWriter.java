@@ -23,6 +23,7 @@ import java.io.*;
 import java.util.*;
 
 import mc3kit.*;
+import mc3kit.model.Model;
 
 @SuppressWarnings("serial")
 public class CsvSampleWriter implements SampleWriter

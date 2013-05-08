@@ -27,12 +27,14 @@ import static mc3kit.util.Random.*;
 import cern.jet.random.Uniform;
 import cern.jet.random.engine.RandomEngine;
 import mc3kit.*;
+import mc3kit.mcmc.Chain;
+import mc3kit.model.Model;
+import mc3kit.step.univariate.VariableProposer;
 import static mc3kit.util.Math.*;
 
 @SuppressWarnings("serial")
 public class PartitionProposer extends VariableProposer
 {
-  protected PartitionProposer() { }
   
 	protected PartitionProposer(String name) {
     super(name);
