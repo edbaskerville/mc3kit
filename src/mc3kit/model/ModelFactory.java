@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.model;
 
@@ -24,8 +24,9 @@ import java.util.*;
 import mc3kit.MC3KitException;
 import mc3kit.mcmc.Chain;
 
-public interface ModelFactory
-{
+public interface ModelFactory {
 	Model createModel(Chain initialChain) throws MC3KitException;
-	Model createModel(Chain initialChain, Map<String, Object> sample) throws MC3KitException;
+	
+	Model createModel(Chain initialChain, Map<String, Object> sample)
+			throws MC3KitException;
 }

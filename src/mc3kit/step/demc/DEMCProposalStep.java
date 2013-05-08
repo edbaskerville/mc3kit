@@ -19,7 +19,6 @@
 
 package mc3kit.step.demc;
 
-
 import mc3kit.*;
 import mc3kit.mcmc.Step;
 import mc3kit.mcmc.Task;
@@ -70,7 +69,8 @@ public class DEMCProposalStep implements Step {
 	boolean useLarge = true;
 	boolean useSnooker = true;
 	
-	public DEMCProposalStep(long tuneFor, long tuneEvery, long recordHistoryAfter, long iterateAfter) {
+	public DEMCProposalStep(long tuneFor, long tuneEvery,
+			long recordHistoryAfter, long iterateAfter) {
 	}
 	
 	public void setMinBlockSize(int minBlockSize) {
@@ -86,7 +86,7 @@ public class DEMCProposalStep implements Step {
 	}
 	
 	public void setUseLarge(boolean useLarge) {
-		this.useLarge= useLarge;
+		this.useLarge = useLarge;
 	}
 	
 	public void setUseSnooker(boolean useSnooker) {

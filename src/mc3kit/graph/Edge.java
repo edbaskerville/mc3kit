@@ -15,35 +15,36 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.graph;
 
 import java.util.Observable;
 
 public class Edge extends Observable {
-  Node tail;
-  Node head;
-  String name;
-  Graph graph;
-  
-  protected Edge() { }
-  
-  public Edge(Node tail, Node head) {
-    this.tail = tail;
-    this.head = head;
-  }
-  
-  public Edge(String name, Node tail, Node head) {
-    this(tail, head);
-    this.name = name;
-  }
-  
-  public Node getTail() {
-    return tail;
-  }
-  
-  public Node getHead() {
-    return head;
-  }
+	Node tail;
+	Node head;
+	String name;
+	Graph graph;
+	
+	protected Edge() {
+	}
+	
+	public Edge(Node tail, Node head) {
+		this.tail = tail;
+		this.head = head;
+	}
+	
+	public Edge(String name, Node tail, Node head) {
+		this(tail, head);
+		this.name = name;
+	}
+	
+	public Node getTail() {
+		return tail;
+	}
+	
+	public Node getHead() {
+		return head;
+	}
 }

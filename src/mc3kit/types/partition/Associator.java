@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.types.partition;
 
@@ -23,5 +23,5 @@ import mc3kit.MC3KitException;
 import mc3kit.model.ModelNode;
 
 public interface Associator {
-  void associate(ModelNode tail, ModelNode head) throws MC3KitException;
+	void associate(ModelNode tail, ModelNode head) throws MC3KitException;
 }

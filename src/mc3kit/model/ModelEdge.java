@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.model;
 
@@ -23,25 +23,28 @@ import mc3kit.MC3KitException;
 import mc3kit.graph.Edge;
 
 public class ModelEdge extends Edge {
-  Model model;
-  
-  protected ModelEdge() { }
-  
-  public ModelEdge(Model model, ModelNode tail, ModelNode head) throws MC3KitException {
-    super(tail, head);
-    model.addEdge(this);
-  }
-
-  public ModelEdge(Model model, String name, ModelNode tail, ModelNode head) throws MC3KitException {
-    super(name, tail, head);
-    model.addEdge(this);
-  }
-  
-  public ModelNode getTail() {
-    return (ModelNode)super.getTail();
-  }
-  
-  public ModelNode getHead() {
-    return (ModelNode)super.getHead();
-  }
+	Model model;
+	
+	protected ModelEdge() {
+	}
+	
+	public ModelEdge(Model model, ModelNode tail, ModelNode head)
+			throws MC3KitException {
+		super(tail, head);
+		model.addEdge(this);
+	}
+	
+	public ModelEdge(Model model, String name, ModelNode tail, ModelNode head)
+			throws MC3KitException {
+		super(name, tail, head);
+		model.addEdge(this);
+	}
+	
+	public ModelNode getTail() {
+		return (ModelNode) super.getTail();
+	}
+	
+	public ModelNode getHead() {
+		return (ModelNode) super.getHead();
+	}
 }

@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.types.binary.distributions;
 
@@ -37,66 +37,69 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class BernoulliDistributionTest {
-
-  @Before
-  public void setUp() throws Exception {
-  }
-
-  @After
-  public void tearDown() throws Exception {
-  }
-
-  @Test
-  public void test() throws Throwable {
-    long burnIn = 5000;
-    long iterCount = 10000;
-    
-    MCMC mcmc = new MCMC("db");
-    mcmc.setRandomSeed(100L);
-    
-    mcmc.setLogLevel(Level.INFO);
-    
-    ModelFactory mf = new ModelFactory() {
-      @Override
-      public Model createModel(Chain initialChain, Map<String, Object> sample) throws MC3KitException {
-        Model m = new Model(initialChain);
-        
-        m.beginConstruction();
-        new BinaryVariable(m, "v", new BernoulliDistribution(m, 0.3));
-        m.endConstruction();
-        
-        return m;
-      }
-
-		@Override
-		public Model createModel(Chain initialChain) throws MC3KitException {
-			return createModel(initialChain, null);
+	
+	@Before
+	public void setUp() throws Exception {
+	}
+	
+	@After
+	public void tearDown() throws Exception {
+	}
+	
+	@Test
+	public void test() throws Throwable {
+		long burnIn = 5000;
+		long iterCount = 10000;
+		
+		MCMC mcmc = new MCMC("db");
+		mcmc.setRandomSeed(100L);
+		
+		mcmc.setLogLevel(Level.INFO);
+		
+		ModelFactory mf = new ModelFactory() {
+			@Override
+			public Model createModel(Chain initialChain,
+					Map<String, Object> sample) throws MC3KitException {
+				Model m = new Model(initialChain);
+				
+				m.beginConstruction();
+				new BinaryVariable(m, "v", new BernoulliDistribution(m, 0.3));
+				m.endConstruction();
+				
+				return m;
+			}
+			
+			@Override
+			public Model createModel(Chain initialChain) throws MC3KitException {
+				return createModel(initialChain, null);
+			}
+		};
+		
+		mcmc.setModelFactory(mf);
+		
+		UnivariateProposalStep proposalStep = new UnivariateProposalStep(0.25,
+				100, burnIn);
+		mcmc.addStep(proposalStep);
+		
+		// Run, collect statistics, and check moments against expected
+		// distribution
+		int sum = 0;
+		for(long i = 0; i < iterCount; i++) {
+			mcmc.step();
+			mcmc.getModel().recalculate(1e-8);
+			
+			assertEquals(i + 1, mcmc.getIterationCount());
+			
+			if(i >= burnIn) {
+				boolean val = mcmc.getModel().getBinaryVariable("v").getValue();
+				sum += val ? 1 : 0;
+			}
 		}
-    };
-    
-    mcmc.setModelFactory(mf);
-    
-    UnivariateProposalStep proposalStep = new UnivariateProposalStep(0.25, 100, burnIn);
-    mcmc.addStep(proposalStep);
-    
-    // Run, collect statistics, and check moments against expected distribution
-    int sum = 0;
-    for(long i = 0; i < iterCount; i++) {
-      mcmc.step();
-      mcmc.getModel().recalculate(1e-8);
-      
-      assertEquals(i + 1, mcmc.getIterationCount());
-      
-      if(i >= burnIn) {
-        boolean val = mcmc.getModel().getBinaryVariable("v").getValue();
-        sum += val ? 1 : 0;
-      }
-    }
-    
-    double N = iterCount - burnIn;
-    
-    double mean = sum / (double)N;
-    System.err.printf("mean = %f\n", mean);
-    assertEquals(0.3, mean, 0.02);
-  }
+		
+		double N = iterCount - burnIn;
+		
+		double mean = sum / (double) N;
+		System.err.printf("mean = %f\n", mean);
+		assertEquals(0.3, mean, 0.02);
+	}
 }

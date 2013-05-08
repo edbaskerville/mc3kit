@@ -63,12 +63,10 @@ public class IntMatrixSum extends IntMatrixFunction {
 			}
 		}
 		
-		/*for(int i = 0; i < rowCount; i++) {
-			for(int j = 0; j < rowCount; j++) {
-				System.err.printf("%d\t", value[i][j]);
-			}
-			System.err.println();
-		}*/
+		/*
+		 * for(int i = 0; i < rowCount; i++) { for(int j = 0; j < rowCount; j++)
+		 * { System.err.printf("%d\t", value[i][j]); } System.err.println(); }
+		 */
 		
 		return true;
 	}

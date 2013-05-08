@@ -22,7 +22,8 @@ package mc3kit.types.intmatrix;
 import mc3kit.model.Function;
 import mc3kit.model.Model;
 
-public abstract class IntMatrixFunction extends Function implements IntMatrixValued {
+public abstract class IntMatrixFunction extends Function implements
+		IntMatrixValued {
 	int rowCount;
 	int columnCount;
 	protected int[][] value;

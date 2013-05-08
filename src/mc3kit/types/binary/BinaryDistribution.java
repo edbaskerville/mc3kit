@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.types.binary;
 
@@ -23,14 +23,15 @@ import mc3kit.model.Distribution;
 import mc3kit.model.Model;
 
 public abstract class BinaryDistribution extends Distribution {
-
-  protected BinaryDistribution() { }
-  
-  public BinaryDistribution(Model model) {
-    this(model, null);
-  }
-  
-  public BinaryDistribution(Model model, String name) {
-    super(model, name);
-  }
+	
+	protected BinaryDistribution() {
+	}
+	
+	public BinaryDistribution(Model model) {
+		this(model, null);
+	}
+	
+	public BinaryDistribution(Model model, String name) {
+		super(model, name);
+	}
 }

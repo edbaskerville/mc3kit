@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.types.intarray;
 
@@ -24,17 +24,18 @@ import mc3kit.model.Model;
 import mc3kit.step.univariate.VariableProposer;
 
 public abstract class IntArrayDistribution extends Distribution {
-
-  protected IntArrayDistribution() { }
-  
-  public IntArrayDistribution(Model model) {
-    this(model, null);
-  }
-  
-  public IntArrayDistribution(Model model, String name) {
-    super(model, name);
-  }
-
-  @Override
-  public abstract VariableProposer makeVariableProposer(String varName);
+	
+	protected IntArrayDistribution() {
+	}
+	
+	public IntArrayDistribution(Model model) {
+		this(model, null);
+	}
+	
+	public IntArrayDistribution(Model model, String name) {
+		super(model, name);
+	}
+	
+	@Override
+	public abstract VariableProposer makeVariableProposer(String varName);
 }

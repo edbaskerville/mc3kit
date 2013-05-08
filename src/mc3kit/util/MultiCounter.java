@@ -15,54 +15,46 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.util;
+
 import java.util.*;
 
-public class MultiCounter<T extends Enum<?>>
-{
+public class MultiCounter<T extends Enum<?>> {
 	long count;
 	Map<T, Long> counts;
 	
-	public MultiCounter()
-	{
+	public MultiCounter() {
 		count = 0;
 		counts = new HashMap<T, Long>();
 	}
 	
-	public long getCount()
-	{
+	public long getCount() {
 		return count;
 	}
 	
-	public long getCount(T type)
-	{
+	public long getCount(T type) {
 		return counts.containsKey(type) ? counts.get(type) : 0;
 	}
 	
-	public double getRate(T type)
-	{
-		return count == 0 ? 0.0 : getCount(type) / (double)count;
+	public double getRate(T type) {
+		return count == 0 ? 0.0 : getCount(type) / (double) count;
 	}
 	
-	public void reset()
-	{
+	public void reset() {
 		count = 0;
 		counts.clear();
 	}
 	
-	public void record(@SuppressWarnings("unchecked") T... types)
-	{
+	public void record(@SuppressWarnings("unchecked") T... types) {
 		count++;
-		for(T type : types)
-		{
+		for(T type : types) {
 			increment(type);
 		}
 	}
 	
-	private void increment(T type)
-	{
+	private void increment(T type) {
 		counts.put(type, getCount(type) + 1);
 	}
 }

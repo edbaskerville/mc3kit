@@ -73,7 +73,7 @@ public class Chain {
 		if(chainId != 0 && !mcmc.logAllChains) {
 			logger.setLevel(Level.OFF);
 		}
-		 
+		
 		File dbFile = null;
 		Path dbDir = mcmc.getDbPath();
 		if(dbDir != null) {

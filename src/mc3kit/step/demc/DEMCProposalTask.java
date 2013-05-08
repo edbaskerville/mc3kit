@@ -93,8 +93,7 @@ public class DEMCProposalTask implements Task {
 	DoubleMatrix1D makeVector(Model model) {
 		DoubleMatrix1D vec = new DenseDoubleMatrix1D(varNames.size());
 		for(int i = 0; i < varNames.size(); i++) {
-			vec.setQuick(i, model.getDoubleVariable(varNames.get(i))
-					.getValue());
+			vec.setQuick(i, model.getDoubleVariable(varNames.get(i)).getValue());
 		}
 		return vec;
 	}
@@ -112,8 +111,8 @@ public class DEMCProposalTask implements Task {
 			throws MC3KitException {
 		boolean valid = true;
 		for(int i = 0; i < block.length; i++) {
-			if(!model.getDoubleVariable(varNames.get(block[i]))
-					.valueIsValid(xNew.get(i))) {
+			if(!model.getDoubleVariable(varNames.get(block[i])).valueIsValid(
+					xNew.get(i))) {
 				valid = false;
 				break;
 			}
@@ -140,12 +139,11 @@ public class DEMCProposalTask implements Task {
 			// to past samples
 			try {
 				SqlJetDb db = chain.getDb();
-				db.createTable(
-					format("CREATE TABLE %s (iteration INTEGER, sample BLOB, sums BLOB, sumSqs BLOB, state TEXT)", step.getTableName())
-				);
-				db.createIndex(
-					format("CREATE INDEX %s ON %s (iteration)", step.getIndexName(), step.getTableName())
-				);
+				db.createTable(format(
+						"CREATE TABLE %s (iteration INTEGER, sample BLOB, sums BLOB, sumSqs BLOB, state TEXT)",
+						step.getTableName()));
+				db.createIndex(format("CREATE INDEX %s ON %s (iteration)",
+						step.getIndexName(), step.getTableName()));
 			}
 			catch(SqlJetException e) {
 				throw new MC3KitException(format(
@@ -166,7 +164,8 @@ public class DEMCProposalTask implements Task {
 		if(shouldRestore) {
 			long iteration = chain.getIteration();
 			try {
-				ISqlJetTable table = chain.getDb().getTable(step.getTableName());
+				ISqlJetTable table = chain.getDb()
+						.getTable(step.getTableName());
 				ISqlJetCursor c = table.lookup(step.getIndexName(), iteration);
 				
 				if(iteration > step.recordHistoryAfter) {
@@ -175,11 +174,14 @@ public class DEMCProposalTask implements Task {
 				}
 				
 				Gson gson = chain.getGson();
-				JsonObject stateJson = new JsonParser().parse(c.getString("state")).getAsJsonObject();
+				JsonObject stateJson = new JsonParser().parse(
+						c.getString("state")).getAsJsonObject();
 				
 				blockSizeManagers = new ArrayList<DEMCBlockSizeManager>();
-				for(JsonElement bsmJson : stateJson.getAsJsonArray("blockSizeManagers")) {
-					DEMCBlockSizeManager bsm = gson.fromJson(bsmJson,  DEMCBlockSizeManager.class);
+				for(JsonElement bsmJson : stateJson
+						.getAsJsonArray("blockSizeManagers")) {
+					DEMCBlockSizeManager bsm = gson.fromJson(bsmJson,
+							DEMCBlockSizeManager.class);
 					bsm.setTask(this);
 					blockSizeManagers.add(bsm);
 				}
@@ -198,14 +200,16 @@ public class DEMCProposalTask implements Task {
 			// Block sizes are minBlockSize, 2*minBlockSize, 4*minBlockSize, ...
 			int blockSize = step.minBlockSize;
 			blockSizeManagers = new ArrayList<DEMCBlockSizeManager>();
-			while(blockSize <= step.maxBlockSize && blockSize <= varNames.size()) {
+			while(blockSize <= step.maxBlockSize
+					&& blockSize <= varNames.size()) {
 				if(model.getLogger().isLoggable(Level.FINE)) {
 					model.getLogger()
 							.fine(format(
 									"Creating block size manager for block size = %d",
 									blockSize));
 				}
-				blockSizeManagers.add(new DEMCBlockSizeManager(this, blockSize));
+				blockSizeManagers
+						.add(new DEMCBlockSizeManager(this, blockSize));
 				blockSize *= 2;
 			}
 		}
@@ -213,26 +217,29 @@ public class DEMCProposalTask implements Task {
 	
 	private void recordState(Chain chain) throws MC3KitException {
 		long iteration = chain.getIteration();
-
-		if(iteration % chain.getMCMC().getThin() == 0 && iteration > step.recordHistoryAfter) {
+		
+		if(iteration % chain.getMCMC().getThin() == 0
+				&& iteration > step.recordHistoryAfter) {
 			try {
-					ISqlJetTable table = chain.getDb().getTable(step.getTableName());
-					ISqlJetCursor c = table.lookup(step.getIndexName(), iteration);
-					while(!c.eof()) {
-						c.delete();
+				ISqlJetTable table = chain.getDb()
+						.getTable(step.getTableName());
+				ISqlJetCursor c = table.lookup(step.getIndexName(), iteration);
+				while(!c.eof()) {
+					c.delete();
+				}
+				if(iteration > step.recordHistoryAfter) {
+					Model model = chain.getModel();
+					
+					double[] values = new double[varNames.size()];
+					for(int i = 0; i < values.length; i++) {
+						values[i] = model.getDoubleVariable(varNames.get(i))
+								.getValue();
+						sums[i] += values[i];
+						sumSqs[i] += values[i] * values[i];
 					}
-					if(iteration > step.recordHistoryAfter) {
-						Model model = chain.getModel();
-						
-						double[] values = new double[varNames.size()];
-						for(int i = 0; i < values.length; i++) {
-							values[i] = model.getDoubleVariable(varNames.get(i))
-									.getValue();
-							sums[i] += values[i];
-							sumSqs[i] += values[i] * values[i];
-						}
-						table.insert(iteration, toBytes(values), toBytes(sums), toBytes(sumSqs), getJsonState(chain));
-					}
+					table.insert(iteration, toBytes(values), toBytes(sums),
+							toBytes(sumSqs), getJsonState(chain));
+				}
 			}
 			catch(SqlJetException e) {
 				throw new MC3KitException(format(
@@ -248,8 +255,8 @@ public class DEMCProposalTask implements Task {
 		return chain.getGson().toJson(jsonObj);
 	}
 	
-	DoubleMatrix1D[] getRandomSamples(Chain chain,
-			RandomEngine rng, int count) throws MC3KitException {
+	DoubleMatrix1D[] getRandomSamples(Chain chain, RandomEngine rng, int count)
+			throws MC3KitException {
 		long iteration = chain.getIteration();
 		long thin = chain.getMCMC().getThin();
 		
@@ -261,7 +268,9 @@ public class DEMCProposalTask implements Task {
 		for(int i = 0; i < count; i++) {
 			boolean done = false;
 			while(!done) {
-				iterations[i] = thin * (unif.nextLongFromTo(step.recordHistoryAfter, iteration) / thin);
+				iterations[i] = thin
+						* (unif.nextLongFromTo(step.recordHistoryAfter,
+								iteration) / thin);
 				done = true;
 				for(int j = 0; j < i; j++) {
 					if(iterations[i] == iterations[j]) {

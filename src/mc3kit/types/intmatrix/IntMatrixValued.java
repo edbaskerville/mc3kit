@@ -15,14 +15,16 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.types.intmatrix;
 
 public interface IntMatrixValued {
-  int rowCount();
-  int columnCount();
-  
-  int[][] getValue();
-  int getValue(int r, int c);
+	int rowCount();
+	
+	int columnCount();
+	
+	int[][] getValue();
+	
+	int getValue(int r, int c);
 }

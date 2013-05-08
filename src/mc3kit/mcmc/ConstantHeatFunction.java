@@ -15,42 +15,41 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.mcmc;
 
-public class ConstantHeatFunction implements HeatFunction
-{
-  double priorHeatExponent;
-  double likelihoodHeatExponent;
-  
-  public ConstantHeatFunction() {
-    this(1.0, 1.0);
-  }
-  
-  public ConstantHeatFunction(double priorHeatExponent, double likelihoodHeatExponent) {
-    this.priorHeatExponent = priorHeatExponent;
-    this.likelihoodHeatExponent = likelihoodHeatExponent;
-  }
-  
+public class ConstantHeatFunction implements HeatFunction {
+	double priorHeatExponent;
+	double likelihoodHeatExponent;
+	
+	public ConstantHeatFunction() {
+		this(1.0, 1.0);
+	}
+	
+	public ConstantHeatFunction(double priorHeatExponent,
+			double likelihoodHeatExponent) {
+		this.priorHeatExponent = priorHeatExponent;
+		this.likelihoodHeatExponent = likelihoodHeatExponent;
+	}
+	
 	@Override
-	public double[] getPriorHeatExponents(int chainCount)
-	{
+	public double[] getPriorHeatExponents(int chainCount) {
 		double[] heatExponents = new double[chainCount];
 		for(int i = 0; i < chainCount; i++)
 			heatExponents[i] = priorHeatExponent;
 		return heatExponents;
 	}
-
+	
 	@Override
-	public double[] getLikelihoodHeatExponents(int chainCount)
-	{
-	  System.err.printf("likelihoodheatexpnoent: %f\n", likelihoodHeatExponent);
-	  
-    double[] heatExponents = new double[chainCount];
-    for(int i = 0; i < chainCount; i++)
-      heatExponents[i] = likelihoodHeatExponent;
-    return heatExponents;
+	public double[] getLikelihoodHeatExponents(int chainCount) {
+		System.err.printf("likelihoodheatexpnoent: %f\n",
+				likelihoodHeatExponent);
+		
+		double[] heatExponents = new double[chainCount];
+		for(int i = 0; i < chainCount; i++)
+			heatExponents[i] = likelihoodHeatExponent;
+		return heatExponents;
 	}
-
+	
 }

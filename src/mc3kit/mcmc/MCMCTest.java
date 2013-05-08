@@ -128,7 +128,7 @@ public class MCMCTest {
 				
 				return m;
 			}
-
+			
 			@Override
 			public Model createModel(Chain initialChain,
 					Map<String, Object> sample) throws MC3KitException {
@@ -187,7 +187,7 @@ public class MCMCTest {
 				
 				return m;
 			}
-
+			
 			@Override
 			public Model createModel(Chain initialChain,
 					Map<String, Object> sample) throws MC3KitException {
@@ -250,7 +250,7 @@ public class MCMCTest {
 				
 				return m;
 			}
-
+			
 			@Override
 			public Model createModel(Chain initialChain,
 					Map<String, Object> sample) throws MC3KitException {
@@ -315,7 +315,7 @@ public class MCMCTest {
 				
 				return m;
 			}
-
+			
 			@Override
 			public Model createModel(Chain initialChain,
 					Map<String, Object> sample) throws MC3KitException {

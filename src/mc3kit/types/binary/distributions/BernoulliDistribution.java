@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.types.binary.distributions;
 
@@ -32,59 +32,61 @@ import mc3kit.types.doublevalue.DoubleValued;
 import static java.lang.Math.*;
 
 public class BernoulliDistribution extends BinaryDistribution {
-  double pVal;
-  ModelEdge pEdge;
-  
-  protected BernoulliDistribution() { }
-  
-  public BernoulliDistribution(Model model) {
-    this(model, null, 0.5);
-  }
-
-  public BernoulliDistribution(Model model, String name) {
-    this(model, name, 0.5);
-  }
-  
-  public BernoulliDistribution(Model model, DoubleValued pNode) throws MC3KitException {
-    this(model, null, 0.5);
-    setP(pNode);
-  }
-  
-  public BernoulliDistribution(Model model, double pVal) {
-    this(model, null, pVal);
-  }
-  
-  public BernoulliDistribution(Model model, String name, double pVal) {
-    super(model, name);
-    this.pVal = pVal;
-  }
-  
-  
-  public <T extends ModelNode & DoubleValued> BernoulliDistribution setP(T node) throws MC3KitException {
-    pEdge = updateEdge(pEdge, node);
-    return this;
-  }
-  
-  public void setP(DoubleValued pNode) throws MC3KitException {
-    pEdge = updateEdge(pEdge, (ModelNode)pNode);
-  }
-  
-  @Override
-  public double getLogP(Variable var) {
-    boolean value = ((BinaryVariable)var).getValue();
-    double p = pEdge == null ? this.pVal : getDoubleValue(pEdge);
-    
-    return value ? log(p) : log1p(-p);
-  }
-
-  @Override
-  public VariableProposer makeVariableProposer(String varName) {
-    return new GibbsBinaryProposer(varName);
-  }
-
-  @Override
-  public void sample(Variable var) {
-    double p = pEdge == null ? this.pVal : getDoubleValue(pEdge);
-    ((BinaryVariable)var).setValue(getRng().nextDouble() < p);
-  }
+	double pVal;
+	ModelEdge pEdge;
+	
+	protected BernoulliDistribution() {
+	}
+	
+	public BernoulliDistribution(Model model) {
+		this(model, null, 0.5);
+	}
+	
+	public BernoulliDistribution(Model model, String name) {
+		this(model, name, 0.5);
+	}
+	
+	public BernoulliDistribution(Model model, DoubleValued pNode)
+			throws MC3KitException {
+		this(model, null, 0.5);
+		setP(pNode);
+	}
+	
+	public BernoulliDistribution(Model model, double pVal) {
+		this(model, null, pVal);
+	}
+	
+	public BernoulliDistribution(Model model, String name, double pVal) {
+		super(model, name);
+		this.pVal = pVal;
+	}
+	
+	public <T extends ModelNode & DoubleValued> BernoulliDistribution setP(
+			T node) throws MC3KitException {
+		pEdge = updateEdge(pEdge, node);
+		return this;
+	}
+	
+	public void setP(DoubleValued pNode) throws MC3KitException {
+		pEdge = updateEdge(pEdge, (ModelNode) pNode);
+	}
+	
+	@Override
+	public double getLogP(Variable var) {
+		boolean value = ((BinaryVariable) var).getValue();
+		double p = pEdge == null ? this.pVal : getDoubleValue(pEdge);
+		
+		return value ? log(p) : log1p(-p);
+	}
+	
+	@Override
+	public VariableProposer makeVariableProposer(String varName) {
+		return new GibbsBinaryProposer(varName);
+	}
+	
+	@Override
+	public void sample(Variable var) {
+		double p = pEdge == null ? this.pVal : getDoubleValue(pEdge);
+		((BinaryVariable) var).setValue(getRng().nextDouble() < p);
+	}
 }

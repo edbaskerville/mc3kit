@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.util;
 
@@ -24,36 +24,32 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.io.*;
 
-public class JsonUtils
-{
-	public static <T> T parseObject(Class<T> cls, String filename) throws FileNotFoundException
-	{
+public class JsonUtils {
+	public static <T> T parseObject(Class<T> cls, String filename)
+			throws FileNotFoundException {
 		return parseObject(cls, new FileReader(filename));
 	}
 	
-	public static  <T> T parseObject(Class<T> cls, Reader reader)
-	{
+	public static <T> T parseObject(Class<T> cls, Reader reader) {
 		Gson gson = new Gson();
 		JsonParser parser = new JsonParser();
 		JsonObject raw = parser.parse(reader).getAsJsonObject();
 		return gson.fromJson(raw, cls);
 	}
 	
-	public static <T> List<T> parseList(Class<T> cls, String filename) throws FileNotFoundException
-	{
+	public static <T> List<T> parseList(Class<T> cls, String filename)
+			throws FileNotFoundException {
 		return parseList(cls, new FileReader(filename));
 	}
 	
-	public static <T> List<T> parseList(Class<T> cls, Reader reader)
-	{
+	public static <T> List<T> parseList(Class<T> cls, Reader reader) {
 		Gson gson = new Gson();
 		JsonParser parser = new JsonParser();
 		
 		JsonObject raw = parser.parse(reader).getAsJsonObject();
 		
 		List<T> list = new ArrayList<T>();
-		for(Entry<String, JsonElement> entry : raw.entrySet())
-		{
+		for(Entry<String, JsonElement> entry : raw.entrySet()) {
 			T obj = gson.fromJson(entry.getValue(), cls);
 			list.add(obj);
 		}
@@ -61,21 +57,19 @@ public class JsonUtils
 		return list;
 	}
 	
-	public static <T> Map<String, T> parseMap(Class<T> cls, String filename) throws FileNotFoundException
-	{
+	public static <T> Map<String, T> parseMap(Class<T> cls, String filename)
+			throws FileNotFoundException {
 		return parseMap(cls, new FileReader(filename));
 	}
 	
-	public static <T> Map<String, T> parseMap(Class<T> cls, Reader reader)
-	{
+	public static <T> Map<String, T> parseMap(Class<T> cls, Reader reader) {
 		Gson gson = new Gson();
 		JsonParser parser = new JsonParser();
 		
 		JsonObject raw = parser.parse(reader).getAsJsonObject();
 		
 		Map<String, T> map = new LinkedHashMap<String, T>();
-		for(Entry<String, JsonElement> entry : raw.entrySet())
-		{
+		for(Entry<String, JsonElement> entry : raw.entrySet()) {
 			T obj = gson.fromJson(entry.getValue(), cls);
 			map.put(entry.getKey(), obj);
 		}

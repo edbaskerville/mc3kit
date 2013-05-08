@@ -15,11 +15,12 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.types.doublevalue;
 
 public interface DoubleValued {
-  double getValue();
-  void setValue(double value);
+	double getValue();
+	
+	void setValue(double value);
 }

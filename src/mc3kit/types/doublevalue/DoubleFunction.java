@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.types.doublevalue;
 
@@ -23,26 +23,27 @@ import mc3kit.model.Function;
 import mc3kit.model.Model;
 
 public abstract class DoubleFunction extends Function implements DoubleValued {
-  private double value;
-  
-  protected DoubleFunction() { }
-  
-  public DoubleFunction(Model model) {
-    this(model, null);
-  }
-
-  public DoubleFunction(Model model, String name) {
-    super(model, name);
-    this.value = Double.NaN;
-  }
-
-  @Override
-  public double getValue() {
-    return value;
-  }
-
-  @Override
-  public void setValue(double value) {
-    this.value = value;
-  }
+	private double value;
+	
+	protected DoubleFunction() {
+	}
+	
+	public DoubleFunction(Model model) {
+		this(model, null);
+	}
+	
+	public DoubleFunction(Model model, String name) {
+		super(model, name);
+		this.value = Double.NaN;
+	}
+	
+	@Override
+	public double getValue() {
+		return value;
+	}
+	
+	@Override
+	public void setValue(double value) {
+		this.value = value;
+	}
 }

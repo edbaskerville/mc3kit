@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.step.univariate;
 
@@ -25,25 +25,26 @@ import mc3kit.mcmc.Step;
 import mc3kit.mcmc.Task;
 
 public class UnivariateProposalStep implements Step {
-  
-  double targetAcceptanceRate;
-  long tuneFor;
-  long tuneEvery;
-
-  public UnivariateProposalStep(double targetAcceptanceRate, long tuneFor, long tuneEvery) {
-    this.targetAcceptanceRate = targetAcceptanceRate;
-    this.tuneFor = tuneFor;
-    this.tuneEvery = tuneEvery;
-  }
-
-  @Override
-  public List<Task> makeTasks(int chainCount) throws MC3KitException {
-    List<Task> tasks = new ArrayList<Task>();
-    for(int i = 0; i < chainCount; i++) {
-      tasks.add(new UnivariateProposalTask(this, i));
-    }
-    return tasks;
-  }
+	
+	double targetAcceptanceRate;
+	long tuneFor;
+	long tuneEvery;
+	
+	public UnivariateProposalStep(double targetAcceptanceRate, long tuneFor,
+			long tuneEvery) {
+		this.targetAcceptanceRate = targetAcceptanceRate;
+		this.tuneFor = tuneFor;
+		this.tuneEvery = tuneEvery;
+	}
+	
+	@Override
+	public List<Task> makeTasks(int chainCount) throws MC3KitException {
+		List<Task> tasks = new ArrayList<Task>();
+		for(int i = 0; i < chainCount; i++) {
+			tasks.add(new UnivariateProposalTask(this, i));
+		}
+		return tasks;
+	}
 	
 	String getTableName() {
 		return getClass().getSimpleName();

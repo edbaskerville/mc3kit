@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.types.doublevalue;
 
@@ -24,19 +24,20 @@ import mc3kit.model.Model;
 import mc3kit.step.univariate.VariableProposer;
 
 public abstract class DoubleDistribution extends Distribution {
-
-  protected DoubleDistribution() { }
-  
-  public DoubleDistribution(Model model) {
-    this(model, null);
-  }
-  
-  public DoubleDistribution(Model model, String name) {
-    super(model, name);
-  }
-
-  @Override
-  public abstract VariableProposer makeVariableProposer(String varName);
-  
-  public abstract boolean valueIsValid(double value);
+	
+	protected DoubleDistribution() {
+	}
+	
+	public DoubleDistribution(Model model) {
+		this(model, null);
+	}
+	
+	public DoubleDistribution(Model model, String name) {
+		super(model, name);
+	}
+	
+	@Override
+	public abstract VariableProposer makeVariableProposer(String varName);
+	
+	public abstract boolean valueIsValid(double value);
 }

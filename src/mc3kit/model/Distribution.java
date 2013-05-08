@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.model;
 
@@ -23,24 +23,26 @@ import mc3kit.MC3KitException;
 import mc3kit.step.univariate.VariableProposer;
 
 public abstract class Distribution extends ModelNode {
-
-  protected Distribution() { }
-  
-  public Distribution(Model model) {
-    this(model, null);
-  }
-  
-  public Distribution(Model model, String name) {
-    super(name);
-    
-    if(model != null) {
-      model.addDistribution(this);
-    }
-  }
-  
-  public abstract double getLogP(Variable var) throws MC3KitException;
-  
-  public abstract VariableProposer makeVariableProposer(String varName) throws MC3KitException;
-  
-  public abstract void sample(Variable var) throws MC3KitException;
+	
+	protected Distribution() {
+	}
+	
+	public Distribution(Model model) {
+		this(model, null);
+	}
+	
+	public Distribution(Model model, String name) {
+		super(name);
+		
+		if(model != null) {
+			model.addDistribution(this);
+		}
+	}
+	
+	public abstract double getLogP(Variable var) throws MC3KitException;
+	
+	public abstract VariableProposer makeVariableProposer(String varName)
+			throws MC3KitException;
+	
+	public abstract void sample(Variable var) throws MC3KitException;
 }

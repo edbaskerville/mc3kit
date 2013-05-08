@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.types.doublevalue.distributions;
 
@@ -27,38 +27,40 @@ import mc3kit.types.doublevalue.DoubleDistribution;
 import mc3kit.types.doublevalue.proposers.MHNormalProposer;
 
 public class ImproperUniformDistribution extends DoubleDistribution {
-  protected ImproperUniformDistribution() { }
-  
-  public ImproperUniformDistribution(Model model) {
-    this(model, null);
-  }
-
-  public ImproperUniformDistribution(Model model, String name) {
-    super(model, name);
-  }
-
-  @Override
-  public VariableProposer makeVariableProposer(String varName) {
-    return new MHNormalProposer(varName);
-  }
-
-  @Override
-  public boolean valueIsValid(double value) {
-    return !Double.isNaN(value) && !Double.isInfinite(value);
-  }
-
-  @Override
-  public double getLogP(Variable var) {
-    return 0.0;
-  }
-
-  @Override
-  public void sample(Variable var) throws MC3KitException {
-    throw new MC3KitException("Cannot sample from improper prior. Initialize value during construction.");
-  }
-
-  @Override
-  public boolean update() {
-    return false;
-  }
+	protected ImproperUniformDistribution() {
+	}
+	
+	public ImproperUniformDistribution(Model model) {
+		this(model, null);
+	}
+	
+	public ImproperUniformDistribution(Model model, String name) {
+		super(model, name);
+	}
+	
+	@Override
+	public VariableProposer makeVariableProposer(String varName) {
+		return new MHNormalProposer(varName);
+	}
+	
+	@Override
+	public boolean valueIsValid(double value) {
+		return !Double.isNaN(value) && !Double.isInfinite(value);
+	}
+	
+	@Override
+	public double getLogP(Variable var) {
+		return 0.0;
+	}
+	
+	@Override
+	public void sample(Variable var) throws MC3KitException {
+		throw new MC3KitException(
+				"Cannot sample from improper prior. Initialize value during construction.");
+	}
+	
+	@Override
+	public boolean update() {
+		return false;
+	}
 }

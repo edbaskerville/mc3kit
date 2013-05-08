@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.types.binary;
 
@@ -25,76 +25,82 @@ import mc3kit.model.Model;
 import mc3kit.model.Variable;
 
 public class BinaryVariable extends Variable implements BinaryValued {
-  
-  private boolean value;
-  
-  protected BinaryVariable() { }
-  
-  public BinaryVariable(Model model, boolean value) {
-    this(model, (String)null, value);
-  }
-  
-  public BinaryVariable(Model model, String name) {
-    super(model, name, false);
-  }
-  
-  public BinaryVariable(Model model, String name, boolean value) {
-    super(model, name, true);
-    this.value = value;
-  }
-  
-  public BinaryVariable(Model model, boolean value, BinaryDistribution dist) throws MC3KitException {
-    this(model, null, value, dist);
-  }
-  
-  public BinaryVariable(Model model, String name, boolean value, BinaryDistribution dist) throws MC3KitException {
-    super(model, name, true, dist);
-    this.value = value;
-  }
-  
-  public BinaryVariable(Model model, String name, BinaryDistribution dist) throws MC3KitException {
-    super(model, name, false, dist);
-  }
-
-  @Override
-  public boolean getValue() {
-    return value;
-  }
-
-  @Override
-  public void setValue(boolean value) {
-    if(isObserved()) {
-      throw new UnsupportedOperationException("Can't set value on an observed variable.");
-    }
-    
-    this.value = value;
-    setChanged();
-    notifyObservers();
-  }
-  
-  @Override
-  public BinaryVariable setDistribution(Distribution dist) throws MC3KitException {
-    super.setDistribution(dist);
-    return this;
-  }
-
-  @Override
-  public Object makeOutputObject() {
-    return value ? 1 : 0;
-  }
-  
-  @Override
-  public String makeOutputString() {
-    return value ? "1" : "0";
-  }
-
-  @Override
-  public Object toDbValue() {
-    return value ? 1 : 0;
-  }
-
-  @Override
-  public void loadFromDbValue(Object value) {
-    setValue((int)value == 1);
-  }
+	
+	private boolean value;
+	
+	protected BinaryVariable() {
+	}
+	
+	public BinaryVariable(Model model, boolean value) {
+		this(model, (String) null, value);
+	}
+	
+	public BinaryVariable(Model model, String name) {
+		super(model, name, false);
+	}
+	
+	public BinaryVariable(Model model, String name, boolean value) {
+		super(model, name, true);
+		this.value = value;
+	}
+	
+	public BinaryVariable(Model model, boolean value, BinaryDistribution dist)
+			throws MC3KitException {
+		this(model, null, value, dist);
+	}
+	
+	public BinaryVariable(Model model, String name, boolean value,
+			BinaryDistribution dist) throws MC3KitException {
+		super(model, name, true, dist);
+		this.value = value;
+	}
+	
+	public BinaryVariable(Model model, String name, BinaryDistribution dist)
+			throws MC3KitException {
+		super(model, name, false, dist);
+	}
+	
+	@Override
+	public boolean getValue() {
+		return value;
+	}
+	
+	@Override
+	public void setValue(boolean value) {
+		if(isObserved()) {
+			throw new UnsupportedOperationException(
+					"Can't set value on an observed variable.");
+		}
+		
+		this.value = value;
+		setChanged();
+		notifyObservers();
+	}
+	
+	@Override
+	public BinaryVariable setDistribution(Distribution dist)
+			throws MC3KitException {
+		super.setDistribution(dist);
+		return this;
+	}
+	
+	@Override
+	public Object makeOutputObject() {
+		return value ? 1 : 0;
+	}
+	
+	@Override
+	public String makeOutputString() {
+		return value ? "1" : "0";
+	}
+	
+	@Override
+	public Object toDbValue() {
+		return value ? 1 : 0;
+	}
+	
+	@Override
+	public void loadFromDbValue(Object value) {
+		setValue((int) value == 1);
+	}
 }

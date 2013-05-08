@@ -15,16 +15,18 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.types.intarray;
 
 public interface IntArrayValued {
-  int getLength();
-  
-  int[] getValue();
-  void setValue(int[] value);
-  
-  int getValue(int index);
-  void setValue(int index, int value);
+	int getLength();
+	
+	int[] getValue();
+	
+	void setValue(int[] value);
+	
+	int getValue(int index);
+	
+	void setValue(int index, int value);
 }

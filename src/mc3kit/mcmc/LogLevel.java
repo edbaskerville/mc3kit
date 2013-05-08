@@ -15,28 +15,23 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.mcmc;
 
 import java.util.logging.Level;
 
 public enum LogLevel {
-  ALL(Level.ALL),
-  OFF(Level.OFF),
-  FINEST(Level.FINEST),
-  FINER(Level.FINER),
-  FINE(Level.FINE),
-  INFO(Level.INFO),
-  SEVERE(Level.SEVERE);
-
-  Level level;
-
-  LogLevel(Level level) {
-    this.level = level;
-  }
-
-  public Level getLevel() {
-    return level;
-  }
+	ALL(Level.ALL), OFF(Level.OFF), FINEST(Level.FINEST), FINER(Level.FINER), FINE(
+			Level.FINE), INFO(Level.INFO), SEVERE(Level.SEVERE);
+	
+	Level level;
+	
+	LogLevel(Level level) {
+		this.level = level;
+	}
+	
+	public Level getLevel() {
+		return level;
+	}
 }

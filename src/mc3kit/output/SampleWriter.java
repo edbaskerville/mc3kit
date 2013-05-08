@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.output;
 
@@ -24,7 +24,6 @@ import java.io.Serializable;
 import mc3kit.*;
 import mc3kit.model.Model;
 
-public interface SampleWriter extends Serializable
-{
+public interface SampleWriter extends Serializable {
 	public void writeSample(Model model) throws MC3KitException;
 }

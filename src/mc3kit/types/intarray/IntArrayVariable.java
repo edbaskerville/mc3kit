@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.types.intarray;
 
@@ -26,108 +26,119 @@ import mc3kit.model.Model;
 import mc3kit.model.Variable;
 
 public class IntArrayVariable extends Variable implements IntArrayValued {
-  
-  private int[] value;
-  
-  protected IntArrayVariable() { }
-  
-  /**
-   * Constructor for an <i>observed</i> int-array-valued variable.
-   * @param model
-   * @param value
-   */
-  public IntArrayVariable(Model model, int[] value) {
-    this(model, (String)null, value);
-  }
-  
-  /**
-   * Constructor for an <i>observed</i> int-array-valued variable with a name.
-   * @param model
-   * @param name
-   * @param value
-   */
-  public IntArrayVariable(Model model, String name, int[] value) {
-    super(model, name, true);
-    this.value = value;
-  }
-  
-  /**
-   * Constructor for an <i>observed</i> int-array-valued variable with a distribution.
-   * @param model
-   * @param name
-   * @param value
-   * @throws MC3KitException 
-   */
-  public IntArrayVariable(Model model, int[] value, IntArrayDistribution dist) throws MC3KitException {
-    this(model, null, value, dist);
-  }
-  
-  /**
-   * Constructor for an <i>observed</i> int-array-valued variable with a name and distribution.
-   * @param model
-   * @param name
-   * @param value
-   * @param dist
-   * @throws MC3KitException
-   */
-  public IntArrayVariable(Model model, String name, int[] value, IntArrayDistribution dist) throws MC3KitException {
-    super(model, name, true, dist);
-    this.value = value;
-  }
-
-  @Override
-  public int[] getValue() {
-    return value;
-  }
-  
-  public IntArrayVariable setDistribution(IntArrayDistribution dist) throws MC3KitException {
-    super.setDistribution(dist);
-    return this;
-  }
-  
-  @Override
-  public Object makeOutputObject() {
-    return value;
-  }
-  
-  @Override
-  public String makeOutputString() {
-    return Arrays.toString(value);
-  }
-
-  @Override
-  public int getLength() {
-    return value.length;
-  }
-
-  @Override
-  public void setValue(int[] value) {
-    if(value.length != this.value.length) {
-      throw new IllegalArgumentException("int array variables have fixed length");
-    }
-    
-    for(int i = 0; i < value.length; i++) {
-      this.value[i] = value[i];
-    }
-  }
-
-  @Override
-  public int getValue(int index) {
-    return value[index];
-  }
-
-  @Override
-  public void setValue(int index, int value) {
-    this.value[index] = value;
-  }
-
-  @Override
-  public Object toDbValue() {
-    return getGson().toJson(value);
-  }
-
-  @Override
-  public void loadFromDbValue(Object value) {
-    setValue(getGson().fromJson((String)value, int[].class));
-  }
+	
+	private int[] value;
+	
+	protected IntArrayVariable() {
+	}
+	
+	/**
+	 * Constructor for an <i>observed</i> int-array-valued variable.
+	 * 
+	 * @param model
+	 * @param value
+	 */
+	public IntArrayVariable(Model model, int[] value) {
+		this(model, (String) null, value);
+	}
+	
+	/**
+	 * Constructor for an <i>observed</i> int-array-valued variable with a name.
+	 * 
+	 * @param model
+	 * @param name
+	 * @param value
+	 */
+	public IntArrayVariable(Model model, String name, int[] value) {
+		super(model, name, true);
+		this.value = value;
+	}
+	
+	/**
+	 * Constructor for an <i>observed</i> int-array-valued variable with a
+	 * distribution.
+	 * 
+	 * @param model
+	 * @param name
+	 * @param value
+	 * @throws MC3KitException
+	 */
+	public IntArrayVariable(Model model, int[] value, IntArrayDistribution dist)
+			throws MC3KitException {
+		this(model, null, value, dist);
+	}
+	
+	/**
+	 * Constructor for an <i>observed</i> int-array-valued variable with a name
+	 * and distribution.
+	 * 
+	 * @param model
+	 * @param name
+	 * @param value
+	 * @param dist
+	 * @throws MC3KitException
+	 */
+	public IntArrayVariable(Model model, String name, int[] value,
+			IntArrayDistribution dist) throws MC3KitException {
+		super(model, name, true, dist);
+		this.value = value;
+	}
+	
+	@Override
+	public int[] getValue() {
+		return value;
+	}
+	
+	public IntArrayVariable setDistribution(IntArrayDistribution dist)
+			throws MC3KitException {
+		super.setDistribution(dist);
+		return this;
+	}
+	
+	@Override
+	public Object makeOutputObject() {
+		return value;
+	}
+	
+	@Override
+	public String makeOutputString() {
+		return Arrays.toString(value);
+	}
+	
+	@Override
+	public int getLength() {
+		return value.length;
+	}
+	
+	@Override
+	public void setValue(int[] value) {
+		if(value.length != this.value.length) {
+			throw new IllegalArgumentException(
+					"int array variables have fixed length");
+		}
+		
+		for(int i = 0; i < value.length; i++) {
+			this.value[i] = value[i];
+		}
+	}
+	
+	@Override
+	public int getValue(int index) {
+		return value[index];
+	}
+	
+	@Override
+	public void setValue(int index, int value) {
+		this.value[index] = value;
+	}
+	
+	@Override
+	public Object toDbValue() {
+		return getGson().toJson(value);
+	}
+	
+	@Override
+	public void loadFromDbValue(Object value) {
+		setValue(getGson().fromJson((String) value, int[].class));
+	}
 }

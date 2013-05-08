@@ -15,18 +15,20 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.types.doublearray;
 
 import mc3kit.MC3KitException;
 
 public interface DoubleArrayValued {
-  int getLength() throws MC3KitException;
-  
-  double[] getValue() throws MC3KitException;
-  void setValue(double[] value) throws MC3KitException;
-  
-  double getValue(int index) throws MC3KitException;
-  void setValue(int index, double value) throws MC3KitException;
+	int getLength() throws MC3KitException;
+	
+	double[] getValue() throws MC3KitException;
+	
+	void setValue(double[] value) throws MC3KitException;
+	
+	double getValue(int index) throws MC3KitException;
+	
+	void setValue(int index, double value) throws MC3KitException;
 }

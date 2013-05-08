@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.model;
 
@@ -31,67 +31,70 @@ import mc3kit.mcmc.Chain;
 import mc3kit.types.doublevalue.DoubleValued;
 
 public abstract class ModelNode extends Node {
-  Model model;
-  
-  protected ModelNode() { }
-
-  protected ModelNode(String name) {
-    super(name);
-  }
-  
-  public boolean update() throws MC3KitException {
-    return true;
-  }
-  
-  public boolean update(Set<ModelEdge> fromEdges) throws MC3KitException {
-    return update();
-  }
-  
-  public boolean updateAfterRejection() throws MC3KitException {
-    return update();
-  }
-  
-  public boolean updateAfterRejection(Set<ModelEdge> fromEdges) throws MC3KitException {
-    return update(fromEdges);
-  }
-  
-  public Model getModel() {
-    return model;
-  }
-  
-  protected ModelEdge updateEdge(ModelEdge edge, ModelNode headNode) throws MC3KitException {
-    if(edge != null) {
-      if(edge.getHead() == headNode) {
-        return edge;
-      }
-      getModel().removeEdge(edge);
-    }
-    
-    if(headNode == null) {
-      return null;
-    }
-    
-    edge = getModel().addEdge(this, headNode);
-    return edge;
-  }
-  
-  protected double getDoubleValue(ModelEdge edge) {
-    return ((DoubleValued)edge.getHead()).getValue();
-  }
-  
-  public Chain getChain() {
-    return model.getChain();
-  }
-  
-  public RandomEngine getRng() {
-    return getChain().getRng();
-  }
-  
-  public Logger getLogger() {
-    return model.getLogger();
-  }
-  
-  protected Gson getGson() {
-    return getModel().getGson();
-  }
+	Model model;
+	
+	protected ModelNode() {
+	}
+	
+	protected ModelNode(String name) {
+		super(name);
+	}
+	
+	public boolean update() throws MC3KitException {
+		return true;
+	}
+	
+	public boolean update(Set<ModelEdge> fromEdges) throws MC3KitException {
+		return update();
+	}
+	
+	public boolean updateAfterRejection() throws MC3KitException {
+		return update();
+	}
+	
+	public boolean updateAfterRejection(Set<ModelEdge> fromEdges)
+			throws MC3KitException {
+		return update(fromEdges);
+	}
+	
+	public Model getModel() {
+		return model;
+	}
+	
+	protected ModelEdge updateEdge(ModelEdge edge, ModelNode headNode)
+			throws MC3KitException {
+		if(edge != null) {
+			if(edge.getHead() == headNode) {
+				return edge;
+			}
+			getModel().removeEdge(edge);
+		}
+		
+		if(headNode == null) {
+			return null;
+		}
+		
+		edge = getModel().addEdge(this, headNode);
+		return edge;
+	}
+	
+	protected double getDoubleValue(ModelEdge edge) {
+		return ((DoubleValued) edge.getHead()).getValue();
+	}
+	
+	public Chain getChain() {
+		return model.getChain();
+	}
+	
+	public RandomEngine getRng() {
+		return getChain().getRng();
+	}
+	
+	public Logger getLogger() {
+		return model.getLogger();
+	}
+	
+	protected Gson getGson() {
+		return getModel().getGson();
+	}
 }

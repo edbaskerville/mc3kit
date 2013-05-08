@@ -15,27 +15,28 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.model;
 
 import mc3kit.MC3KitException;
 
 public abstract class Function extends ModelNode {
-
-  protected Function() { }
-  
-  public Function(Model model) {
-    this(model, null);
-  }
-
-  public Function(Model model, String name) {
-    super(name);
-    if(model != null) {
-      model.addFunction(this);
-    }
-  }
-  
-  @Override
-  public abstract boolean update() throws MC3KitException;
+	
+	protected Function() {
+	}
+	
+	public Function(Model model) {
+		this(model, null);
+	}
+	
+	public Function(Model model, String name) {
+		super(name);
+		if(model != null) {
+			model.addFunction(this);
+		}
+	}
+	
+	@Override
+	public abstract boolean update() throws MC3KitException;
 }

@@ -15,14 +15,14 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.mcmc;
 
 import mc3kit.MC3KitException;
 
-public interface Task
-{
+public interface Task {
 	int[] getChainIds();
+	
 	void step(Chain[] chains) throws MC3KitException;
 }

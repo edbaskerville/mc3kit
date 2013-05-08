@@ -52,8 +52,8 @@ public class DEMCBlockSizeManager {
 	
 	void step(Chain chain, Model model) throws MC3KitException {
 		if(chain.getLogger().isLoggable(Level.FINER)) {
-			chain.getLogger().finer(
-					format("Stepping block size %d", blockSize));
+			chain.getLogger()
+					.finer(format("Stepping block size %d", blockSize));
 		}
 		
 		proposeDEMC(chain, model);
@@ -64,13 +64,11 @@ public class DEMCBlockSizeManager {
 	void recordStats(Chain chain, int chainId) throws MC3KitException {
 		long iteration = chain.getIteration();
 		if(iteration % step.tuneEvery == 0) {
-			Map<String, Object> infoObj = makeMap("iteration",
-					iteration, "chainId", chainId, "blockSize",
-					blockSize, "snookerGammaFactor",
-					snookerGammaFactor, "snookerRates",
-					getCounterObject(snookerCounter),
-					"parallelGammaFactor", parallelGammaFactor,
-					"parallelSmallRates",
+			Map<String, Object> infoObj = makeMap("iteration", iteration,
+					"chainId", chainId, "blockSize", blockSize,
+					"snookerGammaFactor", snookerGammaFactor, "snookerRates",
+					getCounterObject(snookerCounter), "parallelGammaFactor",
+					parallelGammaFactor, "parallelSmallRates",
 					getCounterObject(parallelSmallCounter),
 					"parallelLargeRates",
 					getCounterObject(parallelLargeCounter));
@@ -93,16 +91,14 @@ public class DEMCBlockSizeManager {
 					double parallelRate = parallelSmallCounter
 							.getRate(DEMCCounterType.ACCEPTANCE);
 					if(logger.isLoggable(Level.FINE)) {
-						logger.fine(format(
-								"Old parallelGammaFactor: %f",
+						logger.fine(format("Old parallelGammaFactor: %f",
 								parallelGammaFactor));
 					}
 					parallelGammaFactor = adjustTuningParameter(
 							parallelGammaFactor, parallelRate,
 							step.targetAcceptanceRate);
 					if(logger.isLoggable(Level.FINE)) {
-						logger.fine(format(
-								"New parallelGammaFactor: %f",
+						logger.fine(format("New parallelGammaFactor: %f",
 								parallelGammaFactor));
 					}
 				}
@@ -111,16 +107,14 @@ public class DEMCBlockSizeManager {
 					double snookerRate = snookerCounter
 							.getRate(DEMCCounterType.ACCEPTANCE);
 					if(logger.isLoggable(Level.FINE)) {
-						logger.fine(format(
-								"Old snookerGammaFactor: %f",
+						logger.fine(format("Old snookerGammaFactor: %f",
 								snookerGammaFactor));
 					}
 					snookerGammaFactor = adjustTuningParameter(
 							snookerGammaFactor, snookerRate,
 							step.targetAcceptanceRate);
 					if(logger.isLoggable(Level.FINE)) {
-						logger.fine(format(
-								"New snookerGammaFactor: %f",
+						logger.fine(format("New snookerGammaFactor: %f",
 								snookerGammaFactor));
 					}
 				}
@@ -132,8 +126,8 @@ public class DEMCBlockSizeManager {
 		}
 	}
 	
-	Map<String, Object> getCounterObject(
-			MultiCounter<DEMCCounterType> counter) throws MC3KitException {
+	Map<String, Object> getCounterObject(MultiCounter<DEMCCounterType> counter)
+			throws MC3KitException {
 		return makeMap("count", counter.getCount(), "acceptance",
 				counter.getRate(DEMCCounterType.ACCEPTANCE), "rejection",
 				counter.getRate(DEMCCounterType.REJECTION), "impossible",
@@ -173,7 +167,8 @@ public class DEMCBlockSizeManager {
 		// Get order of entries in a way that makes
 		// covarying/anti-covarying
 		// entries tend to get lumped together
-		int[] entryOrder = getEntryOrder(refVec, logger, chain.getIteration(), chain.getMCMC().getThin());
+		int[] entryOrder = getEntryOrder(refVec, logger, chain.getIteration(),
+				chain.getMCMC().getThin());
 		
 		if(logger.isLoggable(Level.FINER)) {
 			logger.finer(format("Entry order %d: %s", blockSize,
@@ -184,8 +179,7 @@ public class DEMCBlockSizeManager {
 		// each block
 		for(int i = 0; i < entryOrder.length; i += blockSize) {
 			if(logger.isLoggable(Level.FINER)) {
-				logger.finer(format(
-						"Proposing blockSize %d, blockStart %d",
+				logger.finer(format("Proposing blockSize %d, blockStart %d",
 						blockSize, i));
 			}
 			int blockEnd = i + blockSize;
@@ -194,51 +188,49 @@ public class DEMCBlockSizeManager {
 			int[] block = Arrays.copyOfRange(entryOrder, i, blockEnd);
 			
 			if(step.useParallel) {
-				proposeBlockDEMCParallel(chain, priorHeatExp,
-						likeHeatExp, false, block, xModel, rng);
+				proposeBlockDEMCParallel(chain, priorHeatExp, likeHeatExp,
+						false, block, xModel, rng);
 				if(step.useLarge) {
-					proposeBlockDEMCParallel(chain, priorHeatExp,
-							likeHeatExp, true, block, xModel, rng);
+					proposeBlockDEMCParallel(chain, priorHeatExp, likeHeatExp,
+							true, block, xModel, rng);
 				}
 			}
 			if(step.useSnooker) {
-				proposeBlockDEMCSnooker(chain, priorHeatExp,
-						likeHeatExp, block, xModel, rng);
+				proposeBlockDEMCSnooker(chain, priorHeatExp, likeHeatExp,
+						block, xModel, rng);
 			}
 		}
 	}
 	
 	void proposeBlockDEMCSnooker(Chain chain, double priorHeatExp,
-			double likeHeatExp, int[] block, Model xModel,
-			RandomEngine rng) throws MC3KitException {
+			double likeHeatExp, int[] block, Model xModel, RandomEngine rng)
+			throws MC3KitException {
 		// Scale factor of 1.7 is optimal for normal/Student posteriors;
 		// adjusted by factor to target this distribution
 		double gamma = snookerGammaFactor * 1.7;
 		
-		proposeBlockDEMC(chain, priorHeatExp, likeHeatExp, gamma,
-				false, true, block, xModel, rng);
+		proposeBlockDEMC(chain, priorHeatExp, likeHeatExp, gamma, false, true,
+				block, xModel, rng);
 	}
 	
 	void proposeBlockDEMCParallel(Chain chain, double priorHeatExp,
-			double likeHeatExp, boolean isLarge, int[] block,
-			Model xModel, RandomEngine rng) throws MC3KitException {
+			double likeHeatExp, boolean isLarge, int[] block, Model xModel,
+			RandomEngine rng) throws MC3KitException {
 		// Scale factor of 2.38/sqrt(2d) is optimal for normal/Student
 		// posteriors.
 		// For "large" proposals, to help avoid local minima,
 		// gamma = 2 * base scale factor
-		double gamma = parallelGammaFactor * 2.38
-				/ sqrt(2 * block.length);
+		double gamma = parallelGammaFactor * 2.38 / sqrt(2 * block.length);
 		if(isLarge)
 			gamma *= 2.0;
 		
-		proposeBlockDEMC(chain, priorHeatExp, likeHeatExp, gamma,
-				isLarge, false, block, xModel, rng);
+		proposeBlockDEMC(chain, priorHeatExp, likeHeatExp, gamma, isLarge,
+				false, block, xModel, rng);
 	}
 	
-	void proposeBlockDEMC(Chain chain, double priorHeatExp,
-			double likeHeatExp, double gamma, boolean isLarge,
-			boolean isSnooker, int[] block, Model xModel,
-			RandomEngine rng) throws MC3KitException {
+	void proposeBlockDEMC(Chain chain, double priorHeatExp, double likeHeatExp,
+			double gamma, boolean isLarge, boolean isSnooker, int[] block,
+			Model xModel, RandomEngine rng) throws MC3KitException {
 		Logger logger = xModel.getLogger();
 		int d = block.length;
 		
@@ -281,8 +273,9 @@ public class DEMCBlockSizeManager {
 		// Update x
 		DoubleMatrix1D xNew = new DenseDoubleMatrix1D(d);
 		for(int i = 0; i < d; i++) {
-			xNew.setQuick(i, xOld.getQuick(i) + gamma
-					* (z1.getQuick(i) - z2.getQuick(i)));
+			xNew.setQuick(i,
+					xOld.getQuick(i) + gamma
+							* (z1.getQuick(i) - z2.getQuick(i)));
 		}
 		
 		// Perform update
@@ -320,8 +313,7 @@ public class DEMCBlockSizeManager {
 			
 			invalidPriorLike = Double.isInfinite(newLogPrior)
 					|| Double.isInfinite(newLogLike)
-					|| Double.isNaN(newLogPrior)
-					|| Double.isNaN(newLogLike);
+					|| Double.isNaN(newLogPrior) || Double.isNaN(newLogLike);
 		}
 		
 		// Acceptance/rejection
@@ -339,14 +331,13 @@ public class DEMCBlockSizeManager {
 				logProposalRatio = 0.0;
 			}
 			
-			accepted = shouldAcceptMetropolisHastings(rng,
-					priorHeatExp, likeHeatExp, oldLogPrior, oldLogLike,
-					newLogPrior, newLogLike, logProposalRatio);
+			accepted = shouldAcceptMetropolisHastings(rng, priorHeatExp,
+					likeHeatExp, oldLogPrior, oldLogLike, newLogPrior,
+					newLogLike, logProposalRatio);
 		}
 		
 		MultiCounter<DEMCCounterType> counter = isSnooker ? snookerCounter
-				: (isLarge ? parallelLargeCounter
-						: parallelSmallCounter);
+				: (isLarge ? parallelLargeCounter : parallelSmallCounter);
 		if(accepted) {
 			logger.fine("Accepted");
 			xModel.acceptProposal();
@@ -370,7 +361,8 @@ public class DEMCBlockSizeManager {
 	// Sort entries by abs(std dev-normalized distance from mean)
 	// so that covarying or anti-covarying quantities will tend to
 	// cluster together
-	int[] getEntryOrder(DoubleMatrix1D x, Logger logger, long iteration, long thin) {
+	int[] getEntryOrder(DoubleMatrix1D x, Logger logger, long iteration,
+			long thin) {
 		final double[] xRel = new double[x.size()];
 		final int[] order = new int[x.size()];
 		
@@ -379,8 +371,7 @@ public class DEMCBlockSizeManager {
 		for(int i = 0; i < xRel.length; i++) {
 			double N = (iteration - step.recordHistoryAfter) / thin;
 			double iMean = task.sums[i] / N;
-			double iSD = N / (N - 1.0)
-					* (task.sumSqs[i] / N - iMean * iMean);
+			double iSD = N / (N - 1.0) * (task.sumSqs[i] / N - iMean * iMean);
 			
 			order[i] = i;
 			if(iSD == 0)
@@ -399,8 +390,7 @@ public class DEMCBlockSizeManager {
 		IntComparator comparator = new IntComparator() {
 			@Override
 			public int compare(int a, int b) {
-				return xRel[a] == xRel[b] ? 0 : (xRel[a] < xRel[b] ? -1
-						: 1);
+				return xRel[a] == xRel[b] ? 0 : (xRel[a] < xRel[b] ? -1 : 1);
 			}
 		};
 		
@@ -422,5 +412,5 @@ public class DEMCBlockSizeManager {
 		GenericSorting.quickSort(0, xRel.length, comparator, swapper);
 		
 		return order;
-	}	
+	}
 }
