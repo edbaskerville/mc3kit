@@ -132,6 +132,7 @@ public class Chain {
 			}
 			else {
 				db.beginTransaction(SqlJetTransactionMode.WRITE);
+//				db.getOptions().setCacheSize(500000);
 			}
 			
 			// Populate parameters table and record var id
@@ -210,7 +211,6 @@ public class Chain {
 				db.createTable("CREATE TABLE samples (iteration INTEGER, pid INTEGER, value)");
 				db.createIndex("CREATE INDEX iterationIndex ON samples (iteration)");
 				db.createIndex("CREATE INDEX iterationPidIndex ON samples (iteration, pid)");
-				db.createIndex("CREATE INDEX pidIndex ON samples (pid)");
 			}
 			assert model != null;
 			model.setChain(this);
@@ -292,9 +292,11 @@ public class Chain {
 			// If we're redoing a sample because chains finished at different
 			// points before a restore,
 			// delete the old sample
-			ISqlJetCursor c = table.lookup("iterationIndex", iteration);
-			while(!c.eof()) {
-				c.delete();
+			if(mcmc.shouldRestore()) {
+				ISqlJetCursor c = table.lookup("iterationIndex", iteration);
+				while(!c.eof()) {
+					c.delete();
+				}
 			}
 			
 			table.insert(iteration, paramNameIdMap.get("logPrior"),

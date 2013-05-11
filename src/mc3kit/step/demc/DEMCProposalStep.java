@@ -71,6 +71,10 @@ public class DEMCProposalStep implements Step {
 	
 	public DEMCProposalStep(long tuneFor, long tuneEvery,
 			long recordHistoryAfter, long iterateAfter) {
+		this.tuneFor = tuneFor;
+		this.tuneEvery = tuneEvery;
+		this.recordHistoryAfter = recordHistoryAfter;
+		this.iterateAfter = iterateAfter;
 	}
 	
 	public void setMinBlockSize(int minBlockSize) {
