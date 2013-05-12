@@ -10,8 +10,7 @@ import mc3kit.mcmc.Task;
 import mc3kit.model.Model;
 import mc3kit.util.*;
 
-@SuppressWarnings("serial")
-public class PriorLikelihoodOutputStep implements Step, Serializable {
+public class PriorLikelihoodOutputStep implements Step {
 	private String filename;
 	private long thin;
 	private int chainCount;
@@ -22,9 +21,6 @@ public class PriorLikelihoodOutputStep implements Step, Serializable {
 	// Map<Long, ValueCollector> collectedValues;
 	
 	/*** METHODS ***/
-	
-	protected PriorLikelihoodOutputStep() {
-	};
 	
 	public PriorLikelihoodOutputStep(String filename, long thin)
 			throws FileNotFoundException {
@@ -102,7 +98,7 @@ public class PriorLikelihoodOutputStep implements Step, Serializable {
 		}
 	}
 	
-	private class LogPriorLikelihoodValue implements Serializable {
+	private class LogPriorLikelihoodValue {
 		double logPrior;
 		double logLikelihood;
 		

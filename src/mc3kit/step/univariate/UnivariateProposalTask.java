@@ -91,10 +91,10 @@ class UnivariateProposalTask implements Task {
 			try {
 				ISqlJetTable table = chain.getDb()
 						.getTable(step.getTableName());
-				ISqlJetCursor c = table.lookup(step.getIndexName(), iteration);
-				while(!c.eof()) {
-					c.delete();
-				}
+//				ISqlJetCursor c = table.lookup(step.getIndexName(), iteration);
+//				while(!c.eof()) {
+//					c.delete();
+//				}
 				
 				table.insert(iteration, stateJson.toString());
 			}
@@ -126,8 +126,19 @@ class UnivariateProposalTask implements Task {
 			
 			if(chain.getMCMC().shouldRestore()) {
 				ISqlJetTable table = db.getTable(step.getTableName());
-				ISqlJetCursor c = table.lookup(step.getIndexName(),
-						chain.getIteration());
+//				ISqlJetCursor c = table.lookup(step.getIndexName(),
+//						chain.getIteration());
+				ISqlJetCursor c = table.open();
+				if(!c.last()) {
+					throw new MC3KitException(
+						format("No iteration to restore from in UnivariateProposalTask on chain %d", chain.getChainId())
+					);
+				}
+				if(c.getInteger("iteration") != chain.getIteration() - 1) {
+					throw new MC3KitException(
+						format("Last iteration in UnivariateProposalTask does not match last iteration on chain %d", chain.getChainId())
+					);
+				}
 				
 				JsonParser parser = new JsonParser();
 				JsonArray stateJson = parser.parse(c.getString("state"))
@@ -141,8 +152,8 @@ class UnivariateProposalTask implements Task {
 				db.createTable(format(
 						"CREATE TABLE %s (iteration INTEGER, state TEXT)",
 						step.getTableName()));
-				db.createIndex(format("CREATE INDEX %s ON %s (iteration)",
-						step.getIndexName(), step.getTableName()));
+//				db.createIndex(format("CREATE INDEX %s ON %s (iteration)",
+//						step.getIndexName(), step.getTableName()));
 			}
 		}
 		catch(SqlJetException e) {

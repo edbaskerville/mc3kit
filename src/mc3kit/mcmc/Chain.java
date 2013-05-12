@@ -143,38 +143,25 @@ public class Chain {
 			if(shouldRestore) {
 				ISqlJetTable pTable = db.getTable("parameters");
 				ISqlJetCursor c = pTable.open();
-				if(c.getRowCount() < 3) {
-					throw new MC3KitException("parameter table too small");
-				}
 				do {
 					int pid = (int) c.getInteger("pid");
 					String pname = c.getString("pname");
-					if(pid == 1) {
-						assert pname.equals("logPrior");
-					}
-					else if(pid == 2) {
-						assert pname.equals("logLikelihood");
-					}
-					else if(pid == 3) {
-						assert pname.equals("rngState");
-					}
 					paramIdNameMap.put(pid, pname);
 					paramNameIdMap.put(pname, pid);
 					
 				} while(c.next());
 				
-				iteration = mcmc.getLastSavedIteration();
-				model = mcmc.modelFactory.createModel(this,
-						getSample(iteration));
+				model = mcmc.modelFactory.createModel(this, getLastSample());
 				
 				// Restore RNG state
-				ISqlJetTable sTable = db.getTable("samples");
-				rng = gson.fromJson(
-						sTable.lookup("iterationPidIndex", iteration, 3)
-								.getString("value"), MersenneTwister.class);
+				ISqlJetTable rngTable = db.getTable("rng");
+				c = rngTable.open();
+				c.last();
+				iteration = c.getInteger("iteration");
+				rng = gson.fromJson(c.getString("state"), MersenneTwister.class);
 				
 				// Verify parameter names actually those in database
-				int pid = 4;
+				int pid = 1;
 				for(Variable var : model.getUnobservedVariables()) {
 					String varName = var.getName();
 					int dbPid = paramNameIdMap.get(varName);
@@ -189,13 +176,13 @@ public class Chain {
 			else {
 				model = mcmc.modelFactory.createModel(this);
 				
+				db.createTable("CREATE TABLE likelihood (iteration INTEGER, logPrior REAL, logLikelihood REAL)");
+				db.createTable("CREATE TABLE rng (iteration INTEGER, state TEXT)");
+				
 				db.createTable("CREATE TABLE parameters (pid INTEGER PRIMARY KEY, pname TEXT)");
 				ISqlJetTable pTable = db.getTable("parameters");
 				
 				int pid = 1;
-				paramIdNameMap.put(pid++, "logPrior");
-				paramIdNameMap.put(pid++, "logLikelihood");
-				paramIdNameMap.put(pid++, "rngState");
 				for(Variable var : model.getUnobservedVariables()) {
 					paramIdNameMap.put(pid++, var.getName());
 				}
@@ -209,8 +196,6 @@ public class Chain {
 					pTable.insert(pid, pname);
 				}
 				db.createTable("CREATE TABLE samples (iteration INTEGER, pid INTEGER, value)");
-				db.createIndex("CREATE INDEX iterationIndex ON samples (iteration)");
-				db.createIndex("CREATE INDEX iterationPidIndex ON samples (iteration, pid)");
 			}
 			assert model != null;
 			model.setChain(this);
@@ -223,24 +208,30 @@ public class Chain {
 		}
 	}
 	
-	private Map<String, Object> getSample(long iteration)
-			throws MC3KitException {
+	private Map<String, Object> getLastSample() throws MC3KitException {
 		Map<String, Object> sample = new LinkedHashMap<>();
 		try {
 			ISqlJetTable table = db.getTable("samples");
-			ISqlJetCursor c = table.lookup("iterationIndex", iteration);
-			if(c.eof()) {
-				throw new MC3KitException(format("No records for iteration %d",
-						iteration));
+			ISqlJetCursor c = table.open();
+			long rowCount = c.getRowCount();
+			int paramCount = paramIdNameMap.size();
+			if(rowCount == 0 || rowCount % paramCount != 0) {
+				throw new MC3KitException(format("Sample row count is not a multiple of parameter count (chain %d)", chainId));
 			}
-			do {
-				sample.put(paramIdNameMap.get((int) c.getInteger("pid")),
-						c.getValue("value"));
-			} while(c.next());
+			
+			c.goTo(rowCount - paramCount + 1);
+			for(int pid = 1; pid <= paramCount; pid++) {
+				if(pid != (int)c.getInteger("pid")) {
+					throw new MC3KitException(
+						format("pid should be %d, is %d (chain %d)", pid, c.getInteger("pid"), chainId)
+					);
+				}
+				sample.put(paramIdNameMap.get(pid), c.getValue("value"));
+				c.next();
+			}
 		}
 		catch(SqlJetException e) {
-			throw new MC3KitException(format("Could not get iteration %d",
-					iteration), e);
+			throw new MC3KitException(format("Could not get last sample (chain %d)", chainId));
 		}
 		return sample;
 	}
@@ -248,10 +239,10 @@ public class Chain {
 	public long getLastSavedIteration() throws MC3KitException {
 		try {
 			db.beginTransaction(SqlJetTransactionMode.READ_ONLY);
-			ISqlJetTable table = db.getTable("samples");
+			ISqlJetTable table = db.getTable("rng");
 			ISqlJetCursor c = table.open();
 			if(!c.last()) {
-				throw new MC3KitException("Samples table has no rows");
+				throw new MC3KitException("rng table has no rows");
 			}
 			long iteration = c.getInteger("iteration");
 			db.commit();
@@ -287,27 +278,12 @@ public class Chain {
 	
 	void writeToDb() throws MC3KitException {
 		try {
-			ISqlJetTable table = db.getTable("samples");
+			db.getTable("likelihood").insert(iteration, model.getLogPrior(), model.getLogLikelihood());
+			db.getTable("rng").insert(iteration, gson.toJson(rng));
 			
-			// If we're redoing a sample because chains finished at different
-			// points before a restore,
-			// delete the old sample
-			if(mcmc.shouldRestore()) {
-				ISqlJetCursor c = table.lookup("iterationIndex", iteration);
-				while(!c.eof()) {
-					c.delete();
-				}
-			}
-			
-			table.insert(iteration, paramNameIdMap.get("logPrior"),
-					model.getLogPrior());
-			table.insert(iteration, paramNameIdMap.get("logLikelihood"),
-					model.getLogLikelihood());
-			table.insert(iteration, paramNameIdMap.get("rngState"),
-					gson.toJson(rng));
-			
+			ISqlJetTable sampTable = db.getTable("samples");
 			for(Map.Entry<String, Object> entry : model.toDbSample().entrySet()) {
-				table.insert(iteration, paramNameIdMap.get(entry.getKey()),
+				sampTable.insert(iteration, paramNameIdMap.get(entry.getKey()),
 						entry.getValue());
 			}
 		}

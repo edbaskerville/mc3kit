@@ -79,9 +79,7 @@ public class DEMCProposalTask implements Task {
 	long getHistoryCount(Chain chain) throws MC3KitException {
 		try {
 			SqlJetDb db = chain.getDb();
-			
-			ISqlJetTable table = db.getTable("demcHistory");
-			return table.open().getRowCount();
+			return db.getTable(step.getTableName()).open().getRowCount();
 		}
 		catch(SqlJetException e) {
 			throw new MC3KitException(format(
@@ -142,8 +140,8 @@ public class DEMCProposalTask implements Task {
 				db.createTable(format(
 						"CREATE TABLE %s (iteration INTEGER, sample BLOB, sums BLOB, sumSqs BLOB, state TEXT)",
 						step.getTableName()));
-				db.createIndex(format("CREATE INDEX %s ON %s (iteration)",
-						step.getIndexName(), step.getTableName()));
+//				db.createIndex(format("CREATE INDEX %s ON %s (iteration)",
+//						step.getIndexName(), step.getTableName()));
 			}
 			catch(SqlJetException e) {
 				throw new MC3KitException(format(
@@ -162,11 +160,19 @@ public class DEMCProposalTask implements Task {
 		}
 		
 		if(shouldRestore) {
-			long iteration = chain.getIteration();
+			int chainId = chain.getChainId();
+			
+			long iteration = chain.getIteration() - 1;
 			try {
 				ISqlJetTable table = chain.getDb()
 						.getTable(step.getTableName());
-				ISqlJetCursor c = table.lookup(step.getIndexName(), iteration);
+				ISqlJetCursor c = table.open();
+				if(!c.last()) {
+					throw new MC3KitException(format("No DEMC state to restore from on chain %d", chainId));
+				}
+				if(c.getInteger("iteration") != iteration) {
+					throw new MC3KitException(format("DEMC state iteration does not match chain (%d)", chainId));
+				}
 				
 				if(iteration > step.recordHistoryAfter) {
 					sums = fromBytes(c.getBlobAsArray("sums"));
@@ -223,10 +229,10 @@ public class DEMCProposalTask implements Task {
 			try {
 				ISqlJetTable table = chain.getDb()
 						.getTable(step.getTableName());
-				ISqlJetCursor c = table.lookup(step.getIndexName(), iteration);
-				while(!c.eof()) {
-					c.delete();
-				}
+//				ISqlJetCursor c = table.lookup(step.getIndexName(), iteration);
+//				while(!c.eof()) {
+//					c.delete();
+//				}
 				if(iteration > step.recordHistoryAfter) {
 					Model model = chain.getModel();
 					
@@ -257,20 +263,20 @@ public class DEMCProposalTask implements Task {
 	
 	DoubleMatrix1D[] getRandomSamples(Chain chain, RandomEngine rng, int count)
 			throws MC3KitException {
-		long iteration = chain.getIteration();
-		long thin = chain.getMCMC().getThin();
+//		long iteration = chain.getIteration();
+//		long thin = chain.getMCMC().getThin();
 		
 		Uniform unif = new Uniform(rng);
 		
 		long[] iterations = new long[count];
 		DoubleMatrix1D[] samples = new DoubleMatrix1D[count];
 		
+		long historyCount = getHistoryCount(chain);
+		
 		for(int i = 0; i < count; i++) {
 			boolean done = false;
 			while(!done) {
-				iterations[i] = thin
-						* (unif.nextLongFromTo(step.recordHistoryAfter,
-								iteration) / thin);
+				iterations[i] = unif.nextLongFromTo(0, historyCount - 1);
 				done = true;
 				for(int j = 0; j < i; j++) {
 					if(iterations[i] == iterations[j]) {
@@ -285,12 +291,14 @@ public class DEMCProposalTask implements Task {
 		return samples;
 	}
 	
-	private DoubleMatrix1D getSample(Chain chain, long iteration)
+	private DoubleMatrix1D getSample(Chain chain, long rowId)
 			throws MC3KitException {
 		try {
 			SqlJetDb db = chain.getDb();
 			ISqlJetTable table = db.getTable(step.getTableName());
-			ISqlJetCursor c = table.lookup(step.getIndexName(), iteration);
+//			ISqlJetCursor c = table.lookup(step.getIndexName(), iteration);
+			ISqlJetCursor c = table.open();
+			c.goTo(rowId);
 			double[] values = fromBytes(c.getBlobAsArray("sample"));
 			
 			return new DenseDoubleMatrix1D(values);

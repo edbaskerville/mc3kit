@@ -26,8 +26,6 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static mc3kit.util.Math.*;
-
 import mc3kit.MC3KitException;
 import mc3kit.model.Model;
 import mc3kit.model.ModelFactory;
@@ -55,7 +53,6 @@ public class MCMC {
 	
 	private Path dbPath;
 	private boolean restore;
-	private long lastSavedIteration;
 	
 	/*** STATE ***/
 	
@@ -223,18 +220,15 @@ public class MCMC {
 		// If we're restoring, find out the maximum iteration present in all
 		// chains
 		if(restore) {
-			long[] lastSavedIters = new long[chainCount];
-			for(int i = 0; i < chainCount; i++) {
-				lastSavedIters[i] = chains[i].getLastSavedIteration();
+			long lastSavedIteration = chains[0].getLastSavedIteration();
+			for(int i = 1; i < chainCount; i++) {
+				if(chains[i].getLastSavedIteration() != lastSavedIteration) {
+					throw new MC3KitException("Chains don't all have the same last saved iteration.");
+				}
 			}
-			lastSavedIteration = min(lastSavedIters);
 		}
 		
 		getLogger().info("Chains created.");
-	}
-	
-	public long getLastSavedIteration() {
-		return lastSavedIteration;
 	}
 	
 	private void initializeSteps() throws MC3KitException {
