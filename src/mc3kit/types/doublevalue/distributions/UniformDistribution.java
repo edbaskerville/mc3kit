@@ -24,6 +24,7 @@ import mc3kit.model.Variable;
 import mc3kit.step.univariate.VariableProposer;
 import mc3kit.types.doublevalue.DoubleDistribution;
 import mc3kit.types.doublevalue.DoubleVariable;
+import mc3kit.types.doublevalue.proposers.MHMultiplierProposer;
 import mc3kit.types.doublevalue.proposers.MHUniformProposer;
 import static java.lang.Math.*;
 
@@ -71,6 +72,9 @@ public class UniformDistribution extends DoubleDistribution {
 	
 	@Override
 	public VariableProposer makeVariableProposer(String varName) {
+		if(min == 0) {
+			return new MHMultiplierProposer(varName);
+		}
 		return new MHUniformProposer(varName, min, max);
 	}
 	
