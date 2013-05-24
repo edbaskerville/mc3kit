@@ -116,6 +116,12 @@ public class Model implements Observer {
 		
 		assert graph.verifyOrder();
 		
+		for(Variable var : unobservedVariables) {
+			if(var.canManipulateGraph()) {
+				metaVariables.add(var);
+			}
+		}
+		
 		// Sample from meta-graph: variables that can manipulate the graph and
 		// variables they depend on
 		logger.fine("Sampling from meta-graph...");
@@ -185,6 +191,8 @@ public class Model implements Observer {
 		if(node instanceof Variable) {
 			Variable var = (Variable) node;
 			if(!var.isObserved() && !changedValueVars.contains(var)) {
+				System.err.printf("sampling variable: %s\n", node.getName());
+				
 				var.sample();
 				if(logger.isLoggable(Level.FINE)) {
 					logger.fine(format("Sampling %s: %s", var,
@@ -428,10 +436,6 @@ public class Model implements Observer {
 			}
 			unobservedVariables.add(var);
 			var.addObserver(this);
-			
-			if(var.canManipulateGraph()) {
-				metaVariables.add(var);
-			}
 		}
 		
 		return var;

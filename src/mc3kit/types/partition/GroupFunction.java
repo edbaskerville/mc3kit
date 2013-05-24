@@ -10,15 +10,13 @@ public class GroupFunction extends Function {
 	private int groupNum;
 	private IterableBitSet group;
 	
-	protected GroupFunction() {
-	}
-	
 	public GroupFunction(Model model, PartitionVariable partVar, int groupNum)
 			throws MC3KitException {
 		super(model);
 		
 		this.partVar = partVar;
 		this.groupNum = groupNum;
+		
 		model.addEdge(this, partVar);
 	}
 	
@@ -26,7 +24,7 @@ public class GroupFunction extends Function {
 	public boolean update() {
 		IterableBitSet oldGroup = group;
 		group = (IterableBitSet) partVar.getGroup(groupNum).clone();
-		if(oldGroup == null || !group.equals(oldGroup)) {
+		if(!group.equals(oldGroup)) {
 			return true;
 		}
 		return false;
