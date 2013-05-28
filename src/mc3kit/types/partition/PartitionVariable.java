@@ -198,7 +198,7 @@ public class PartitionVariable extends Variable {
 	
 	@Override
 	public boolean canManipulateGraph() {
-		return associations.size() > 0;
+		return associations.size() > 0 || indexAssociators.size() > 0;
 	}
 	
 	public int getElementCount() {
