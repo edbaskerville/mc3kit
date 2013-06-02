@@ -8,6 +8,7 @@ from autohist import *
 from sqlighter import *
 from mc3kit import *
 import json
+import pymc
 
 def getParameterNames(db):
 	c = db.cursor()
@@ -40,6 +41,8 @@ def plotHists(pNames, bestHists):
 		pp.subplot(nVec, 1, i+1)
 		pp.title(pName)
 		bestHists[pName].plot()
+
+
 
 def plotPairs(db, pNames, pVecs, pModes):
 	nVec = len(pVecs)
