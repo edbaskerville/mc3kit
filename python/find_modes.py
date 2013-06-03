@@ -8,27 +8,24 @@ from autohist import *
 from sqlighter import *
 from mc3kit import *
 import json
-import pymc
 
-def getParameterNames(db):
-	c = db.cursor()
-	paramNames = [x['pname'] for x in c.execute('SELECT * FROM parameters')]
-	return paramNames
-
-def getVecs(db, pNames):
-	sampCount = getSampleCount(db)
-	iterRange = (sampCount - 999, sampCount)
-
+def getVecs(db, pNames, burnin, thin):
 	pVecs = OrderedDict()
 	for pName in pNames:
-		pVecs[pName] = getFloatParameter(db, pName, iterRange)
+		pVecs[pName] = getParameter(db, pName, burnin, thin)
 	return pVecs
 
-def findModes(db, pNames, pVecs, pRanges):
+def findModes(db, pNames, pVecs, pDict):
 	pModes = OrderedDict()
 	bestHists = OrderedDict()
 	for pName in pNames:
-		bestHist, hists = autohist(pVecs[pName], xRange=(pRanges[pName] if pName in pRanges else None))
+		pInfo = pDict[pName]
+		if 'range' in pInfo:
+			xRange = pInfo['range']
+		else:
+			xRange = None
+
+		bestHist, hists = autohist(pVecs[pName], xRange=xRange)
 		pModes[pName] = average_modes(hists)
 		bestHists[pName] = bestHist
 	return pModes, bestHists
@@ -61,27 +58,18 @@ def plotPairs(db, pNames, pVecs, pModes):
 
 if __name__ == '__main__':
 	dbFilename = sys.argv[1]
-	db = connectToDatabase(dbFilename)
+	paramFilename = sys.argv[2]
+	burnin = int(sys.argv[3])
+	thin = int(sys.argv[4])
 
+	db = connectToDatabase(dbFilename)
 	createIndexes(db)
 
-	if os.path.exists(dbFilename + '.ranges.json'):
-		pRanges = json.load(open(dbFilename + '.ranges.json'))
-	else:
-		pRanges = {}
+	pDict = json.load(open(paramFilename), object_pairs_hook=OrderedDict)
 
-	try:
-		allPNames = getParameterNames(db)
-		pNames = eval('allPNames[{0}]'.format(sys.argv[2]))
-	except Exception as e:
-		pNames = sys.argv[2:]
-
-	if len(pNames) == 0:
-		print 'Usage: find_modes <db-filename> <parameter-names>'
-		sys.exit(1)
-
-	pVecs = getVecs(db, pNames)
-	pModes, bestHists = findModes(db, pNames, pVecs, pRanges)
+	pNames = pDict.keys()
+	pVecs = getVecs(db, pNames, burnin, thin)
+	pModes, bestHists = findModes(db, pNames, pVecs, pDict)
 
 	json.dump(pModes, open(dbFilename + '.modes.json', 'w'), indent=2)
 

@@ -155,7 +155,10 @@ public class DEMCProposalTask implements Task {
 		varNames = new ArrayList<String>();
 		for(Variable var : model.getUnobservedVariables()) {
 			if(var instanceof DoubleVariable) {
-				varNames.add(var.getName());
+				boolean exclude = (Boolean)var.getProperty(DEMCProperties.EXCLUDE, false);
+				if(!exclude) {
+					varNames.add(var.getName());
+				}
 			}
 		}
 		

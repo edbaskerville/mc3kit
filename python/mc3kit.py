@@ -62,21 +62,28 @@ def makeHierarchicalSample(s):
                 cur = cur[k]
     return hs
 
-def getLogPrior(db, iterRange=None):
+def getLogPrior(db, burnin=0, thin=1):
     c = db.cursor()
-    query = 'SELECT logPrior FROM likelihood'
-    if iterRange is not None:
-        query += ' WHERE iteration BETWEEN {0} AND {1}'.format(iterRange[0], iterRange[1])
-    return [y['logPrior'] for y in c.execute(query)]
+    c.execute('SELECT logPrior FROM likelihood')
+    if burnin > 0:
+        c.fetchmany(size=burnin)
 
-def getLogLikelihood(db, iterRange=None):
+    return [y['logPrior'] for i, y in enumerate(c.fetchall()) if i % thin == 0]
+
+def getLogLikelihood(db, burnin=0, thin=1):
     c = db.cursor()
-    query = 'SELECT logLikelihood FROM likelihood'
-    if iterRange is not None:
-        query += ' WHERE iteration BETWEEN {0} AND {1}'.format(iterRange[0], iterRange[1])
-    return [y['logLikelihood'] for y in c.execute(query)]
+    c.execute('SELECT logLikelihood FROM likelihood')
+    if burnin > 0:
+        c.fetchmany(size=burnin)
+
+    return [y['logLikelihood'] for i, y in enumerate(c.fetchall()) if i % thin == 0]
 
 def getParameter(db, paramName, burnin=0, thin=1):
+    if paramName == 'logLikelihood':
+        return getLogLikelihood(db, burnin, thin)
+    elif paramName == 'logPrior':
+        return getLogPrior(db, burnin, thin)
+
     c = db.cursor()
     pid = c.execute('SELECT pid FROM parameters WHERE pname = "{0}"'.format(paramName)).next()['pid']
     #print pid

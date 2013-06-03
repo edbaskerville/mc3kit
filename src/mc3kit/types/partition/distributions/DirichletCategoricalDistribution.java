@@ -137,8 +137,9 @@ public class DirichletCategoricalDistribution extends PartitionDistribution {
 				break;
 			}
 		}
+		allZero = true;
 		if(allZero) {
-			for(int g = 0; g < g; g++) {
+			for(int g = 0; g < k; g++) {
 				weights[g] = 1.0;
 			}
 		}

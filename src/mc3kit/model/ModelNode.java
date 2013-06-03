@@ -33,11 +33,15 @@ import mc3kit.types.doublevalue.DoubleValued;
 public abstract class ModelNode extends Node {
 	Model model;
 	
+	Map<String, Object> properties;
+	
 	protected ModelNode() {
+		properties = new HashMap<>();
 	}
 	
 	protected ModelNode(String name) {
 		super(name);
+		properties = new HashMap<>();
 	}
 	
 	public boolean update() throws MC3KitException {
@@ -96,5 +100,18 @@ public abstract class ModelNode extends Node {
 	
 	protected Gson getGson() {
 		return getModel().getGson();
+	}
+	
+	public void setProperty(String property, Object value) {
+		properties.put(property, value);
+	}
+	
+	public Object getProperty(String property) {
+		return properties.get(property);
+	}
+	
+	public Object getProperty(String property, Object defaultValue) {
+		Object value = properties.get(property);
+		return value == null ? defaultValue : value;
 	}
 }

@@ -163,8 +163,6 @@ public class MCMC {
 		int randomSeedStartLocation = random.nextInt(Integer.MAX_VALUE);
 		seedGen = new RandomSeedGenerator(randomSeedStartLocation, 0);
 		
-		thin = 1L;
-		
 		if(dbPath != null) {
 			dbPath.toFile().mkdirs();
 		}
