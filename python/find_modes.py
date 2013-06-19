@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import matplotlib
+matplotlib.use('Agg')
+
 import matplotlib.pyplot as pp
 import os
 import sys
@@ -41,7 +44,7 @@ def plotHists(pNames, bestHists):
 
 
 
-def plotPairs(db, pNames, pVecs, pModes):
+def plotPairs(db, pNames, pVecs, pModes, pDict):
 	nVec = len(pVecs)
 	fig = pp.figure(figsize=(6*nVec, 4*nVec))
 
@@ -53,8 +56,14 @@ def plotPairs(db, pNames, pVecs, pModes):
 			pp.scatter(pVecs[pName1], pVecs[pName2])
 			pp.xlabel(pName1)
 			pp.ylabel(pName2)
+
 			pp.axvline(pModes[pName1])
 			pp.axhline(pModes[pName2])
+
+			if 'range' in pDict[pName1]:
+				pp.xlim(pDict[pName1]['range'])
+			if 'range' in pDict[pName2]:
+				pp.ylim(pDict[pName2]['range'])
 
 if __name__ == '__main__':
 	dbFilename = sys.argv[1]
@@ -76,6 +85,6 @@ if __name__ == '__main__':
 	plotHists(pNames, bestHists)
 	pp.savefig(dbFilename + '.histograms.png')
 
-	plotPairs(db, pNames, pVecs, pModes)
+	plotPairs(db, pNames, pVecs, pModes, pDict)
 	pp.savefig(dbFilename + '.bivariate_plots.png')
 

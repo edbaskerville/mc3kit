@@ -27,8 +27,8 @@ def getMaxIteration(db):
 
 def getSampleCount(db):
     c = db.cursor()
-    x = c.execute('SELECT MAX(iteration) FROM likelihood')
-    return x.next()['MAX(iteration)']
+    x = c.execute('SELECT COUNT(iteration) FROM likelihood')
+    return x.next()['COUNT(iteration)']
 
 def getPidNameMap(db):
     c = db.cursor()
