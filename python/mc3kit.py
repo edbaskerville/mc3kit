@@ -1,6 +1,31 @@
+import sqlite3
+import numpy as np
 from sqlighter import *
 import json
+import os
 from collections import OrderedDict
+
+def getMultiChainLogLikelihoodTable(dbDir):
+    chainCount = max(
+        [int(x.split('.')[0]) for x in os.listdir(dbDir) if x.endswith('.sqlite')]
+    ) + 1
+    iters = None
+    iterCount = None
+    llTable = None
+    for i in range(chainCount):
+        filename = os.path.join(dbDir, '{0}.sqlite'.format(i))
+        db = sqlite3.connect(filename)
+        c = db.cursor()
+
+        if iters is None:
+            iters = np.array([x[0] for x in c.execute('SELECT iteration FROM likelihood')])
+            iterCount = len(iters)
+            llTable = np.zeros((iterCount, chainCount))
+
+        llTable[:,i] = np.array([x[0] for x in c.execute('SELECT logLikelihood FROM likelihood')])
+
+        db.close()
+    return iters, llTable
 
 def getFloatParameterNames(db):
     firstSamp = getFirstSample(db)
