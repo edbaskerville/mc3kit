@@ -5,6 +5,10 @@ import json
 import os
 from collections import OrderedDict
 
+def getChainHeats(chainCount, heatPower):
+    chainIds = np.array(range(chainCount), dtype=float)
+    return (1.0 - chainIds  / (chainCount - 1.0))**heatPower
+
 def getMultiChainLogLikelihoodTable(dbDir):
     chainCount = max(
         [int(x.split('.')[0]) for x in os.listdir(dbDir) if x.endswith('.sqlite')]
@@ -26,6 +30,24 @@ def getMultiChainLogLikelihoodTable(dbDir):
 
         db.close()
     return iters, llTable
+
+def integrateTrapezoidal(x, y):
+    dx = x[1:] - x[:-1]
+    ymeans = (y[1:] + y[:-1]) / 2.0
+    return np.sum(dx * ymeans)
+
+def integrateLikelihoodsTrapezoid(logLikeTable, heatPower):
+    iterCount, chainCount = logLikeTable.shape
+    chainIds = np.array(range(chainCount), dtype=float)
+    heats = (1.0 - chainIds  / (chainCount - 1.0))**3.0
+
+    integratedLikelihoods = np.zeros(logLikeTable.shape[0], dtype=float)
+    for i in range(iterCount):
+        integratedLikelihoods[i] = integrateTrapezoidal(
+            heats[::-1],
+            logLikeTable[i,:][::-1]
+        )
+    return integratedLikelihoods
 
 def getFloatParameterNames(db):
     firstSamp = getFirstSample(db)
@@ -59,6 +81,10 @@ def getPidNameMap(db):
     c = db.cursor()
     return OrderedDict([(x['pid'], x['pname']) for x in c.execute('SELECT * FROM parameters')])
 
+def getPidForParameter(db, pname):
+    c = db.cursor()
+    return c.execute('SELECT pid FROM parameters WHERE pname = "{0}"'.format(pname)).next()['pid']
+
 def getFirstSample(db):
     c = db.cursor()
     x = c.execute('SELECT * FROM samples WHERE iteration = {0}'.format(getMinIteration(db)))
@@ -70,6 +96,12 @@ def getSample(db, iteration):
     x = c.execute('SELECT * FROM samples WHERE iteration = {0}'.format(iteration))
     pidNameMap = getPidNameMap(db)
     return OrderedDict([(pidNameMap[y['pid']], y['value']) for y in x])
+
+def getMaxPosteriorSample(db, burnin):
+    c = db.cursor()
+    x = c.execute('SELECT iteration, MAX(logLikelihood + logPrior) FROM likelihood WHERE ROWID >= {0}'.format(burnin))
+    sampIter = x.next()['iteration']
+    return sampIter, getSample(db, sampIter)
 
 def makeHierarchicalSample(s):
     hs = OrderedDict()
@@ -118,6 +150,32 @@ def getParameter(db, paramName, burnin=0, thin=1):
         c.fetchmany(size=burnin)
 
     return [y['value'] for i, y in enumerate(c.fetchall()) if i % thin == 0]
+
+def iterateSamples(db, burnin=None, thin=1):
+    if burnin is None:
+        sampCount = getSampleCount(db)
+        burnin = sampCount / 2
+
+    burnIter = db.execute(
+        'SELECT iteration FROM likelihood WHERE rowid = {0}'.format(burnin)
+    ).next()['iteration']
+
+    c = db.cursor()
+    pidNameMap = getPidNameMap(db)
+    query = 'SELECT * FROM samples WHERE iteration > {0}'.format(burnIter)
+
+    i = 0
+    lastIteration = None
+    sampDict = OrderedDict()
+    for rowNum, x in enumerate(c.execute(query)):
+        if (rowNum / len(pidNameMap)) % thin == 0:
+            sampDict[pidNameMap[x['pid']]] = x['value']
+
+            if (rowNum + 1) % len(pidNameMap) == 0:
+                assert len(sampDict) == len(pidNameMap)
+                yield sampDict
+                sampDict = OrderedDict()
+
 
 def getFloatParameter(db, paramName, iterRange=None, thin=1):
     return [float(x) for x in getParameter(db, paramName, iterRange, thin)]
