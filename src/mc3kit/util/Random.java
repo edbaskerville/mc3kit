@@ -20,6 +20,9 @@
 package mc3kit.util;
 
 import static mc3kit.util.Math.*;
+
+import java.math.BigInteger;
+
 import cern.jet.random.Uniform;
 import cern.jet.random.engine.RandomEngine;
 
@@ -30,6 +33,31 @@ public final class Random {
 		if(i == except)
 			i = end;
 		return i;
+	}
+	
+	public static BigInteger nextBigIntegerFromTo(RandomEngine rng, BigInteger from, BigInteger to)
+	{
+		if(from.compareTo(to) > 0) return null;
+		
+		BigInteger range = to.subtract(from).add(BigInteger.ONE);
+		
+		int numBits = range.bitLength() + 1;
+		if(numBits % 32 != 0)
+			numBits = (numBits / 32 + 1) * 32;
+		assert(numBits >= range.bitLength());
+		
+		byte[] bytes = new byte[numBits / 8];
+		for(int i = 0; i < bytes.length / 4; i++)
+		{
+			int val = rng.nextInt();
+			bytes[i*4]     = (byte)(val >>> 24);
+			bytes[i*4 + 1] = (byte)(val >>> 16);
+			bytes[i*4 + 2] = (byte)(val >>>  8);
+			bytes[i*4 + 3] = (byte)(val       );
+		}
+		bytes[0] = (byte)(bytes[0] & Byte.MAX_VALUE);
+		
+		return new BigInteger(bytes).remainder(range).add(from);
 	}
 	
 	public static IterableBitSet uniformRandomSubset(Uniform unif, int n, int k) {

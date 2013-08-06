@@ -46,17 +46,12 @@ public class PartitionProposer extends VariableProposer {
 		if(var.getGroupCount() == 1)
 			return;
 		
-		if(var.allowsEmptyGroups()) {
-			if(var.useGibbs) {
-				stepGibbsAllowingEmpty(model, chain, rng, var);
-			}
-			else {
-				stepAllowingEmpty(model, chain, rng, var);
-			}
+		if(var.useGibbs) {
+			stepGibbs(model, chain, rng, var);
 		}
 		else {
-			if(var.useGibbs) {
-				stepGibbsNoEmpty(model, chain, rng, var);
+			if(var.allowsEmptyGroups()) {
+				stepAllowingEmpty(model, chain, rng, var);
 			}
 			else {
 				stepNoEmpty(model, chain, rng, var);
@@ -64,7 +59,7 @@ public class PartitionProposer extends VariableProposer {
 		}
 	}
 	
-	private void stepGibbsAllowingEmpty(Model model, Chain chain,
+	private void stepGibbs(Model model, Chain chain,
 			RandomEngine rng, PartitionVariable var) throws MC3KitException {
 		Uniform unif = new Uniform(rng);
 		
@@ -78,46 +73,49 @@ public class PartitionProposer extends VariableProposer {
 		int[] order = getRandomPermutation(n, unif);
 		for(int i : order) {
 			int gi = var.getGroupId(i);
-			double[] logRelPs = new double[k];
 			
-			// Record the log-pdf for the initial configuration
-			logRelPs[gi] = priorExp * model.getLogPrior() + likeExp
-					* model.getLogLikelihood();
-			double maxLogP = logRelPs[gi];
-			
-			// Find out the log-pdf for all other configurations
-			for(int g = 0; g < k; g++) {
-				if(g == gi)
-					continue;
+			if(var.allowsEmptyGroups() || var.getGroupSize(gi) > 1) {
+				double[] logRelPs = new double[k];
 				
-				// Try putting i into group g
-				model.beginProposal();
-				var.setGroup(i, g);
-				model.endProposal();
-				model.acceptProposal();
-				
-				// Record the log-pdf for this configuration
-				logRelPs[g] = priorExp * model.getLogPrior() + likeExp
+				// Record the log-pdf for the initial configuration
+				logRelPs[gi] = priorExp * model.getLogPrior() + likeExp
 						* model.getLogLikelihood();
-				if(logRelPs[g] > maxLogP) {
-					maxLogP = logRelPs[g];
+				double maxLogP = logRelPs[gi];
+				
+				// Find out the log-pdf for all other configurations
+				for(int g = 0; g < k; g++) {
+					if(g == gi)
+						continue;
+					
+					// Try putting i into group g
+					model.beginProposal();
+					var.setGroup(i, g);
+					model.endProposal();
+					model.acceptProposal();
+					
+					// Record the log-pdf for this configuration
+					logRelPs[g] = priorExp * model.getLogPrior() + likeExp
+							* model.getLogLikelihood();
+					if(logRelPs[g] > maxLogP) {
+						maxLogP = logRelPs[g];
+					}
 				}
+				
+				// Calculate exponentiated relative weights of configurations
+				double[] relPs = new double[k];
+				for(int g = 0; g < k; g++) {
+					relPs[g] = exp(logRelPs[g] - maxLogP);
+				}
+				
+				int giNew = nextDiscreteLinearSearch(rng, relPs);
+				if(giNew != k - 1) {
+					model.beginProposal();
+					var.setGroup(i, giNew);
+					model.endProposal();
+					model.acceptProposal();
+				}
+				recordAcceptance();
 			}
-			
-			// Calculate exponentiated relative weights of configurations
-			double[] relPs = new double[k];
-			for(int g = 0; g < k; g++) {
-				relPs[g] = exp(logRelPs[g] - maxLogP);
-			}
-			
-			int giNew = nextDiscreteLinearSearch(rng, relPs);
-			if(giNew != k - 1) {
-				model.beginProposal();
-				var.setGroup(i, giNew);
-				model.endProposal();
-				model.acceptProposal();
-			}
-			recordAcceptance();
 		}
 	}
 	
@@ -222,11 +220,6 @@ public class PartitionProposer extends VariableProposer {
 				recordRejection();
 			}
 		}
-	}
-	
-	private void stepGibbsNoEmpty(Model model, Chain chain, RandomEngine rng,
-			PartitionVariable var) throws MC3KitException {
-		
 	}
 	
 	@Override
