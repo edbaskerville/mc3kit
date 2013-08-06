@@ -16,9 +16,6 @@ import mc3kit.types.intarray.IntArrayVariable;
 public class MultinomialDistribution extends IntArrayDistribution {
 	private ModelEdge pEdge;
 	
-	protected MultinomialDistribution() {
-	}
-	
 	public MultinomialDistribution(Model model) {
 		this(model, null);
 	}

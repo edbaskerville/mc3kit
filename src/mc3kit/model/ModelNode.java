@@ -82,6 +82,22 @@ public abstract class ModelNode extends Node {
 		return edge;
 	}
 	
+	protected IndexedEdge updateEdge(IndexedEdge edge, int index, ModelNode headNode) throws MC3KitException {
+		if(edge != null) {
+			if(edge.getHead() == headNode) {
+				return edge;
+			}
+			getModel().removeEdge(edge);
+		}
+		
+		if(headNode == null) {
+			return null;
+		}
+		
+		edge = getModel().addEdge(index, this, headNode);
+		return edge;
+	}
+	
 	protected double getDoubleValue(ModelEdge edge) {
 		return ((DoubleValued) edge.getHead()).getValue();
 	}

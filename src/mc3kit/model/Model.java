@@ -473,6 +473,16 @@ public class Model implements Observer {
 		return edge;
 	}
 	
+	public IndexedEdge addEdge(int index, ModelNode tail, ModelNode head)
+			throws MC3KitException {
+		if(!(state == State.IN_CONSTRUCTION || state == State.IN_PROPOSAL || state == State.IN_REJECTION)) {
+			throw new MC3KitException("Adding edge in wrong state");
+		}
+		
+		IndexedEdge edge = new IndexedEdge(this, index, tail, head);
+		return edge;
+	}
+	
 	public void addEdge(ModelEdge edge) throws MC3KitException {
 		if(!(state == State.IN_CONSTRUCTION || state == State.IN_PROPOSAL || state == State.IN_REJECTION)) {
 			throw new MC3KitException("Adding edge in wrong state");
