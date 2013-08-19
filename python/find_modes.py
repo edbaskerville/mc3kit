@@ -68,11 +68,19 @@ def plotPairs(db, pNames, pVecs, pModes, pDict):
 if __name__ == '__main__':
 	dbFilename = sys.argv[1]
 	paramFilename = sys.argv[2]
-	burnin = int(sys.argv[3])
-	thin = int(sys.argv[4])
 
 	db = connectToDatabase(dbFilename)
 	createIndexes(db)
+	
+	if len(sys.argv) > 3:
+		burnin = int(sys.argv[3])
+		thin = int(sys.argv[4])
+	else:
+		burnin = getSampleCount(db) / 2
+		thin = 1
+	
+	print 'burnin:', burnin
+	print 'thin:', thin
 
 	pDict = json.load(open(paramFilename), object_pairs_hook=OrderedDict)
 
