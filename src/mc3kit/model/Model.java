@@ -554,6 +554,10 @@ public class Model implements Observer {
 		return logLikelihood;
 	}
 	
+	public double getLogPosterior() {
+		return logPrior + logLikelihood;
+	}
+	
 	public ModelNode get(String name) {
 		return (ModelNode) graph.getNode(name);
 	}

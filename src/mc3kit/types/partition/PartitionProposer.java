@@ -73,7 +73,7 @@ public class PartitionProposer extends VariableProposer {
 		int[] order = getRandomPermutation(n, unif);
 		for(int i : order) {
 			int gi = var.getGroupId(i);
-			
+
 			if(var.allowsEmptyGroups() || var.getGroupSize(gi) > 1) {
 				double[] logRelPs = new double[k];
 				

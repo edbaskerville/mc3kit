@@ -33,6 +33,7 @@ import mc3kit.output.SampleWriterFactory;
 public class SampleOutputStep implements Step {
 	String filename;
 	String format;
+	boolean maximumOnly;
 	boolean useQuotes;
 	long thin;
 	int chainId;
@@ -41,13 +42,23 @@ public class SampleOutputStep implements Step {
 		this(filename, null, false, thin, 0);
 	}
 	
+	public SampleOutputStep(String filename, long thin, boolean maximumOnly) {
+		this(filename, null, false, thin, 0, maximumOnly);
+	}
+	
 	public SampleOutputStep(String filename, String format, boolean useQuotes,
 			long thin, int chainId) {
+		this(filename, format, useQuotes, thin, chainId, false);
+	}
+	
+	public SampleOutputStep(String filename, String format, boolean useQuotes,
+			long thin, int chainId, boolean maximumOnly) {
 		this.filename = filename;
 		this.format = format;
 		this.useQuotes = useQuotes;
 		this.thin = thin;
 		this.chainId = chainId;
+		this.maximumOnly = maximumOnly;
 	}
 	
 	/*** METHODS ***/
@@ -64,6 +75,8 @@ public class SampleOutputStep implements Step {
 	private class SampleOutputTask implements Task {
 		SampleWriter writer;
 		
+		private double maxLogPost;
+		
 		@Override
 		public int[] getChainIds() {
 			return new int[] { chainId };
@@ -77,6 +90,7 @@ public class SampleOutputStep implements Step {
 			catch(FileNotFoundException e) {
 				throw new MC3KitException("File not found", e);
 			}
+			maxLogPost = Double.NEGATIVE_INFINITY;
 		}
 		
 		@Override
@@ -87,7 +101,16 @@ public class SampleOutputStep implements Step {
 				chain.getLogger().fine(format("Writing sample %d", iteration));
 				Model model = chain.getModel();
 				
-				writer.writeSample(model);
+				if(maximumOnly) {
+					double logPost = model.getLogPosterior();
+					if(logPost > maxLogPost) {
+						maxLogPost = logPost;
+						writer.writeSample(model);
+					}
+				}
+				else {
+					writer.writeSample(model);
+				}
 			}
 		}
 	}
