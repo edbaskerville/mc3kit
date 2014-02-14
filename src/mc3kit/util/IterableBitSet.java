@@ -15,7 +15,7 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit.util;
 
@@ -23,33 +23,34 @@ import java.util.*;
 
 @SuppressWarnings("serial")
 public class IterableBitSet extends BitSet implements Iterable<Integer> {
-  
-  public IterableBitSet() { }
-
-  public IterableBitSet(int n) {
-    super(n);
-  }
-  
-  public int[] getSetBits() {
-    int[] setBits = new int[cardinality()];
-    int j = 0;
-    for(int i = nextSetBit(0); i >= 0; i = nextSetBit(i+1)) {
-      setBits[j++] = i;
-    }
-    return setBits;
-  }
-  
-  @Override
-  public Iterator<Integer> iterator() {
-    return new BitSetIterator(this);
-  }
-  
-  @Override
-  public Object clone() {
-    IterableBitSet bs = new IterableBitSet();
-    for(int i : this) {
-      bs.set(i);
-    }
-    return bs;
-  }
+	
+	public IterableBitSet() {
+	}
+	
+	public IterableBitSet(int n) {
+		super(n);
+	}
+	
+	public int[] getSetBits() {
+		int[] setBits = new int[cardinality()];
+		int j = 0;
+		for(int i = nextSetBit(0); i >= 0; i = nextSetBit(i + 1)) {
+			setBits[j++] = i;
+		}
+		return setBits;
+	}
+	
+	@Override
+	public Iterator<Integer> iterator() {
+		return new BitSetIterator(this);
+	}
+	
+	@Override
+	public Object clone() {
+		IterableBitSet bs = new IterableBitSet();
+		for(int i : this) {
+			bs.set(i);
+		}
+		return bs;
+	}
 }

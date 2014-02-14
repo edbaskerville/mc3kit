@@ -15,25 +15,25 @@
 
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-***/
+ ***/
 
 package mc3kit;
 
 @SuppressWarnings("serial")
 public class MC3KitException extends Exception {
-  public MC3KitException() {
-    super();
-  }
-  
-  public MC3KitException(Throwable cause) {
-    super(cause);
-  }
-  
-  public MC3KitException(String msg) {
-    super(msg);
-  }
-
-  public MC3KitException(String msg, Throwable cause) {
-    super(msg, cause);
-  }
+	public MC3KitException() {
+		super();
+	}
+	
+	public MC3KitException(Throwable cause) {
+		super(cause);
+	}
+	
+	public MC3KitException(String msg) {
+		super(msg);
+	}
+	
+	public MC3KitException(String msg, Throwable cause) {
+		super(msg, cause);
+	}
 }
