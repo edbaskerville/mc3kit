@@ -17,16 +17,16 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-package mc3kit.types.doublearray;
+package mc3kit.types.doublevector;
 
+import cern.colt.matrix.DoubleMatrix1D;
 import mc3kit.MC3KitException;
-import mc3kit.model.Distribution;
 import mc3kit.model.Model;
 import mc3kit.model.Variable;
 
-public class DoubleArrayVariable extends Variable implements DoubleArrayValued {
+public class DoubleVectorVariable extends Variable implements DoubleVectorValued {
 	
-	private double[] value;
+	private DoubleMatrix1D value;
 	
 	/**
 	 * Constructor for an <i>observed</i> double-valued variable.
@@ -34,39 +34,14 @@ public class DoubleArrayVariable extends Variable implements DoubleArrayValued {
 	 * @param model
 	 * @param value
 	 */
-	public DoubleArrayVariable(Model model, double[] value) {
+	public DoubleVectorVariable(Model model, DoubleMatrix1D value) {
 		super(model, null, true);
 		this.value = value;
 	}
 	
 	@Override
-	public double[] getValue() {
+	public DoubleMatrix1D getValue() {
 		return value;
-	}
-	
-	@Override
-	public void setValue(double[] value) {
-		if(isObserved()) {
-			throw new UnsupportedOperationException(
-					"Can't set value on an observed variable.");
-		}
-		
-		if(this.value != value) {
-			this.value = value;
-			setChanged();
-			notifyObservers();
-		}
-	}
-	
-	@Override
-	public DoubleArrayVariable setDistribution(Distribution dist)
-			throws MC3KitException {
-		throw new MC3KitException("Doesn't support distributions.");
-	}
-	
-	public boolean valueIsValid(double value) throws MC3KitException {
-		throw new MC3KitException(
-				"Can't ask whether value is valid without distribution.");
 	}
 	
 	@Override
@@ -90,17 +65,12 @@ public class DoubleArrayVariable extends Variable implements DoubleArrayValued {
 	}
 	
 	@Override
-	public int getLength() {
-		return value.length;
-	}
-	
-	@Override
 	public double getValue(int index) {
-		return value[index];
+		return value.getQuick(index);
 	}
-	
+
 	@Override
-	public void setValue(int index, double value) throws MC3KitException {
-		throw new MC3KitException("can't set value");
+	public int size() throws MC3KitException {
+		return value.size();
 	}
 }

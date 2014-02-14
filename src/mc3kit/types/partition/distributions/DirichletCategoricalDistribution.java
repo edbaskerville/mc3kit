@@ -9,8 +9,8 @@ import mc3kit.model.Model;
 import mc3kit.model.ModelEdge;
 import mc3kit.model.ModelNode;
 import mc3kit.model.Variable;
-import mc3kit.types.doublearray.DoubleArrayValued;
 import mc3kit.types.doublevalue.DoubleValued;
+import mc3kit.types.doublevector.DoubleVectorValued;
 import mc3kit.types.partition.PartitionDistribution;
 import mc3kit.types.partition.PartitionVariable;
 import static mc3kit.util.Math.*;
@@ -59,7 +59,7 @@ public class DirichletCategoricalDistribution extends PartitionDistribution {
 	}
 	
 	public DirichletCategoricalDistribution setAlphaArray(
-			DoubleArrayValued alphaArrayNode) throws MC3KitException {
+			DoubleVectorValued alphaArrayNode) throws MC3KitException {
 		alphaArrayEdge = updateEdge(alphaArrayEdge, (ModelNode) alphaArrayNode);
 		alphaEdge = updateEdge(alphaEdge, null);
 		
@@ -75,7 +75,7 @@ public class DirichletCategoricalDistribution extends PartitionDistribution {
 		else if(alphaArrayEdge != null) {
 			assert alphaEdge == null;
 			
-			return ((DoubleArrayValued) alphaArrayEdge.getHead())
+			return ((DoubleVectorValued) alphaArrayEdge.getHead())
 					.getValue(index);
 		}
 		else if(alphaArray != null) {

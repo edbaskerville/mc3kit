@@ -17,18 +17,13 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***/
 
-package mc3kit.types.doublearray;
+package mc3kit.types.doublevector;
 
+import cern.colt.matrix.DoubleMatrix1D;
 import mc3kit.MC3KitException;
 
-public interface DoubleArrayValued {
-	int getLength() throws MC3KitException;
-	
-	double[] getValue() throws MC3KitException;
-	
-	void setValue(double[] value) throws MC3KitException;
-	
+public interface DoubleVectorValued {
+	DoubleMatrix1D getValue() throws MC3KitException;
 	double getValue(int index) throws MC3KitException;
-	
-	void setValue(int index, double value) throws MC3KitException;
+	int size() throws MC3KitException;
 }

@@ -2,14 +2,14 @@ package mc3kit.types.intarray.distributions;
 
 import static java.lang.Math.*;
 import static mc3kit.util.Math.*;
-
+import cern.colt.matrix.DoubleMatrix1D;
 import mc3kit.*;
 import mc3kit.model.Model;
 import mc3kit.model.ModelEdge;
 import mc3kit.model.ModelNode;
 import mc3kit.model.Variable;
 import mc3kit.step.univariate.VariableProposer;
-import mc3kit.types.doublearray.DoubleArrayValued;
+import mc3kit.types.doublevector.DoubleVectorValued;
 import mc3kit.types.intarray.IntArrayDistribution;
 import mc3kit.types.intarray.IntArrayVariable;
 
@@ -24,7 +24,7 @@ public class MultinomialDistribution extends IntArrayDistribution {
 		super(model, name);
 	}
 	
-	public MultinomialDistribution setP(DoubleArrayValued p)
+	public MultinomialDistribution setP(DoubleVectorValued p)
 			throws MC3KitException {
 		pEdge = updateEdge(pEdge, (ModelNode) p);
 		return this;
@@ -38,18 +38,18 @@ public class MultinomialDistribution extends IntArrayDistribution {
 	
 	@Override
 	public double getLogP(Variable var) throws MC3KitException {
-		DoubleArrayValued pNode = (DoubleArrayValued) pEdge.getHead();
-		double[] p = pNode.getValue();
+		DoubleVectorValued pNode = (DoubleVectorValued) pEdge.getHead();
+		DoubleMatrix1D p = pNode.getValue();
 		int[] x = ((IntArrayVariable) var).getValue();
 		
-		assert p.length == x.length;
+		assert p.size() == x.length;
 		
 		double logP = 0.0;
 		
 		int n = 0;
-		for(int i = 0; i < p.length; i++) {
+		for(int i = 0; i < p.size(); i++) {
 			n += x[i];
-			logP += x[i] * log(p[i]) - logFactorial(x[i]);
+			logP += x[i] * log(p.getQuick(i)) - logFactorial(x[i]);
 		}
 		logP += logFactorial(n);
 		
