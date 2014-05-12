@@ -209,6 +209,19 @@ public class PartitionVariable extends Variable {
 		return k;
 	}
 	
+	public int getNonemptyGroupCount() {
+		if(allowsEmptyGroups) {
+			int count = 0;
+			for(IterableBitSet group : groups) {
+				if(group.cardinality() > 0) {
+					count++;
+				}
+			}
+			return count;
+		}
+		return k;
+	}
+	
 	public int getGroupSize(int g) {
 		return groups[g].cardinality();
 	}

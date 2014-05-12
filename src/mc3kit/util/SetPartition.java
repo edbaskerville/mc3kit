@@ -12,12 +12,17 @@ public class SetPartition
 	{
 		cacheStirling = Collections.synchronizedMap(
 			new HashMap<Pair<Integer>, BigInteger>());
+		cachePartialBell = Collections.synchronizedMap(
+			new HashMap<Pair<Integer>, BigInteger>());
 		cacheBell = Collections.synchronizedMap(
 			new HashMap<Integer, BigInteger>());
 	}
 	
 	// Cache of Stirling numbers of the second kind S(n,k)
 	private static Map<Pair<Integer>, BigInteger> cacheStirling;
+	
+	// Cache of partial Bell numbers numbers Bp(n) = sum(S(n,k)) from k=1 to k=kMax
+	private static Map<Pair<Integer>, BigInteger> cachePartialBell;
 	
 	// Cache of Bell numbers B(n) = sum(S(n,k))
 	private static Map<Integer, BigInteger> cacheBell;
@@ -40,6 +45,22 @@ public class SetPartition
 		return bellN; 
 	}
 	
+	public static BigInteger getPartitionCountUpTo(int n, int kMax)
+	{
+		if(n <= 0) return BigInteger.ZERO;
+		if(kMax <= 0) return BigInteger.ZERO;
+		if(kMax == 1) return BigInteger.ONE;
+		
+		BigInteger value = cachePartialBell.get(n);
+		if(value == null)
+		{
+			value = getPartitionCount(n, kMax).add(getPartitionCountUpTo(n, kMax-1));
+			cachePartialBell.put(new Pair<Integer>(n, kMax), value);
+		}
+		
+		return value;
+	}
+	
 	public static BigInteger getPartitionCount(int n, int k)
 	{
 		if(n < 0 || k < 0) return BigInteger.ZERO;
@@ -57,6 +78,19 @@ public class SetPartition
 			cacheStirling.put(pair, value);
 		}
 		return value;
+	}
+	
+	public static List<List<Integer>> getPartition(int n, BigInteger partitionNumber)
+	{
+		List<List<Integer>> partition = null;
+		
+		for(int k = 1; k <= n; k++) {
+			if(partitionNumber.compareTo(getPartitionCountUpTo(n, k)) < 0) {
+				return getPartition(n, k, partitionNumber.subtract(getPartitionCountUpTo(n, k-1)));
+			}
+		}
+		
+		return partition;
 	}
 	
 	public static List<List<Integer>> getPartition(int n, int k, BigInteger partitionNumber)
@@ -130,5 +164,17 @@ public class SetPartition
 				partitionCount.subtract(BigInteger.ONE));
 		
 		return getPartition(n, k, partitionNumber);
+	}
+	
+	public static List<List<Integer>> generateRandomPartitionUpTo(RandomEngine rng, int n, int kMax)
+	{
+		BigInteger partitionCount = getPartitionCountUpTo(n, kMax);
+		if(partitionCount.equals(BigInteger.ZERO))
+			return null;
+		
+		BigInteger partitionNumber = nextBigIntegerFromTo(rng, BigInteger.ZERO,
+				partitionCount.subtract(BigInteger.ONE));
+		
+		return getPartition(n, partitionNumber);
 	}
 }

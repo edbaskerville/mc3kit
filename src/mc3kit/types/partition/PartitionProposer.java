@@ -76,6 +76,7 @@ public class PartitionProposer extends VariableProposer {
 
 			if(var.allowsEmptyGroups() || var.getGroupSize(gi) > 1) {
 				double[] logRelPs = new double[k];
+				boolean foundEmpty = false;
 				
 				// Record the log-pdf for the initial configuration
 				logRelPs[gi] = priorExp * model.getLogPrior() + likeExp
@@ -86,6 +87,16 @@ public class PartitionProposer extends VariableProposer {
 				for(int g = 0; g < k; g++) {
 					if(g == gi)
 						continue;
+					
+					if(var.getGroupSize(g) == 0) {
+						if(foundEmpty) {
+							logRelPs[g] = Double.NEGATIVE_INFINITY;
+							continue;
+						}
+						else {
+							foundEmpty = true;
+						}
+					}
 					
 					// Try putting i into group g
 					model.beginProposal();
@@ -104,7 +115,12 @@ public class PartitionProposer extends VariableProposer {
 				// Calculate exponentiated relative weights of configurations
 				double[] relPs = new double[k];
 				for(int g = 0; g < k; g++) {
-					relPs[g] = exp(logRelPs[g] - maxLogP);
+					if(relPs[g] == Double.NEGATIVE_INFINITY) {
+						relPs[g] = 0;
+					}
+					else {
+						relPs[g] = exp(logRelPs[g] - maxLogP);
+					}
 				}
 				
 				int giNew = nextDiscreteLinearSearch(rng, relPs);

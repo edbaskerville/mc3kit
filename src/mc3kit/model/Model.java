@@ -191,7 +191,7 @@ public class Model implements Observer {
 		if(node instanceof Variable) {
 			Variable var = (Variable) node;
 			if(!var.isObserved() && !changedValueVars.contains(var)) {
-				System.err.printf("sampling variable: %s\n", node.getName());
+//				System.err.printf("sampling variable: %s\n", node.getName());
 				
 				var.sample();
 				if(logger.isLoggable(Level.FINE)) {

@@ -31,6 +31,6 @@ public class GroupFunction extends Function {
 	}
 	
 	public IterableBitSet getGroup() {
-		return group;
+		return (IterableBitSet)group.clone();
 	}
 }

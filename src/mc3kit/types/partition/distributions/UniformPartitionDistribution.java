@@ -29,20 +29,22 @@ public class UniformPartitionDistribution extends PartitionDistribution {
 		int n = partVar.getElementCount();
 		int k = partVar.getGroupCount();
 		
+		List<List<Integer>> groups;
 		if(partVar.allowsEmptyGroups()) {
-			assert false; // Unimplemented
+			groups = SetPartition.generateRandomPartitionUpTo(getRng(), n, k);
+			assert groups.size() <= k;
 		}
 		else {
-			System.err.printf("SAMPLING\n");
-			List<List<Integer>> groups = SetPartition.generateRandomPartition(getRng(), n, k);
-			int[] gs = new int[n];
+			groups = SetPartition.generateRandomPartition(getRng(), n, k);
 			assert groups.size() == k;
-			for(int g = 0; g < k; g++) {
-				for(int i : groups.get(g)) {
-					gs[i] = g;
-				}
-			}
-			partVar.setGroups(gs);
 		}
+		System.err.printf("initial groups: %s\n", groups);
+		int[] gs = new int[n];
+		for(int g = 0; g < groups.size(); g++) {
+			for(int i : groups.get(g)) {
+				gs[i] = g;
+			}
+		}
+		partVar.setGroups(gs);
 	}
 }

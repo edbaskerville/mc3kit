@@ -364,7 +364,7 @@ public class MCMC {
 				Future<Object> completedTask = completionService.take();
 				Object result = completedTask.get();
 				if(result == terminationManager) {
-					getLogger().fine("Got termination task.");
+					getLogger().info("Got termination task.");
 					done = true;
 					assert (iteration == terminationCount);
 				}

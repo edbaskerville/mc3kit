@@ -43,9 +43,6 @@ public class ConstantHeatFunction implements HeatFunction {
 	
 	@Override
 	public double[] getLikelihoodHeatExponents(int chainCount) {
-		System.err.printf("likelihoodheatexpnoent: %f\n",
-				likelihoodHeatExponent);
-		
 		double[] heatExponents = new double[chainCount];
 		for(int i = 0; i < chainCount; i++)
 			heatExponents[i] = likelihoodHeatExponent;
